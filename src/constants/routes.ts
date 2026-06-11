@@ -1,6 +1,6 @@
 const ROUTES = {
-  HOME: "/",
-  MENU: "/menu",
-}
+  HOME: '/',
+  MENU: '/menu',
+};
 
 export default ROUTES;

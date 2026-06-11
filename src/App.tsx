@@ -1,7 +1,7 @@
-import { Routes, Route } from "react-router"
-import ROUTES from "./constants/routes"
-import { Layout } from "./components/Layout"
-import { Menu } from "./pages/menu/Menu"
+import { Routes, Route } from 'react-router';
+import ROUTES from './constants/routes';
+import { Layout } from './components/Layout';
+import { Menu } from './pages/menu/Menu';
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
         <Route path={ROUTES.HOME} element={<Menu />} />
       </Route>
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;

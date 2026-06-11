@@ -1,11 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @layer base {
   :root {
-    --color-primary: #FDF1DB;
-    --color-secundary: #E7D4B4;
-    --color-text: #5C4D3D;
-    --color-hover: #D9C3A5;
+    --color-primary: #fdf1db;
+    --color-secundary: #e7d4b4;
+    --color-text: #5c4d3d;
+    --color-hover: #d9c3a5;
   }
 }
 
@@ -28,7 +28,7 @@
 }
 
 @theme {
-  --font-text: "Pixelify Sans", sans-serif;
+  --font-text: 'Pixelify Sans', sans-serif;
   --color-primary: var(--color-primary);
   --color-secundary: var(--color-secundary);
   --color-text: var(--color-text);

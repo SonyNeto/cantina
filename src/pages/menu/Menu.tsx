@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import type { FC } from 'react';
 
 export const Menu: FC = () => {
   return (
@@ -6,4 +6,4 @@ export const Menu: FC = () => {
       <h1>Menu</h1>
     </div>
   );
-}
+};
