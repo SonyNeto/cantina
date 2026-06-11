@@ -6,6 +6,7 @@
     --color-secundary: #e7d4b4;
     --color-text: #5c4d3d;
     --color-hover: #d9c3a5;
+    --color-text-hover: #3a3127;
   }
 }
 
@@ -33,6 +34,7 @@
   --color-secundary: var(--color-secundary);
   --color-text: var(--color-text);
   --color-hover: var(--color-hover);
+  --color-text-hover: var(--color-text-hover);
   --animate-drawer-in: drawer-in 0.1s ease-out;
   --animate-drawer-out: drawer-out 0.1s ease-out;
 }

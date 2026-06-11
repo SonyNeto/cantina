@@ -27,8 +27,8 @@ const DrawerContent: FC<ComponentProps<typeof DrawerPrimitive.Content>> = ({
           <DrawerPrimitive.Close
             className="absolute top-2 right-3 cursor-pointer rounded-full p-1 transition-all hover:text-red-500"
             render={
-              <Button variant="ghost" size="sm" className="size-10 rounded-full">
-                <ArrowBarLeft width={30} height={30} />
+              <Button variant="ghost" size="lg" className="rounded-full">
+                <ArrowBarLeft />
               </Button>
             }
           />
