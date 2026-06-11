@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #FDF1DB;
+    --color-secundary: #E7D4B4;
+    --color-text: #5C4D3D;
+    --color-hover: #D9C3A5;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawer-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@theme {
+  --font-text: "Pixelify Sans", sans-serif;
+  --color-primary: var(--color-primary);
+  --color-secundary: var(--color-secundary);
+  --color-text: var(--color-text);
+  --color-hover: var(--color-hover);
+  --animate-drawer-in: drawer-in 0.1s ease-out;
+  --animate-drawer-out: drawer-out 0.1s ease-out;
+}
+
+body {
+  @apply font-text text-text bg-primary;
+}
