@@ -4,9 +4,10 @@
   :root {
     --color-primary: #fdf1db;
     --color-secundary: #e7d4b4;
-    --color-text: #5c4d3d;
-    --color-hover: #d9c3a5;
-    --color-text-hover: #3a3127;
+    --color-tertiary: #d9c3a5;
+    --color-text: #64351B;
+    --color-hover: #BEA98A;
+    --color-text-hover: #44220F;
   }
 }
 
@@ -32,6 +33,7 @@
   --font-text: 'Pixelify Sans', sans-serif;
   --color-primary: var(--color-primary);
   --color-secundary: var(--color-secundary);
+  --color-tertiary: var(--color-tertiary);
   --color-text: var(--color-text);
   --color-hover: var(--color-hover);
   --color-text-hover: var(--color-text-hover);

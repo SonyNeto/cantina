@@ -20,18 +20,19 @@ const DrawerContent: FC<ComponentProps<typeof DrawerPrimitive.Content>> = ({
           'bg-secundary fixed top-0 left-0 z-50 flex h-screen w-full max-w-64 flex-col shadow-lg',
           'data-open:animate-drawer-in',
           'data-closed:animate-drawer-out',
-          className,
         )}
       >
-        <DrawerPrimitive.Content {...props}>
-          <DrawerPrimitive.Close
-            className="absolute top-2 right-3 cursor-pointer rounded-full p-1 transition-all hover:text-red-500"
-            render={
-              <Button variant="ghost" size="lg" className="rounded-full">
-                <ArrowBarLeft />
-              </Button>
-            }
-          />
+        <DrawerPrimitive.Content className={className} {...props}>
+          <div className="flex justify-end bg-tertiary border-b-4 border-text/30 p-4">
+            <DrawerPrimitive.Close
+              className=""
+              render={
+                <Button variant="ghost" size="lg" className="rounded-full hover:text-red-500">
+                  <ArrowBarLeft />
+                </Button>
+              }
+            />
+          </div>
           {children}
         </DrawerPrimitive.Content>
       </DrawerPrimitive.Popup>
