@@ -3,7 +3,7 @@
 @layer base {
   :root {
     --color-primary: #fdf1db;
-    --color-secundary: #e7d4b4;
+    --color-secondary: #e7d4b4;
     --color-tertiary: #d9c3a5;
     --color-text: #64351B;
     --color-hover: #BEA98A;
@@ -32,7 +32,7 @@
 @theme {
   --font-text: 'Pixelify Sans', sans-serif;
   --color-primary: var(--color-primary);
-  --color-secundary: var(--color-secundary);
+  --color-secondary: var(--color-secondary);
   --color-tertiary: var(--color-tertiary);
   --color-text: var(--color-text);
   --color-hover: var(--color-hover);

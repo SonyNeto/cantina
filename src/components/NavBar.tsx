@@ -7,7 +7,7 @@ import NAVMENU from '../constants/navmenu.ts'
 
 export const NavBar: FC = () => {
   return (
-    <div className="fixed top-0 left-0 z-50 flex h-screen w-32 flex-col p-4">
+    <div className="sticky top-0 left-0 z-50 flex w-screen flex-col bg-secondary border-b-4 border-text/30 p-4">
       <Drawer swipeDirection="left">
         <DrawerTrigger
           render={

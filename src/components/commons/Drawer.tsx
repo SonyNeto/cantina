@@ -17,7 +17,7 @@ const DrawerContent: FC<ComponentProps<typeof DrawerPrimitive.Content>> = ({
     <DrawerPrimitive.Viewport className="fixed inset-0 z-50">
       <DrawerPrimitive.Popup
         className={cn(
-          'bg-secundary fixed top-0 left-0 z-50 flex h-screen w-full max-w-64 flex-col shadow-lg',
+          'bg-secondary fixed top-0 left-0 z-50 flex h-screen w-full max-w-64 flex-col shadow-lg',
           'data-open:animate-drawer-in',
           'data-closed:animate-drawer-out',
         )}

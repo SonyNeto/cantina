@@ -3,7 +3,7 @@ import { cn } from '../../utils/functions';
 import { mergeProps, useRender } from '@base-ui/react';
 
 const variants = {
-  primary: 'bg-secundary text-text hover:bg-hover hover:text-text-hover',
+  primary: 'bg-secondary text-text hover:bg-hover hover:text-text-hover',
   ghost: 'hover:bg-hover text-text hover:text-text-hover',
   outlined:
     'border border-text/30 text-text hover:bg-hover hover:text-text-hover',
