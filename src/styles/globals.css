@@ -5,9 +5,9 @@
     --color-primary: #fdf1db;
     --color-secondary: #e7d4b4;
     --color-tertiary: #d9c3a5;
-    --color-text: #64351B;
-    --color-hover: #BEA98A;
-    --color-text-hover: #44220F;
+    --color-text: #64351b;
+    --color-hover: #bea98a;
+    --color-text-hover: #44220f;
   }
 }
 
@@ -29,6 +29,24 @@
   }
 }
 
+@keyframes accordion-in {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--accordion-panel-height);
+  }
+}
+
+@keyframes accordion-out {
+  from {
+    height: var(--accordion-panel-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
 @theme {
   --font-text: 'Pixelify Sans', sans-serif;
   --color-primary: var(--color-primary);
@@ -37,8 +55,10 @@
   --color-text: var(--color-text);
   --color-hover: var(--color-hover);
   --color-text-hover: var(--color-text-hover);
-  --animate-drawer-in: drawer-in 0.1s ease-out;
-  --animate-drawer-out: drawer-out 0.1s ease-out;
+  --animate-drawer-in: drawer-in 0.2s ease-in;
+  --animate-drawer-out: drawer-out 0.2s ease-out;
+  --animate-accordion-in: accordion-in 0.2s ease-in;
+  --animate-accordion-out: accordion-out 0.2s ease-out;
 }
 
 body {

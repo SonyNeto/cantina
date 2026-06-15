@@ -7,18 +7,18 @@ const NAVMENU = {
       label: 'Iniciar Pedidos',
       route: ROUTES.NEWORDERS,
       icon: PenSquare,
-    }, 
+    },
     {
       label: 'Cardápio',
       route: ROUTES.MENU,
       icon: Coffee,
-    }, 
+    },
     {
       label: 'Lista de Pedidos',
       route: ROUTES.ORDERSLIST,
       icon: Notebook,
-    }
-  ]
-}
+    },
+  ],
+};
 
 export default NAVMENU;
