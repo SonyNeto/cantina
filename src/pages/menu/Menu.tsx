@@ -26,25 +26,7 @@ export const Menu: FC = () => {
           return (
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
               <div className="grid">
-                {!isEditing && (
-                  <AccordionTrigger
-                    render={
-                      <Button
-                        size="lg"
-                        variant="ghost"
-                        className="bg-secondary border-text/30 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-6 py-8"
-                        disabled={editingIdx !== null}
-                      >
-                        <div className="inline-flex items-center gap-2.5">
-                          <item.icon />
-                          {!isEditing && <span>{item.label}</span>}
-                        </div>
-                        {!isEditing && <span>{`R$${item.price.toFixed(2)}`}</span>}
-                      </Button>
-                    }
-                  />
-                )}
-                {isEditing && (
+                {isEditing ? (
                   <div className="bg-secondary border-text/30 z-50 col-start-1 row-start-1 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
                     <div className="inline-flex items-center gap-2.5">
                       <item.icon />
@@ -65,28 +47,34 @@ export const Menu: FC = () => {
                       />
                     </div>
                   </div>
+                ) : (
+                  <AccordionTrigger
+                    render={
+                      <Button
+                        size="lg"
+                        variant="ghost"
+                        className="bg-secondary border-text/30 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-6 py-8"
+                        disabled={editingIdx !== null}
+                      >
+                        <div className="inline-flex items-center gap-2.5">
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </div>
+                        <span>{`R$${item.price.toFixed(2)}`}</span>
+                      </Button>
+                    }
+                  />
                 )}
               </div>
 
               <AccordionContent>
                 <div className="flex items-center gap-2.5">
-                  {!isEditing && (
-                    <Button
-                      size="lg"
-                      variant="primary"
-                      className="p-2"
-                      onClick={() => (isEditing ? setEditingIdx(null) : setEditingIdx(idx))}
-                    >
-                      <PenSquare />
-                      <span>Editar</span>
-                    </Button>
-                  )}
-                  {isEditing && (
+                  {isEditing ? (
                     <div className="flex flex-col gap-2.5">
                       <Button
                         size="lg"
                         variant="primary"
-                        className="justify-start p-2"
+                        className="w-40 justify-start p-2"
                         onClick={() => (isEditing ? setEditingIdx(null) : setEditingIdx(idx))}
                       >
                         <Check />
@@ -96,13 +84,23 @@ export const Menu: FC = () => {
                       <Button
                         size="lg"
                         variant="primary"
-                        className="justify-start p-2"
+                        className="w-40 justify-start p-2"
                         onClick={() => (isEditing ? setEditingIdx(null) : setEditingIdx(idx))}
                       >
                         <X />
                         <span>Cancelar</span>
                       </Button>
                     </div>
+                  ) : (
+                    <Button
+                      size="lg"
+                      variant="primary"
+                      className="p-2"
+                      onClick={() => (isEditing ? setEditingIdx(null) : setEditingIdx(idx))}
+                    >
+                      <PenSquare />
+                      <span>Editar</span>
+                    </Button>
                   )}
                   <Button size="lg" variant="primary" className="p-2">
                     <TrashCan />
