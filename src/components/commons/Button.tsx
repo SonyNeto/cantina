@@ -3,10 +3,9 @@ import { cn } from '../../utils/functions';
 import { mergeProps, useRender } from '@base-ui/react';
 
 const variants = {
-  primary: 'bg-secondary text-text hover:bg-hover hover:text-text-hover',
+  primary: 'bg-secondary text-text hover:bg-hover hover:text-text-hover border-4 border-text/30',
   ghost: 'hover:bg-hover text-text hover:text-text-hover',
-  outlined:
-    'border border-text/30 text-text hover:bg-hover hover:text-text-hover',
+  outlined: 'border border-text/30 text-text hover:bg-hover hover:text-text-hover',
   danger: 'bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900',
 };
 
