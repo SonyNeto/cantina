@@ -26,7 +26,7 @@ export const ResponsibleDetails: FC = () => {
           <Link
             key={student.id}
             to={ROUTES.ORDERSLIST.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-            className="border-text/30 text-text relative flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10"
+            className="border-text/30 text-text relative z-50 flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10"
           >
             <span>{student.name}</span>
             <span className="whitespace-nowrap">{`R$ ${totalPerStudent.toFixed(2)}`}</span>
