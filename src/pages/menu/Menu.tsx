@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '../../components/commons/Accordion';
-import MENU from '../../constants/menuitemstemp';
+import { MENU } from '../../constants/menuitemstemp';
 import { Check, PenSquare } from 'pixelarticons/react';
 import { TrashCan, X } from '../../assets/icons/MenuIcons';
 
