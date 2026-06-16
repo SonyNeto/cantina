@@ -4,7 +4,7 @@ import STUDENTS_IDS from './ids/students';
 export interface Student {
   id: string;
   name: string;
-  class?: string;
+  class: string;
   responsibleId: string;
 }
 
