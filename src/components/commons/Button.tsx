@@ -1,12 +1,24 @@
 import type { FC } from 'react';
-import { cn } from '../../utils/functions';
 import { mergeProps, useRender } from '@base-ui/react';
+import { cn } from '../../utils/functions';
 
 const variants = {
-  primary: 'bg-secondary text-text hover:bg-hover hover:text-text-hover border-4 border-text/30',
-  ghost: 'hover:bg-hover text-text hover:text-text-hover',
-  outlined: 'border border-text/30 text-text hover:bg-hover hover:text-text-hover',
-  danger: 'bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900',
+  primary: {
+    base: 'bg-secondary text-text border-4 border-text/30',
+    hover: 'hover:bg-hover hover:text-text-hover',
+  },
+  ghost: {
+    base: 'text-text',
+    hover: 'hover:bg-hover hover:text-text-hover',
+  },
+  outlined: {
+    base: 'border border-text/30 text-text',
+    hover: 'hover:bg-hover hover:text-text-hover',
+  },
+  danger: {
+    base: 'bg-red-100 text-red-700',
+    hover: 'hover:bg-red-200 hover:text-red-900',
+  },
 };
 
 const sizes = {
@@ -19,21 +31,25 @@ interface Props extends useRender.ComponentProps<'button'> {
   variant?: keyof typeof variants;
   size?: keyof typeof sizes;
   nativeButton?: boolean;
+  disableHover?: boolean;
 }
 
 export const Button: FC<Props> = ({
   variant = 'primary',
   size = 'md',
   nativeButton = true,
+  disableHover = false,
   render,
   className,
   ...props
 }) => {
   const defaultProps: useRender.ElementProps<'button'> = {
     className: cn(
-      variants[variant],
+      variants[variant].base,
+      !disableHover && variants[variant].hover,
       sizes[size],
-      'inline-flex cursor-pointer items-center justify-center rounded font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+      'inline-flex cursor-pointer items-center justify-center rounded font-medium whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+      !disableHover && 'transition-all',
       className,
     ),
     ...(nativeButton ? { type: 'button' } : {}),
