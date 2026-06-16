@@ -15,7 +15,7 @@ const NAVMENU = {
     },
     {
       label: 'Lista de Pedidos',
-      route: ROUTES.ORDERSLIST,
+      route: ROUTES.ORDERSLIST.ROOT,
       icon: Notebook,
     },
   ],
