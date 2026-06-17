@@ -25,6 +25,7 @@ const sizes = {
   sm: 'h-8 min-w-8 gap-1.5 px-3 text-sm has-[>svg:only-child]:w-8 has-[>svg:only-child]:px-0 [&_svg]:size-4',
   md: 'h-10 min-w-10 gap-2 px-4 text-md has-[>svg:only-child]:w-10 has-[>svg:only-child]:px-0 [&_svg]:size-8',
   lg: 'h-12 min-w-12 gap-2.5 px-5 text-xl has-[>svg:only-child]:w-12 has-[>svg:only-child]:px-0 [&_svg]:size-10',
+  xl: 'h-14 min-w-14 gap-3 px-6 text-2xl has-[>svg:only-child]:w-14 has-[>svg:only-child]:px-0 [&_svg]:size-14',
 };
 
 interface Props extends useRender.ComponentProps<'button'> {
