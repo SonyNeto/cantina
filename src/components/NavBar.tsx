@@ -26,7 +26,7 @@ export const NavBar: FC = () => {
             <Link
               key={`navmenu-${item.label.trim().toLowerCase()}-${idx}`}
               to={item.route}
-              className="border-text/30 hover:bg-hover text-text hover:text-text-hover inline-flex w-full items-center gap-2.5 border-b-4 p-4 text-xl whitespace-nowrap [&_svg]:size-10"
+              className="border-text/30 hover:bg-hover text-text hover:text-text-hover inline-flex w-full items-center gap-2.5 border-b-4 p-4 text-xl whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
               onClick={() => setIsOpen(false)}
             >
               <item.icon width={12} height={12} />

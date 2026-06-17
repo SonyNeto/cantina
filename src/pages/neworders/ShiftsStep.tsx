@@ -26,7 +26,7 @@ export const ShiftsStep: FC<Props> = ({ onNext }) => {
 
   return (
     <div className="b- flex flex-col gap-5">
-      <div className="bg-tertiary border-text/30 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10">
+      <div className="bg-tertiary border-text/30 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <span>Escolha um turno</span>
       </div>
       {SHIFTS.map((shift) => (

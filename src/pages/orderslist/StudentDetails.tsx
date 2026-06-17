@@ -16,7 +16,7 @@ export const StudentDetails: FC = () => {
 
   return (
     <div className="border-text m-6 flex h-fit flex-col border-4">
-      <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10">
+      <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Link
           key="back-responsible-details"
           to={ROUTES.ORDERSLIST.DETAIL_PATH(responsibleId)}
@@ -32,7 +32,7 @@ export const StudentDetails: FC = () => {
 
         return (
           <div
-            className="border-text/30 text-text inline-flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10"
+            className="border-text/30 text-text inline-flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
             key={order.id}
           >
             <div className="inline-flex items-center gap-2.5">
@@ -47,7 +47,7 @@ export const StudentDetails: FC = () => {
         );
       })}
 
-      <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10">
+      <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10">
         <div className="flex gap-5">
           <span>Total: </span>
           <span>{`R$ ${total.toFixed(2)}`}</span>

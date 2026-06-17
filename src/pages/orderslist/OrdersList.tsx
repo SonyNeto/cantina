@@ -18,7 +18,7 @@ export const OrdersList: FC = () => {
           <Link
             key={responsible.id}
             to={ROUTES.ORDERSLIST.DETAIL_PATH(responsible.id)}
-            className="border-text/30 text-text relative z-50 flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10"
+            className="border-text/30 text-text relative z-50 flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
           >
             <span>{responsible.name}</span>
             <span className="whitespace-nowrap">{`R$ ${totalPerResponsible.toFixed(2)}`}</span>

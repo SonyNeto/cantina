@@ -16,7 +16,7 @@ export const ResponsibleDetails: FC = () => {
 
   return (
     <div className="border-text m-6 flex h-fit flex-col border-4">
-      <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10">
+      <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Link key="back-orders-list" to={ROUTES.ORDERSLIST.ROOT} className="absolute left-4 z-50">
           <ArrowLeft />
         </Link>
@@ -31,7 +31,7 @@ export const ResponsibleDetails: FC = () => {
           <Link
             key={student.id}
             to={ROUTES.ORDERSLIST.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-            className="border-text/30 text-text relative z-50 flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10"
+            className="border-text/30 text-text relative z-50 flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
           >
             <span>{student.name}</span>
             <span className="whitespace-nowrap">{`R$ ${totalPerStudent.toFixed(2)}`}</span>
@@ -39,7 +39,7 @@ export const ResponsibleDetails: FC = () => {
         );
       })}
 
-      <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10">
+      <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <div className="flex gap-5">
           <span>Total: </span>
           <span>{`R$ ${total.toFixed(2)}`}</span>
