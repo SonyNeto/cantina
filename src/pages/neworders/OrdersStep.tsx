@@ -124,21 +124,21 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
                   variant="primary"
                   size="sm"
                   onClick={() => {
-                    setTotal(total + item.price);
-                    increaseQuantity(item.id);
-                  }}
-                >
-                  <Plus />
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => {
                     setTotal(Math.max(0, total - item.price));
                     decreaseQuantity(item.id);
                   }}
                 >
                   <Minus />
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setTotal(total + item.price);
+                    increaseQuantity(item.id);
+                  }}
+                >
+                  <Plus />
                 </Button>
                 <span>{quantity}</span>
               </div>
