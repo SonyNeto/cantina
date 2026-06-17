@@ -1,12 +1,10 @@
 import { useState, type FC } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Button } from '../../components/commons/Button';
-import { ArrowLeft } from 'pixelarticons/react';
-import { MENU } from '../../constants/canteen/menuitemstemp';
 import type { NewOrderForm } from './types';
 import { ShiftsStep } from './ShiftsStep';
 import { ClassesStep } from './ClassesStep';
 import { StudentsStep } from './StudentsStep';
+import { OrdersStep } from './OrdersStep';
 
 const STEPS = {
   SHIFTS: 'SHIFTS',
@@ -53,35 +51,7 @@ export const NewOrders: FC = () => {
             />
           )}
 
-          {step === STEPS.ORDER && (
-            <div className="border-text m-6 flex h-fit flex-col border-4">
-              <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10">
-                <Button
-                  variant={'ghost'}
-                  className="absolute left-4 z-50"
-                  disableHover
-                  onClick={() => setStep(STEPS.STUDENTS)}
-                >
-                  <ArrowLeft />
-                </Button>
-                <span>Cardápio</span>
-              </div>
-
-              {MENU.ITEMS.map((item, idx) => (
-                <Button
-                  key={`orderitem-${item.label.trim().toLowerCase()}-${idx}`}
-                  size="lg"
-                  variant="ghost"
-                  className="bg-secondary border-text/30 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-6 py-8"
-                >
-                  <div className="inline-flex items-center gap-2.5">
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </div>
-                </Button>
-              ))}
-            </div>
-          )}
+          {step === STEPS.ORDER && <OrdersStep onBack={() => setStep(STEPS.STUDENTS)} />}
         </form>
       </FormProvider>
     </div>
