@@ -1,11 +1,6 @@
 import RESPONSIBLES_IDS from './ids/responsibles';
 import STUDENTS_IDS from './ids/students';
-
-export interface Responsible {
-  id: string;
-  name: string;
-  studentsIds: string[];
-}
+import type { Responsible } from './types';
 
 interface Responsibles {
   RESPONSIBLES: Responsible[];

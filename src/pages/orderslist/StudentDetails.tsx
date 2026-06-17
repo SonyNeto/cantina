@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { ORDERS } from '../../constants/orderstemp';
+import { ORDERS } from '../../constants/canteen/orderstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
@@ -7,6 +7,11 @@ import { getStudentTotal } from '../../utils/selectors';
 
 export const StudentDetails: FC = () => {
   const { responsibleId, studentId } = useParams();
+
+  if (!studentId || !responsibleId) {
+    return <div>Aluno não encontrado</div>;
+  }
+
   const total = getStudentTotal(studentId);
 
   return (

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { STUDENTS } from '../../constants/studentstemp';
+import { STUDENTS } from '../../constants/school/studentstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
@@ -7,6 +7,11 @@ import { getResponsibleTotal, getStudentTotal } from '../../utils/selectors';
 
 export const ResponsibleDetails: FC = () => {
   const { responsibleId } = useParams();
+
+  if (!responsibleId) {
+    return <div>Respnsável não encontrado</div>;
+  }
+
   const total = getResponsibleTotal(responsibleId);
 
   return (

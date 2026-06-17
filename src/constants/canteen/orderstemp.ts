@@ -1,15 +1,7 @@
 import dayjs from 'dayjs';
-import type { Item } from './menuitemstemp';
 import { MENU } from './menuitemstemp';
-import STUDENTS_IDS from './ids/students';
-
-export interface Order {
-  id: string;
-  product: Item;
-  created_at: string;
-  studentId: string;
-  total: number;
-}
+import STUDENTS_IDS from '../school/ids/students';
+import type { Item, Order } from './types';
 
 interface Orders {
   ORDERS: Order[];

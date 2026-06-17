@@ -1,18 +1,12 @@
 import { useState, type FC } from 'react';
-import { Form, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { Button } from '../../components/commons/Button';
 import { ArrowLeft } from 'pixelarticons/react';
-import { MENU } from '../../constants/menuitemstemp';
-
-type NewOrderForm = {
-  shift: string;
-  classId: string;
-  studentId: string;
-  order: {
-    menuItemId: string;
-    quantity: number;
-  };
-};
+import { MENU } from '../../constants/canteen/menuitemstemp';
+import type { NewOrderForm } from './types';
+import { ShiftsStep } from './ShiftsStep';
+import { ClassesStep } from './ClassesStep';
+import { StudentsStep } from './StudentsStep';
 
 const STEPS = {
   SHIFTS: 'SHIFTS',
@@ -21,18 +15,17 @@ const STEPS = {
   ORDER: 'ORDER',
 };
 
+type Step = (typeof STEPS)[keyof typeof STEPS];
+
 export const NewOrders: FC = () => {
-  const [step, setStep] = useState<(typeof STEPS)[keyof typeof STEPS]>(STEPS.SHIFTS);
+  const [step, setStep] = useState<Step>(STEPS.SHIFTS);
 
   const form = useForm<NewOrderForm>({
     defaultValues: {
-      shift: '',
+      shiftId: '',
       classId: '',
       studentId: '',
-      order: {
-        menuItemId: '',
-        quantity: 0,
-      },
+      order: [],
     },
   });
 
@@ -42,96 +35,55 @@ export const NewOrders: FC = () => {
 
   return (
     <div className="flex flex-col justify-center">
-      <Form //onSubmit={handleSubmit(onSubmit)}
-        {...form}
-      >
-        {step === STEPS.SHIFTS && (
-          <div className="b- flex flex-col gap-5">
-            <div className="bg-tertiary border-text/30 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10">
-              <span>Escolha um turno</span>
-            </div>
-            <Button variant={'primary'} size={'lg'} onClick={() => setStep(STEPS.CLASSES)}>
-              Manhã
-            </Button>
-            <Button variant={'primary'} size={'lg'} onClick={() => setStep(STEPS.CLASSES)}>
-              Tarde
-            </Button>
-          </div>
-        )}
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          {step === STEPS.SHIFTS && <ShiftsStep onNext={() => setStep(STEPS.CLASSES)} />}
 
-        {step === STEPS.CLASSES && (
-          <div className="flex flex-col gap-5">
-            <div className="bg-tertiary border-text/30 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10">
-              <Button
-                variant={'ghost'}
-                className="absolute left-4 z-50"
-                disableHover
-                onClick={() => setStep(STEPS.SHIFTS)}
-              >
-                <ArrowLeft />
-              </Button>
-              <span>Escolha uma turma</span>
-            </div>
-            <Button variant={'primary'} size={'lg'} onClick={() => setStep(STEPS.STUDENTS)}>
-              1° ano
-            </Button>
-            <Button variant={'primary'} size={'lg'} onClick={() => setStep(STEPS.STUDENTS)}>
-              2° ano
-            </Button>
-          </div>
-        )}
+          {step === STEPS.CLASSES && (
+            <ClassesStep
+              onNext={() => setStep(STEPS.STUDENTS)}
+              onBack={() => setStep(STEPS.SHIFTS)}
+            />
+          )}
 
-        {step === STEPS.STUDENTS && (
-          <div className="flex flex-col gap-5">
-            <div className="bg-tertiary border-text/30 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10">
-              <Button
-                variant={'ghost'}
-                className="absolute left-4 z-50"
-                disableHover
-                onClick={() => setStep(STEPS.CLASSES)}
-              >
-                <ArrowLeft />
-              </Button>
-              <span>Escolha um aluno</span>
-            </div>
-            <Button variant={'primary'} size={'lg'} onClick={() => setStep(STEPS.ORDER)}>
-              Aluno 1
-            </Button>
-            <Button variant={'primary'} size={'lg'} onClick={() => setStep(STEPS.ORDER)}>
-              Aluno 2
-            </Button>
-          </div>
-        )}
+          {step === STEPS.STUDENTS && (
+            <StudentsStep
+              onNext={() => setStep(STEPS.ORDER)}
+              onBack={() => setStep(STEPS.CLASSES)}
+            />
+          )}
 
-        {step === STEPS.ORDER && (
-          <div className="border-text m-6 flex h-fit flex-col border-4">
-            <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10">
-              <Button
-                variant={'ghost'}
-                className="absolute left-4 z-50"
-                disableHover
-                onClick={() => setStep(STEPS.STUDENTS)}
-              >
-                <ArrowLeft />
-              </Button>
-              <span>Cardápio</span>
-            </div>
+          {step === STEPS.ORDER && (
+            <div className="border-text m-6 flex h-fit flex-col border-4">
+              <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10">
+                <Button
+                  variant={'ghost'}
+                  className="absolute left-4 z-50"
+                  disableHover
+                  onClick={() => setStep(STEPS.STUDENTS)}
+                >
+                  <ArrowLeft />
+                </Button>
+                <span>Cardápio</span>
+              </div>
 
-            {MENU.ITEMS.map((item) => (
-              <Button
-                size="lg"
-                variant="ghost"
-                className="bg-secondary border-text/30 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-6 py-8"
-              >
-                <div className="inline-flex items-center gap-2.5">
-                  <item.icon />
-                  <span>{item.label}</span>
-                </div>
-              </Button>
-            ))}
-          </div>
-        )}
-      </Form>
+              {MENU.ITEMS.map((item, idx) => (
+                <Button
+                  key={`orderitem-${item.label.trim().toLowerCase()}-${idx}`}
+                  size="lg"
+                  variant="ghost"
+                  className="bg-secondary border-text/30 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-6 py-8"
+                >
+                  <div className="inline-flex items-center gap-2.5">
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          )}
+        </form>
+      </FormProvider>
     </div>
   );
 };

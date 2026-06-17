@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { RESPONSIBLES } from '../../constants/responsiblestemp';
+import { RESPONSIBLES } from '../../constants/school/responsiblestemp';
 import { Link } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { getResponsibleTotal } from '../../utils/selectors';

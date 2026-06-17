@@ -1,14 +1,8 @@
 import { Cake } from 'pixelarticons/react';
-import { Bread, Cashew, Mango, Guajava } from '../assets/icons/MenuIcons';
-import type { SVGProps, JSX } from 'react';
+import { Bread, Cashew, Mango, Guajava } from '../../assets/icons/MenuIcons';
 import MENU_ITEMS_IDS from './ids/menuitems';
+import type { Item } from './types';
 
-export interface Item {
-  id: string;
-  label: string;
-  price: number;
-  icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
-}
 interface Menu {
   ITEMS: Item[];
 }
