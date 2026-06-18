@@ -15,7 +15,7 @@ export const ResponsibleDetails: FC = () => {
   const total = getResponsibleTotal(responsibleId);
 
   return (
-    <div className="border-text m-6 flex h-fit flex-col border-4">
+    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
       <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Link key="back-orders-list" to={ROUTES.ORDERSLIST.ROOT} className="absolute left-4 z-50">
           <ArrowLeft />
@@ -23,21 +23,23 @@ export const ResponsibleDetails: FC = () => {
         Alunos
       </div>
 
-      {STUDENTS.STUDENTS.map((student) => {
-        if (responsibleId !== student.responsibleId) return;
-        const totalPerStudent = getStudentTotal(student.id);
+      <div className="grid">
+        {STUDENTS.STUDENTS.map((student) => {
+          if (responsibleId !== student.responsibleId) return;
+          const totalPerStudent = getStudentTotal(student.id);
 
-        return (
-          <Link
-            key={student.id}
-            to={ROUTES.ORDERSLIST.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-            className="border-text/30 text-text relative z-50 flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
-          >
-            <span>{student.name}</span>
-            <span className="whitespace-nowrap">{`R$ ${totalPerStudent.toFixed(2)}`}</span>
-          </Link>
-        );
-      })}
+          return (
+            <Link
+              key={student.id}
+              to={ROUTES.ORDERSLIST.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
+              className="border-text/30 text-text relative z-50 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+            >
+              <span>{student.name}</span>
+              <span className="text-right tabular-nums">{`R$ ${totalPerStudent.toFixed(2)}`}</span>
+            </Link>
+          );
+        })}
+      </div>
 
       <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <div className="flex gap-5">

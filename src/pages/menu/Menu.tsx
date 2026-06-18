@@ -14,7 +14,7 @@ export const Menu: FC = () => {
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
   return (
-    <div className="border-text m-6 flex h-fit flex-col border-4">
+    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
       <div className="bg-tertiary flex w-full justify-center gap-2.5 px-6 py-4 text-xl">
         Cardápio
       </div>
@@ -27,7 +27,7 @@ export const Menu: FC = () => {
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
               <div className="grid">
                 {isEditing ? (
-                  <div className="bg-secondary border-text/30 z-50 col-start-1 row-start-1 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
+                  <div className="bg-secondary border-text/30 z-50 col-start-1 row-start-1 flex w-full items-center overflow-hidden justify-between gap-2.5 rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
                     <div className="inline-flex items-center gap-2.5">
                       <item.icon />
                       <input

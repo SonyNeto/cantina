@@ -93,7 +93,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
 
   return (
     <>
-      <div className="border-text m-6 flex h-fit flex-col border-4">
+      <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
         <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10">
           <Button variant={'ghost'} className="absolute left-4 z-50" disableHover onClick={onBack}>
             <ArrowLeft />
@@ -106,20 +106,20 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
             <span>{`R$ ${total.toFixed(2)}`}</span>
           </div>
         </div>
-        {MENU.ITEMS.map((item, idx) => {
-          const quantity = getMenuItemQuantityById(item.id);
+        <div className="grid">
+          {MENU.ITEMS.map((item, idx) => {
+            const quantity = getMenuItemQuantityById(item.id);
 
-          return (
-            <div
-              key={`orderitem-${item.label.trim().toLowerCase()}-${idx}`}
-              className="border-text/30 text-text inline-flex w-full items-center justify-between gap-2.5 border-t-4 p-4 text-xl"
-            >
-              <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                <item.icon />
-                <span>{item.label}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <span>{`R$${item.price.toFixed(2)}`}</span>
+            return (
+              <div
+                key={`orderitem-${item.label.trim().toLowerCase()}-${idx}`}
+                className="border-text/30 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch_2rem_2rem_1.5ch] items-center gap-2.5 border-t-4 p-4 text-xl"
+              >
+                <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                  <item.icon />
+                  <span>{item.label}</span>
+                </div>
+                <span className="text-right tabular-nums">{`R$${item.price.toFixed(2)}`}</span>
                 <Button
                   variant="primary"
                   size="sm"
@@ -140,11 +140,11 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
                 >
                   <Plus />
                 </Button>
-                <span>{quantity}</span>
+                <span className="text-center tabular-nums">{quantity}</span>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
       <div className="sticky bottom-4 flex items-center justify-center">
         <Button
