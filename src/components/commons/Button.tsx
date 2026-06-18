@@ -4,7 +4,7 @@ import { cn } from '../../utils/functions';
 
 const variants = {
   primary: {
-    base: 'bg-secondary text-text border-4 border-text/30',
+    base: 'bg-secondary text-text border-4 border-text/40',
     hover: 'hover:bg-hover hover:text-text-hover',
   },
   ghost: {
@@ -12,7 +12,7 @@ const variants = {
     hover: 'hover:bg-hover hover:text-text-hover',
   },
   outlined: {
-    base: 'border border-text/30 text-text',
+    base: 'border border-text/40 text-text',
     hover: 'hover:bg-hover hover:text-text-hover',
   },
   danger: {

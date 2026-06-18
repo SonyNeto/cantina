@@ -33,7 +33,7 @@ export const StudentDetails: FC = () => {
 
           return (
             <div
-              className="border-text/30 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
               key={order.id}
             >
               <div className="inline-flex items-center gap-2.5">
@@ -47,7 +47,7 @@ export const StudentDetails: FC = () => {
         })}
       </div>
 
-      <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10">
+      <div className="border-text/40 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10">
         <div className="flex gap-5">
           <span>Total: </span>
           <span>{`R$ ${total.toFixed(2)}`}</span>

@@ -32,7 +32,7 @@ export const ResponsibleDetails: FC = () => {
             <Link
               key={student.id}
               to={ROUTES.ORDERSLIST.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-              className="border-text/30 text-text relative z-50 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+              className="border-text/40 text-text relative z-50 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
             >
               <span>{student.name}</span>
               <span className="text-right tabular-nums">{`R$ ${totalPerStudent.toFixed(2)}`}</span>
@@ -41,7 +41,7 @@ export const ResponsibleDetails: FC = () => {
         })}
       </div>
 
-      <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+      <div className="border-text/40 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <div className="flex gap-5">
           <span>Total: </span>
           <span>{`R$ ${total.toFixed(2)}`}</span>

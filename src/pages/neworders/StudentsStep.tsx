@@ -33,7 +33,7 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack }) => {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="bg-tertiary border-text/30 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+      <div className="bg-tertiary border-text/40 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Button variant={'ghost'} className="absolute left-4 z-50" disableHover onClick={onBack}>
           <ArrowLeft />
         </Button>

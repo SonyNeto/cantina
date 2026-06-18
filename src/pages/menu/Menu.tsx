@@ -27,14 +27,14 @@ export const Menu: FC = () => {
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
               <div className="grid">
                 {isEditing ? (
-                  <div className="bg-secondary border-text/30 z-50 col-start-1 row-start-1 flex w-full items-center overflow-hidden justify-between gap-2.5 rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
+                  <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full items-center overflow-hidden justify-between gap-2.5 rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
                     <div className="inline-flex items-center gap-2.5">
                       <item.icon />
                       <input
                         id={`name-input-${item.label.trim().toLowerCase()}-${idx}`}
                         type="text"
                         defaultValue={`${item.label}`}
-                        className="border-text/30 w-[10ch] border-4 px-2"
+                        className="border-text/40 w-[10ch] border-4 px-2"
                       />
                     </div>
                     <div className="inline-flex items-center gap-2.5">
@@ -43,7 +43,7 @@ export const Menu: FC = () => {
                         id={`price-input-${item.label.trim().toLowerCase()}-${idx}`}
                         type="text"
                         defaultValue={`${item.price.toFixed(2)}`}
-                        className="border-text/30 w-[6ch] border-4 px-2 text-end"
+                        className="border-text/40 w-[6ch] border-4 px-2 text-end"
                       />
                     </div>
                   </div>
@@ -53,7 +53,7 @@ export const Menu: FC = () => {
                       <Button
                         size="lg"
                         variant="ghost"
-                        className="bg-secondary border-text/30 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-6 py-8"
+                        className="bg-primary border-text/40 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-6 py-8"
                         disabled={editingIdx !== null}
                       >
                         <div className="inline-flex items-center gap-2.5">

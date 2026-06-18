@@ -4,6 +4,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import type { NewOrderForm } from './types';
 import { ArrowLeft, Minus, Plus } from 'pixelarticons/react';
 import { MENU } from '../../constants/canteen/menuitemstemp';
+import { toast } from 'sonner';
 
 interface Props {
   onBack: () => void;
@@ -100,7 +101,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
           </Button>
           <span>Cardápio</span>
         </div>
-        <div className="border-text/30 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="border-text/40 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
           <div className="flex gap-5">
             <span>Total: </span>
             <span>{`R$ ${total.toFixed(2)}`}</span>
@@ -113,7 +114,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
             return (
               <div
                 key={`orderitem-${item.label.trim().toLowerCase()}-${idx}`}
-                className="border-text/30 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch_2rem_2rem_1.5ch] items-center gap-2.5 border-t-4 p-4 text-xl"
+                className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch_2rem_2rem_1.5ch] items-center gap-2.5 border-t-4 p-4 text-xl"
               >
                 <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                   <item.icon />
@@ -152,7 +153,10 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
           variant="primary"
           size="xl"
           className="border-text-hover bg-text text-primary border-4"
-          onClick={onBack}
+          onClick={() => {
+            onBack();
+            toast.success('Pedido realizado com sucesso!')
+          }}
         >
           Concluir
         </Button>

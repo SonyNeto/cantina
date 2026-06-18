@@ -12,14 +12,14 @@ const AccordionContent: FC<ComponentProps<typeof AccordionPrimitive.Panel>> = ({
 }) => (
   <AccordionPrimitive.Panel
     className={cn(
-      'bg-primary border-text/30 w-full justify-center overflow-hidden rounded-none border-t-4',
+      'bg-primary border-text/40 w-full justify-center overflow-hidden rounded-none border-t-4',
       'data-open:animate-accordion-in',
       'data-closed:animate-accordion-out',
       className,
     )}
     {...props}
   >
-    <div className="flex justify-center p-6">{children}</div>
+    <div className="bg-hover/30 flex justify-center p-6">{children}</div>
   </AccordionPrimitive.Panel>
 );
 
