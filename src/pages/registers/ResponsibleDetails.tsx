@@ -24,11 +24,12 @@ export const ResponsibleDetails: FC = () => {
 
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="absolute left-4 z-50">
+      <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+        <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="z-50 justify-self-start">
           <ArrowLeft />
         </Link>
-        {`Alunos de ${responsibleName}`}
+        <span className="justify-self-center text-center">{`Alunos de ${responsibleName}`}</span>
+        <span aria-hidden="true" />
       </div>
 
       <div className="grid">
@@ -67,7 +68,7 @@ export const ResponsibleDetails: FC = () => {
               <X />
             </Button>
           </div>
-        </div> 
+        </div>
       ) : (
         <Button
           className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 p-4 text-xl"

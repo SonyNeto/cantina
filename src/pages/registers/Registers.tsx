@@ -12,8 +12,8 @@ export const Registers: FC = () => {
 
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary flex w-full justify-center gap-2.5 px-6 py-4 text-xl">
-        Responsáveis
+      <div className="bg-tertiary grid w-full place-items-center gap-2.5 px-6 py-4 text-xl">
+        <span className="text-center">Responsáveis</span>
       </div>
 
       <div className="grid">
@@ -50,7 +50,7 @@ export const Registers: FC = () => {
                 <X />
               </Button>
             </div>
-          </div> 
+          </div>
         ) : (
           <Button
             className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 p-4 text-xl"

@@ -33,24 +33,28 @@ export const ClassesStep: FC<Props> = ({ onNext, onBack }) => {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="bg-tertiary border-text/40 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10">
-        <Button variant={'ghost'} className="absolute left-4 z-50" disableHover onClick={onBack}>
+    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
+      <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10">
+        <Button variant={'ghost'} className="z-50 justify-self-start" disableHover onClick={onBack}>
           <ArrowLeft />
         </Button>
-        <span>Escolha uma turma</span>
+        <span className="justify-self-center text-center">Escolha uma turma</span>
+        <span aria-hidden="true" />
       </div>
-      {classes.map((schoolClass) => (
-        <Button
-          key={schoolClass.id}
-          type="button"
-          variant="primary"
-          size="lg"
-          onClick={() => handleSelectClass(schoolClass.id)}
-        >
-          {schoolClass.label}
-        </Button>
-      ))}
+      <div className="grid">
+        {classes.map((schoolClass) => (
+          <Button
+            key={schoolClass.id}
+            type="button"
+            variant="ghost"
+            size="lg"
+            className="bg-primary border-text/40 grid h-auto w-full grid-cols-[minmax(0,1fr)] justify-items-start rounded-none border-t-4 p-4 text-left text-xl whitespace-normal"
+            onClick={() => handleSelectClass(schoolClass.id)}
+          >
+            <span>{schoolClass.label}</span>
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };

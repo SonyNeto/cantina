@@ -17,15 +17,16 @@ export const StudentDetails: FC = () => {
 
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+      <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Link
           key="back-responsible-details"
           to={ROUTES.REGISTERS.DETAIL_PATH(responsibleId)}
-          className="absolute left-4 z-50"
+          className="z-50 justify-self-start"
         >
           <ArrowLeft />
         </Link>
-        {`Pedidos de ${studentName}`}
+        <span className="justify-self-center text-center">{`Pedidos de ${studentName}`}</span>
+        <span aria-hidden="true" />
       </div>
 
       <div className="grid">
@@ -34,7 +35,7 @@ export const StudentDetails: FC = () => {
 
           return (
             <div
-              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
               key={order.id}
             >
               <div className="inline-flex items-center gap-2.5">
@@ -42,7 +43,7 @@ export const StudentDetails: FC = () => {
                 <span>{order.product.label}</span>
               </div>
               <span className="text-center tabular-nums">{order.created_at}</span>
-              <span className="text-right tabular-nums">{`R$ ${order.product.price.toFixed(2)}`}</span>
+              <span className="text-right tabular-nums">{`R$${order.product.price.toFixed(2)}`}</span>
             </div>
           );
         })}
@@ -51,7 +52,7 @@ export const StudentDetails: FC = () => {
       <div className="border-text/40 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10">
         <div className="flex gap-5">
           <span>Total: </span>
-          <span>{`R$ ${total.toFixed(2)}`}</span>
+          <span>{`R$${total.toFixed(2)}`}</span>
         </div>
       </div>
     </div>

@@ -25,21 +25,24 @@ export const ShiftsStep: FC<Props> = ({ onNext }) => {
   }
 
   return (
-    <div className="b- flex flex-col gap-5">
-      <div className="bg-tertiary border-text/40 relative flex w-screen items-center justify-center gap-2.5 border-b-4 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <span>Escolha um turno</span>
+    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
+      <div className="bg-tertiary grid w-full place-items-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+        <span className="text-center">Escolha um turno</span>
       </div>
-      {SHIFTS.map((shift) => (
-        <Button
-          key={shift.id}
-          type="button"
-          variant="primary"
-          size="lg"
-          onClick={() => handleSelectShift(shift.id)}
-        >
-          {shift.label}
-        </Button>
-      ))}
+      <div className="grid">
+        {SHIFTS.map((shift) => (
+          <Button
+            key={shift.id}
+            type="button"
+            variant="ghost"
+            size="lg"
+            className="bg-primary border-text/40 grid h-auto w-full grid-cols-[minmax(0,1fr)] justify-items-start rounded-none border-t-4 p-4 text-left text-xl whitespace-normal"
+            onClick={() => handleSelectShift(shift.id)}
+          >
+            <span>{shift.label}</span>
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };
