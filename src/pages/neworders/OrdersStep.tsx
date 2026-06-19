@@ -98,7 +98,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
         <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10">
           <Button
             variant={'ghost'}
-            className="z-50 justify-self-start"
+            className="justify-self-start"
             disableHover
             onClick={onBack}
           >

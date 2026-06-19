@@ -49,7 +49,7 @@ export const Button: FC<Props> = ({
       variants[variant].base,
       !disableHover && variants[variant].hover,
       sizes[size],
-      'inline-flex cursor-pointer items-center justify-center rounded font-medium whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+      'inline-flex z-30 cursor-pointer items-center justify-center rounded font-medium whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
       !disableHover && 'transition-all',
       className,
     ),

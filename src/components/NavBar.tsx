@@ -8,8 +8,12 @@ import NAVMENU from '../constants/navmenu.ts';
 export const NavBar: FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
-    <div className="bg-secondary border-text/40 sticky top-0 left-0 z-50 flex w-screen flex-col flex-row justify-between border-b-4 p-4">
-      <Drawer swipeDirection="left" open={isOpen} onOpenChange={setIsOpen}>
+    <Drawer swipeDirection="left" open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerSwipeArea
+        swipeDirection="right"
+        className="bg-red fixed top-0 left-0 z-10 h-screen w-[10vw]"
+      />
+      <div className="bg-secondary border-text/40 sticky top-0 left-0 z-50 flex w-screen flex-col flex-row justify-between border-b-4 p-4">
         <DrawerTrigger
           render={
             <Button size="lg" className="z-50 self-start rounded-full" variant="ghost">
@@ -17,10 +21,7 @@ export const NavBar: FC = () => {
             </Button>
           }
         ></DrawerTrigger>
-        <DrawerSwipeArea
-          swipeDirection="right"
-          className="bg-red fixed top-0 left-0 h-screen w-[10vw]"
-        />
+
         <DrawerContent className="border-text/40 flex h-full flex-col border-r-4">
           {NAVMENU.ITEMS.map((item, idx) => (
             <Link
@@ -34,9 +35,9 @@ export const NavBar: FC = () => {
             </Link>
           ))}
         </DrawerContent>
-      </Drawer>
 
-      <img rel="icon" src="/favicon.png" className="size-10" />
-    </div>
+        <img rel="icon" src="/favicon.png" className="size-10" />
+      </div>
+    </Drawer>
   );
 };

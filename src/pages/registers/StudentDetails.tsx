@@ -21,7 +21,7 @@ export const StudentDetails: FC = () => {
         <Link
           key="back-responsible-details"
           to={ROUTES.REGISTERS.DETAIL_PATH(responsibleId)}
-          className="z-50 justify-self-start"
+          className="z-30 justify-self-start"
         >
           <ArrowLeft />
         </Link>

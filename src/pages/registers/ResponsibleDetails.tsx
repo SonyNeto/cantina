@@ -25,7 +25,7 @@ export const ResponsibleDetails: FC = () => {
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
       <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="z-50 justify-self-start">
+        <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="z-30 justify-self-start">
           <ArrowLeft />
         </Link>
         <span className="justify-self-center text-center">{`Alunos de ${responsibleName}`}</span>
@@ -41,7 +41,7 @@ export const ResponsibleDetails: FC = () => {
             <Link
               key={student.id}
               to={ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
+              className="border-text/40 z-30 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
             >
               <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                 <User />
@@ -74,7 +74,7 @@ export const ResponsibleDetails: FC = () => {
         </div>
       ) : (
         <Button
-          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 py-3 px-4 text-xl"
+          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 px-4 py-3 text-xl"
           variant="ghost"
           size="lg"
           disabled={isAdding}

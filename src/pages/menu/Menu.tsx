@@ -115,7 +115,7 @@ export const Menu: FC = () => {
       {editingIdx !== -1 ? (
         <Button
           size="lg"
-          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 py-3 px-4 text-xl"
+          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 px-4 py-3 text-xl"
           variant="ghost"
           disabled={editingIdx !== null}
           onClick={() => setEditingIdx(-1)}
