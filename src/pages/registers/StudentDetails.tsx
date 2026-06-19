@@ -19,7 +19,7 @@ export const StudentDetails: FC = () => {
       <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Link
           key="back-responsible-details"
-          to={ROUTES.ORDERSLIST.DETAIL_PATH(responsibleId)}
+          to={ROUTES.REGISTERS.DETAIL_PATH(responsibleId)}
           className="absolute left-4 z-50"
         >
           <ArrowLeft />

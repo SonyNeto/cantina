@@ -3,9 +3,9 @@ import ROUTES from './constants/routes';
 import { Layout } from './components/Layout';
 import { Menu } from './pages/menu/Menu';
 import { NewOrders } from './pages/neworders/NewOrders';
-import { OrdersList } from './pages/orderslist/OrdersList';
-import { ResponsibleDetails } from './pages/orderslist/ResponsibleDetails';
-import { StudentDetails } from './pages/orderslist/StudentDetails';
+import { Registers } from './pages/registers/Registers';
+import { ResponsibleDetails } from './pages/registers/ResponsibleDetails';
+import { StudentDetails } from './pages/registers/StudentDetails';
 import { Toast } from './components/commons/Toast';
 
 function App() {
@@ -17,9 +17,9 @@ function App() {
           <Route path={ROUTES.HOME} element={<NewOrders />} />
           <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
           <Route path={ROUTES.MENU} element={<Menu />} />
-          <Route path={ROUTES.ORDERSLIST.ROOT} element={<OrdersList />} />
-          <Route path={ROUTES.ORDERSLIST.DETAIL} element={<ResponsibleDetails />} />
-          <Route path={ROUTES.ORDERSLIST.STUDENTS.DETAIL} element={<StudentDetails />} />
+          <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
+          <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
+          <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
         </Route>
       </Routes>
     </>

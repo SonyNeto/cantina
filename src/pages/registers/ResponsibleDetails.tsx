@@ -17,7 +17,7 @@ export const ResponsibleDetails: FC = () => {
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
       <div className="bg-tertiary relative flex w-full items-center justify-center gap-2.5 px-6 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <Link key="back-orders-list" to={ROUTES.ORDERSLIST.ROOT} className="absolute left-4 z-50">
+        <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="absolute left-4 z-50">
           <ArrowLeft />
         </Link>
         Alunos
@@ -31,8 +31,8 @@ export const ResponsibleDetails: FC = () => {
           return (
             <Link
               key={student.id}
-              to={ROUTES.ORDERSLIST.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-              className="border-text/40 text-text relative z-50 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+              to={ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
+              className="border-text/40 text-text hover:bg-hover hover:text-text-hover relative z-50 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-4 text-xl transition-all [&_svg]:size-10 [&_svg]:shrink-0"
             >
               <span>{student.name}</span>
               <span className="text-right tabular-nums">{`R$ ${totalPerStudent.toFixed(2)}`}</span>
@@ -41,11 +41,9 @@ export const ResponsibleDetails: FC = () => {
         })}
       </div>
 
-      <div className="border-text/40 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <div className="flex gap-5">
-          <span>Total: </span>
-          <span>{`R$ ${total.toFixed(2)}`}</span>
-        </div>
+      <div className="border-text/40 text-text relative grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+        <span className="text-right">Total: </span>
+        <span className="text-right tabular-nums">{`R$ ${total.toFixed(2)}`}</span>
       </div>
     </div>
   );

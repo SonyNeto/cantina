@@ -1,4 +1,4 @@
-import { PenSquare, Coffee, Notebook } from 'pixelarticons/react';
+import { PenSquare, Coffee, User } from 'pixelarticons/react';
 import ROUTES from './routes';
 
 const NAVMENU = {
@@ -14,9 +14,9 @@ const NAVMENU = {
       icon: Coffee,
     },
     {
-      label: 'Lista de Pedidos',
-      route: ROUTES.ORDERSLIST.ROOT,
-      icon: Notebook,
+      label: 'Registros',
+      route: ROUTES.REGISTERS.ROOT,
+      icon: User,
     },
   ],
 };

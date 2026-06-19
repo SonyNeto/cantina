@@ -2,14 +2,14 @@ const ROUTES = {
   HOME: '/',
   NEWORDERS: 'neworders',
   MENU: 'menu',
-  ORDERSLIST: {
-    ROOT: '/orderslist',
-    DETAIL: 'orderslist/:responsibleId',
-    DETAIL_PATH: (responsibleId: string) => `/orderslist/${responsibleId}`,
+  REGISTERS: {
+    ROOT: '/registers',
+    DETAIL: 'registers/:responsibleId',
+    DETAIL_PATH: (responsibleId: string) => `/registers/${responsibleId}`,
     STUDENTS: {
-      DETAIL: 'orderslist/:responsibleId/:studentId',
+      DETAIL: 'registers/:responsibleId/:studentId',
       DETAIL_PATH: (responsibleId: string, studentId: string) =>
-        `/orderslist/${responsibleId}/${studentId}`,
+        `/registers/${responsibleId}/${studentId}`,
     },
   },
 };
