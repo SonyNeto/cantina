@@ -2,7 +2,7 @@ import { useState, type FC } from 'react';
 import { STUDENTS } from '../../constants/school/studentstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
-import { ArrowLeft, Check, Plus } from 'pixelarticons/react';
+import { ArrowLeft, Check, User, UserPlus } from 'pixelarticons/react';
 import {
   getResponsibleNameById,
   getResponsibleTotal,
@@ -41,9 +41,12 @@ export const ResponsibleDetails: FC = () => {
             <Link
               key={student.id}
               to={ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-              className="border-text/40 text-text hover:bg-hover hover:text-text-hover relative z-50 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-4 text-xl transition-all [&_svg]:size-10 [&_svg]:shrink-0"
+              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
             >
-              <span>{student.name}</span>
+              <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                <User />
+                <span>{student.name}</span>
+              </div>
               <span className="text-right tabular-nums">{`R$${totalPerStudent.toFixed(2)}`}</span>
             </Link>
           );
@@ -71,12 +74,13 @@ export const ResponsibleDetails: FC = () => {
         </div>
       ) : (
         <Button
-          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 p-4 text-xl"
+          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 py-3 px-4 text-xl"
           variant="ghost"
+          size="lg"
           disabled={isAdding}
           onClick={() => setIsAdding(true)}
         >
-          <Plus />
+          <UserPlus />
           Adicionar aluno
         </Button>
       )}

@@ -114,7 +114,8 @@ export const Menu: FC = () => {
       </Accordion>
       {editingIdx !== -1 ? (
         <Button
-          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 px-6 py-4 text-xl"
+          size="lg"
+          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 py-3 px-4 text-xl"
           variant="ghost"
           disabled={editingIdx !== null}
           onClick={() => setEditingIdx(-1)}
