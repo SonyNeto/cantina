@@ -155,7 +155,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
           className="border-text-hover bg-text text-primary border-4"
           onClick={() => {
             onBack();
-            toast.success('Pedido realizado com sucesso!')
+            toast.success('Pedido realizado com sucesso!');
           }}
         >
           Concluir

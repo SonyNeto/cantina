@@ -3,7 +3,11 @@ import { STUDENTS } from '../../constants/school/studentstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
-import { getResponsibleTotal, getStudentTotal } from '../../utils/selectors';
+import {
+  getResponsibleNameById,
+  getResponsibleTotal,
+  getStudentTotal,
+} from '../../utils/selectors';
 
 export const ResponsibleDetails: FC = () => {
   const { responsibleId } = useParams();
@@ -13,6 +17,7 @@ export const ResponsibleDetails: FC = () => {
   }
 
   const total = getResponsibleTotal(responsibleId);
+  const responsibleName = getResponsibleNameById(responsibleId);
 
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
@@ -20,7 +25,7 @@ export const ResponsibleDetails: FC = () => {
         <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="absolute left-4 z-50">
           <ArrowLeft />
         </Link>
-        Alunos
+        {`Alunos de ${responsibleName}`}
       </div>
 
       <div className="grid">

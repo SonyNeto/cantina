@@ -15,6 +15,13 @@ export function getStudentTotal(studentId: string): number {
   }, 0);
 }
 
+export function getStudentNameById(studentId: string): string {
+  const student = STUDENTS.STUDENTS.find((student) => student.id === studentId);
+  if (!student) return '';
+
+  return student.name;
+}
+
 export function getOrdersByResponsibleId(responsibleId: string): Order[] {
   const responsible = RESPONSIBLES.RESPONSIBLES.find(
     (responsible) => responsible.id === responsibleId,
@@ -22,6 +29,15 @@ export function getOrdersByResponsibleId(responsibleId: string): Order[] {
   if (!responsible) return [];
 
   return responsible.studentsIds.flatMap((studentId) => getOrdersByStudentId(studentId));
+}
+
+export function getResponsibleNameById(responsibleId: string): string {
+  const responsible = RESPONSIBLES.RESPONSIBLES.find(
+    (responsible) => responsible.id === responsibleId,
+  );
+  if (!responsible) return '';
+
+  return responsible.name;
 }
 
 export function getResponsibleTotal(responsibleId: string): number {

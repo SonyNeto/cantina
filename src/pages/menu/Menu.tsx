@@ -27,7 +27,7 @@ export const Menu: FC = () => {
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
               <div className="grid">
                 {isEditing ? (
-                  <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full items-center overflow-hidden justify-between gap-2.5 rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
+                  <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
                     <div className="inline-flex items-center gap-2.5">
                       <item.icon />
                       <input
@@ -114,7 +114,7 @@ export const Menu: FC = () => {
       </Accordion>
       {editingIdx !== -1 ? (
         <Button
-          className="!w-full !h-full border-t-4 border-text/40 rounded-none justify-center gap-2.5 px-6 py-4 text-xl"
+          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 px-6 py-4 text-xl"
           variant="ghost"
           disabled={editingIdx !== null}
           onClick={() => setEditingIdx(-1)}
@@ -123,7 +123,7 @@ export const Menu: FC = () => {
           Adicionar item
         </Button>
       ) : (
-        <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full items-center overflow-hidden justify-between gap-2.5 rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
           <div className="inline-flex items-center gap-2.5">
             <input
               id={`add-item-name`}
@@ -140,24 +140,15 @@ export const Menu: FC = () => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setEditingIdx(null)}
-            >
+            <Button variant="primary" size="sm" onClick={() => setEditingIdx(null)}>
               <Check />
             </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setEditingIdx(null)}
-            >
+            <Button variant="primary" size="sm" onClick={() => setEditingIdx(null)}>
               <X />
             </Button>
           </div>
         </div>
-      )
-      }
+      )}
     </div>
   );
 };

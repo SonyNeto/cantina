@@ -3,7 +3,7 @@ import { ORDERS } from '../../constants/canteen/orderstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
-import { getStudentTotal } from '../../utils/selectors';
+import { getStudentNameById, getStudentTotal } from '../../utils/selectors';
 
 export const StudentDetails: FC = () => {
   const { responsibleId, studentId } = useParams();
@@ -13,6 +13,7 @@ export const StudentDetails: FC = () => {
   }
 
   const total = getStudentTotal(studentId);
+  const studentName = getStudentNameById(studentId);
 
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
@@ -24,7 +25,7 @@ export const StudentDetails: FC = () => {
         >
           <ArrowLeft />
         </Link>
-        Pedidos
+        {`Pedidos de ${studentName}`}
       </div>
 
       <div className="grid">
