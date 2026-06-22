@@ -70,24 +70,24 @@ body {
 }
 
 .frame-1 {
-  animation: frame-1 900ms steps(1, end) infinite;
+  animation: frame-1 1500ms steps(1, end) infinite;
 }
 
 .frame-2 {
-  animation: frame-2 900ms steps(1, end) infinite;
+  animation: frame-2 1500ms steps(1, end) infinite;
 }
 
 .frame-3 {
-  animation: frame-3 900ms steps(1, end) infinite;
+  animation: frame-3 1500ms steps(1, end) infinite;
 }
 
 @keyframes frame-1 {
   0%,
-  33.333% {
+  65% {
     opacity: 1;
   }
 
-  33.334%,
+  65%,
   100% {
     opacity: 0;
   }
@@ -95,16 +95,16 @@ body {
 
 @keyframes frame-2 {
   0%,
-  33.333% {
+  65% {
     opacity: 0;
   }
 
-  33.334%,
-  66.666% {
+  65%,
+  70% {
     opacity: 1;
   }
 
-  66.667%,
+  70%,
   100% {
     opacity: 0;
   }
@@ -112,11 +112,11 @@ body {
 
 @keyframes frame-3 {
   0%,
-  66.666% {
+  70% {
     opacity: 0;
   }
 
-  66.667%,
+  70%,
   100% {
     opacity: 1;
   }
