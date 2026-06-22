@@ -1,5 +1,6 @@
 import { PenSquare, Coffee, User } from 'pixelarticons/react';
 import ROUTES from './routes';
+import { Pan } from '../assets/icons/MenuIcons';
 
 const NAVMENU = {
   ITEMS: [
@@ -7,6 +8,11 @@ const NAVMENU = {
       label: 'Iniciar Pedidos',
       route: ROUTES.NEWORDERS,
       icon: PenSquare,
+    },
+    {
+      label: 'Pedidos',
+      route: ROUTES.ORDERS,
+      icon: Pan,
     },
     {
       label: 'Cardápio',

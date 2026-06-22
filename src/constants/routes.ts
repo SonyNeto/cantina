@@ -1,6 +1,7 @@
 const ROUTES = {
   HOME: '/',
   NEWORDERS: 'neworders',
+  ORDERS: 'orders',
   MENU: 'menu',
   REGISTERS: {
     ROOT: '/registers',
