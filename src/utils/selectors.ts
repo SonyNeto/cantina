@@ -1,3 +1,4 @@
+import { ORDERS } from '../constants/canteen/orderstemp';
 import { REGISTERS } from '../constants/canteen/registerstemp';
 import type { Register } from '../constants/canteen/types';
 import { SCHOOL_CLASSES } from '../constants/school/classestemp';
@@ -63,4 +64,11 @@ export function getClassByClassId(classId: string): SchoolClass | null {
   if (!schoolClass) return null;
 
   return schoolClass;
+}
+
+export function getTotalActiveOrders() {
+  return ORDERS.ORDERS.reduce((total, order) => {
+    if (order.status === 'cooking') return total + 1;
+    return total;
+  }, 0);
 }

@@ -26,7 +26,7 @@ const DrawerContent: FC<ComponentProps<typeof DrawerPrimitive.Content>> = ({
           <div className="bg-tertiary border-text/40 flex justify-end border-b-4 p-4">
             <DrawerPrimitive.Close
               render={
-                <Button variant="ghost" size="lg" className="rounded-full hover:text-red-500">
+                <Button variant="ghost" size="lg" className="rounded-full hover:text-red-600">
                   <ArrowBarLeft />
                 </Button>
               }
