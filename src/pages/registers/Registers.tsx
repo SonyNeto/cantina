@@ -36,7 +36,7 @@ export const Registers: FC = () => {
         })}
 
         {isAdding ? (
-          <div className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 rounded-none border-t-4 p-4 text-xl font-medium [&_svg]:size-10 [&_svg]:shrink-0">
+          <div className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 rounded-none border-t-4 p-4 text-xl font-medium">
             <div className="inline-flex items-center gap-2.5">
               <input
                 id={`add-responsible-name`}

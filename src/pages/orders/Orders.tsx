@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { ORDERS } from '../../constants/canteen/orderstemp';
 import { getStudentById } from '../../utils/selectors';
-import { Check } from 'pixelarticons/react';
+import { Check, Download } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
 import { Cooking, X } from '../../assets/icons/MenuIcons';
 import { useQuery } from '@tanstack/react-query';
@@ -41,10 +41,10 @@ export const Orders: FC = () => {
 
           return (
             <div
-              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl"
               key={order.id}
             >
-              <div className="inline-flex items-center gap-2.5">
+              <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                 <order.product.icon />
                 <span>{order.product.label}</span>
               </div>
@@ -52,9 +52,14 @@ export const Orders: FC = () => {
                 <span className="text-center">{studentName}</span>
                 <span className="text-center">{studentClass.label}</span>
               </div>
-              <Button className="justify-self-end">
-                <Check />
-              </Button>
+              <div className="flex flex-col items-center gap-1 justify-self-end">
+                <Button size="sm">
+                  <Check />
+                </Button>
+                <Button size="sm">
+                  <X />
+                </Button>
+              </div>
             </div>
           );
         })}
@@ -78,10 +83,10 @@ export const Orders: FC = () => {
 
           return (
             <div
-              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl"
               key={order.id}
             >
-              <div className="inline-flex items-center gap-2.5">
+              <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                 <order.product.icon />
                 <span>{order.product.label}</span>
               </div>
@@ -89,9 +94,11 @@ export const Orders: FC = () => {
                 <span className="text-center">{studentName}</span>
                 <span className="text-center">{studentClass.label}</span>
               </div>
-              <Button className="justify-self-end">
-                <X />
-              </Button>
+              <div className="flex flex-col items-center gap-1 justify-self-end">
+                <Button size="sm">
+                  <Download />
+                </Button>
+              </div>
             </div>
           );
         })}

@@ -124,7 +124,7 @@ export const Menu: FC = () => {
           Adicionar item
         </Button>
       ) : (
-        <div className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap">
           <div>
             <input
               id={`add-item-name`}
