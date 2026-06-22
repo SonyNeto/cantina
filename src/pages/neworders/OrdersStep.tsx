@@ -96,12 +96,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
     <>
       <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
         <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10">
-          <Button
-            variant={'ghost'}
-            className="justify-self-start"
-            disableHover
-            onClick={onBack}
-          >
+          <Button variant={'ghost'} className="justify-self-start" disableHover onClick={onBack}>
             <ArrowLeft />
           </Button>
           <span className="justify-self-center text-center">Cardápio</span>

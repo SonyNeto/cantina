@@ -24,7 +24,7 @@ export const Registers: FC = () => {
             <Link
               key={responsible.id}
               to={ROUTES.REGISTERS.DETAIL_PATH(responsible.id)}
-              className="border-text/40 z-30 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
+              className="border-text/40 text-text z-30 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
             >
               <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                 <User />

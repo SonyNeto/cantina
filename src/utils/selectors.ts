@@ -3,7 +3,7 @@ import type { Register } from '../constants/canteen/types';
 import { SCHOOL_CLASSES } from '../constants/school/classestemp';
 import { RESPONSIBLES } from '../constants/school/responsiblestemp';
 import { STUDENTS } from '../constants/school/studentstemp';
-import type { SchoolClass, ShiftId, Student } from '../constants/school/types';
+import type { Responsible, SchoolClass, ShiftId, Student } from '../constants/school/types';
 
 export function getRegistersByStudentId(studentId: string): Register[] {
   return REGISTERS.REGISTERS.filter((register) => register.studentId === studentId);
@@ -15,11 +15,11 @@ export function getStudentTotal(studentId: string): number {
   }, 0);
 }
 
-export function getStudentNameById(studentId: string): string {
+export function getStudentById(studentId: string): Student | null {
   const student = STUDENTS.STUDENTS.find((student) => student.id === studentId);
-  if (!student) return '';
+  if (!student) return null;
 
-  return student.name;
+  return student;
 }
 
 export function getRegistersByResponsibleId(responsibleId: string): Register[] {
@@ -31,13 +31,13 @@ export function getRegistersByResponsibleId(responsibleId: string): Register[] {
   return responsible.studentsIds.flatMap((studentId) => getRegistersByStudentId(studentId));
 }
 
-export function getResponsibleNameById(responsibleId: string): string {
+export function getResponsibleById(responsibleId: string): Responsible | null {
   const responsible = RESPONSIBLES.RESPONSIBLES.find(
     (responsible) => responsible.id === responsibleId,
   );
-  if (!responsible) return '';
+  if (!responsible) return null;
 
-  return responsible.name;
+  return responsible;
 }
 
 export function getResponsibleTotal(responsibleId: string): number {
@@ -56,4 +56,11 @@ export function getStudentsByClassId(classId: string): Student[] {
   if (!classId) return [];
 
   return STUDENTS.STUDENTS.filter((student) => student.classId === classId);
+}
+
+export function getClassByClassId(classId: string): SchoolClass | null {
+  const schoolClass = SCHOOL_CLASSES.find((schoolClass) => schoolClass.id === classId);
+  if (!schoolClass) return null;
+
+  return schoolClass;
 }

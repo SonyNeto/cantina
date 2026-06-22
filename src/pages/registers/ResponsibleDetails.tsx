@@ -3,11 +3,7 @@ import { STUDENTS } from '../../constants/school/studentstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft, Check, User, UserPlus } from 'pixelarticons/react';
-import {
-  getResponsibleNameById,
-  getResponsibleTotal,
-  getStudentTotal,
-} from '../../utils/selectors';
+import { getResponsibleById, getResponsibleTotal, getStudentTotal } from '../../utils/selectors';
 import { Button } from '../../components/commons/Button';
 import { X } from '../../assets/icons/MenuIcons';
 
@@ -20,7 +16,7 @@ export const ResponsibleDetails: FC = () => {
   }
 
   const total = getResponsibleTotal(responsibleId);
-  const responsibleName = getResponsibleNameById(responsibleId);
+  const responsibleName = getResponsibleById(responsibleId)?.name || '';
 
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
@@ -41,7 +37,7 @@ export const ResponsibleDetails: FC = () => {
             <Link
               key={student.id}
               to={ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(student.responsibleId, student.id)}
-              className="border-text/40 z-30 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
+              className="border-text/40 text-text z-30 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
             >
               <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                 <User />

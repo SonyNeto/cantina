@@ -3,7 +3,7 @@ import { REGISTERS } from '../../constants/canteen/registerstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
-import { getStudentNameById, getStudentTotal } from '../../utils/selectors';
+import { getStudentById, getStudentTotal } from '../../utils/selectors';
 
 export const StudentDetails: FC = () => {
   const { responsibleId, studentId } = useParams();
@@ -13,7 +13,7 @@ export const StudentDetails: FC = () => {
   }
 
   const total = getStudentTotal(studentId);
-  const studentName = getStudentNameById(studentId);
+  const studentName = getStudentById(studentId)?.name || '';
 
   return (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
