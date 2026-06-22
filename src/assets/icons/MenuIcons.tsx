@@ -22,6 +22,17 @@ export function TrashCan(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function Pan(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} {...props}>
+      <path
+        fill="currentColor"
+        d="m 16,12 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 H 14 Z M 6,20 H 4 Z m -2,0 h 2 v 2 H 4 Z m 2,0 H 4 Z m 2,0 H 6 Z m -2,0 h 2 v 2 H 6 Z m 2,0 H 6 Z m 2,-2 H 8 Z m -2,0 h 2 v 2 H 8 Z m 2,0 H 8 Z m 2,0 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 H 14 Z M 6,22 H 4 Z m -2,0 h 2 v 2 H 4 Z m 2,0 H 4 Z M 4,20 H 2 Z m -2,0 h 2 v 2 H 2 Z m 2,0 H 2 Z M 2,18 H 0 Z m -2,0 h 2 v 2 H 0 Z m 2,0 H 0 Z M 2,16 H 0 Z m -2,0 h 2 v 2 H 0 Z m 2,0 H 0 Z M 2,14 H 0 Z m -2,0 h 2 v 2 H 0 Z m 2,0 H 0 Z M 4,12 H 2 Z m -2,0 h 2 v 2 H 2 Z m 2,0 H 2 Z M 6,10 H 4 Z m -2,0 h 2 v 2 H 4 Z m 2,0 H 4 Z M 8,8 H 6 Z M 6,8 h 2 v 2 H 6 Z M 8,8 H 6 Z m 2,0 H 8 Z M 8,8 h 2 v 2 H 8 Z m 2,0 H 8 Z m 2,0 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,0 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 H 12 Z M 8,22 H 6 Z m -2,0 h 2 v 2 H 6 Z m 2,0 H 6 Z m 2,0 H 8 Z m -2,0 h 2 v 2 H 8 Z m 2,0 H 8 Z m 2,0 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 0,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 0,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m -2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 H 14 Z M 14,6 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,-2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,0 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 2,2 h -2 z m -2,0 h 2 v 2 z m 2,0 H 22 Z M 18,6 C 0,0 0,0 18,6 Z m 0,0 v 2 z m 0,0 C 0,0 0,0 18,6 Z m 0,2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m 6,-6 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m -2,2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m -2,0 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z m -2,2 h -2 z m -2,0 h 2 v 2 h -2 z m 2,0 h -2 z"
+      />
+    </svg>
+  );
+}
+
 export function Bread(props: SVGProps<SVGSVGElement>) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} {...props}>
