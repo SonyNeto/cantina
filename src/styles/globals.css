@@ -64,3 +64,60 @@
 body {
   @apply font-text text-text bg-primary;
 }
+
+.frame {
+  opacity: 0;
+}
+
+.frame-1 {
+  animation: frame-1 900ms steps(1, end) infinite;
+}
+
+.frame-2 {
+  animation: frame-2 900ms steps(1, end) infinite;
+}
+
+.frame-3 {
+  animation: frame-3 900ms steps(1, end) infinite;
+}
+
+@keyframes frame-1 {
+  0%,
+  33.333% {
+    opacity: 1;
+  }
+
+  33.334%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes frame-2 {
+  0%,
+  33.333% {
+    opacity: 0;
+  }
+
+  33.334%,
+  66.666% {
+    opacity: 1;
+  }
+
+  66.667%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes frame-3 {
+  0%,
+  66.666% {
+    opacity: 0;
+  }
+
+  66.667%,
+  100% {
+    opacity: 1;
+  }
+}
