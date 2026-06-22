@@ -7,7 +7,7 @@ export interface Item {
   icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
 }
 
-export interface Order {
+export interface Register {
   id: string;
   product: Item;
   created_at: string;

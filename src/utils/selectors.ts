@@ -1,17 +1,17 @@
-import { ORDERS } from '../constants/canteen/orderstemp';
-import type { Order } from '../constants/canteen/types';
+import { REGISTERS } from '../constants/canteen/registerstemp';
+import type { Register } from '../constants/canteen/types';
 import { SCHOOL_CLASSES } from '../constants/school/classestemp';
 import { RESPONSIBLES } from '../constants/school/responsiblestemp';
 import { STUDENTS } from '../constants/school/studentstemp';
 import type { SchoolClass, ShiftId, Student } from '../constants/school/types';
 
-export function getOrdersByStudentId(studentId: string): Order[] {
-  return ORDERS.ORDERS.filter((order) => order.studentId === studentId);
+export function getRegistersByStudentId(studentId: string): Register[] {
+  return REGISTERS.REGISTERS.filter((register) => register.studentId === studentId);
 }
 
 export function getStudentTotal(studentId: string): number {
-  return getOrdersByStudentId(studentId).reduce((total, order) => {
-    return total + order.total;
+  return getRegistersByStudentId(studentId).reduce((total, register) => {
+    return total + register.total;
   }, 0);
 }
 
@@ -22,13 +22,13 @@ export function getStudentNameById(studentId: string): string {
   return student.name;
 }
 
-export function getOrdersByResponsibleId(responsibleId: string): Order[] {
+export function getRegistersByResponsibleId(responsibleId: string): Register[] {
   const responsible = RESPONSIBLES.RESPONSIBLES.find(
     (responsible) => responsible.id === responsibleId,
   );
   if (!responsible) return [];
 
-  return responsible.studentsIds.flatMap((studentId) => getOrdersByStudentId(studentId));
+  return responsible.studentsIds.flatMap((studentId) => getRegistersByStudentId(studentId));
 }
 
 export function getResponsibleNameById(responsibleId: string): string {
@@ -41,8 +41,8 @@ export function getResponsibleNameById(responsibleId: string): string {
 }
 
 export function getResponsibleTotal(responsibleId: string): number {
-  return getOrdersByResponsibleId(responsibleId).reduce((total, order) => {
-    return total + order.total;
+  return getRegistersByResponsibleId(responsibleId).reduce((total, register) => {
+    return total + register.total;
   }, 0);
 }
 

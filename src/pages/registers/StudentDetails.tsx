@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { ORDERS } from '../../constants/canteen/orderstemp';
+import { REGISTERS } from '../../constants/canteen/registerstemp';
 import { Link, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
@@ -25,25 +25,25 @@ export const StudentDetails: FC = () => {
         >
           <ArrowLeft />
         </Link>
-        <span className="justify-self-center text-center">{`Pedidos de ${studentName}`}</span>
+        <span className="justify-self-center text-center">{`Registros de ${studentName}`}</span>
         <span aria-hidden="true" />
       </div>
 
       <div className="grid">
-        {ORDERS.ORDERS.map((order) => {
-          if (studentId !== order.studentId) return;
+        {REGISTERS.REGISTERS.map((register) => {
+          if (studentId !== register.studentId) return;
 
           return (
             <div
               className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
-              key={order.id}
+              key={register.id}
             >
               <div className="inline-flex items-center gap-2.5">
-                <order.product.icon />
-                <span>{order.product.label}</span>
+                <register.product.icon />
+                <span>{register.product.label}</span>
               </div>
-              <span className="text-center tabular-nums">{order.created_at}</span>
-              <span className="text-right tabular-nums">{`R$${order.product.price.toFixed(2)}`}</span>
+              <span className="text-center tabular-nums">{register.created_at}</span>
+              <span className="text-right tabular-nums">{`R$${register.product.price.toFixed(2)}`}</span>
             </div>
           );
         })}
