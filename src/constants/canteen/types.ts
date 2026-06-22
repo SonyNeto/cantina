@@ -14,3 +14,7 @@ export interface Register {
   studentId: string;
   total: number;
 }
+
+export interface Order extends Register {
+  status: 'ready' | 'cooking';
+}
