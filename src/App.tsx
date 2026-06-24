@@ -8,10 +8,13 @@ import { ResponsibleDetails } from './pages/registers/ResponsibleDetails';
 import { StudentDetails } from './pages/registers/StudentDetails';
 import { Toast } from './components/commons/Toast';
 import { Orders } from './pages/orders/Orders';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <Toast />
       <Routes>
         <Route element={<Layout />}>
@@ -24,7 +27,7 @@ function App() {
           <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
         </Route>
       </Routes>
-    </>
+    </QueryClientProvider>
   );
 }
 
