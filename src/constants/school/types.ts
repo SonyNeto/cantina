@@ -21,5 +21,4 @@ export interface Student {
 export interface Responsible {
   id: string;
   name: string;
-  studentsIds: string[];
 }
