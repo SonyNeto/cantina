@@ -140,7 +140,7 @@ export const Orders: FC = () => {
 
           return (
             <div
-              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl"
+              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_10ch_5ch] items-center gap-5 border-t-4 px-4 py-3 text-xl"
               key={order.id}
             >
               <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">

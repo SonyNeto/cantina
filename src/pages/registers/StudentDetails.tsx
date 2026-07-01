@@ -9,6 +9,7 @@ import { apiUrl } from '../../utils/api';
 
 type RegistersResponse = {
   registers: Register[];
+  studentName: string;
 };
 
 const getStudentRegisters = async (studentId: string): Promise<RegistersResponse> => {
@@ -48,6 +49,7 @@ export const StudentDetails: FC = () => {
         >
           <ArrowLeft />
         </Link>
+        <span className="justify-self-center text-center">{`Pedidos de ${registersResponse?.studentName}`}</span>
         <span aria-hidden="true" />
       </div>
 

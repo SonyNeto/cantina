@@ -13,6 +13,7 @@ import { apiUrl } from '../../utils/api';
 type StudentTotal = {
   id: string;
   name: string;
+  schoolClassLabel: string;
   total: number;
 };
 
@@ -22,6 +23,7 @@ type SchoolClassesResponse = {
 
 type ResponsibleTotals = {
   responsibleId: string;
+  responsibleName: string;
   total: number;
   studentsTotals: StudentTotal[];
 };
@@ -104,6 +106,7 @@ export const ResponsibleDetails: FC = () => {
         <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="z-30 justify-self-start">
           <ArrowLeft />
         </Link>
+        <span className="justify-self-center text-center">{`Alunos de ${responsibleRegistersResponse?.responsibleTotals.responsibleName}`}</span>
         <span aria-hidden="true" />
       </div>
 
@@ -115,12 +118,13 @@ export const ResponsibleDetails: FC = () => {
               responsibleTotals?.responsibleId ?? responsibleId,
               student.id,
             )}
-            className="border-text/40 text-text z-30 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
+            className="border-text/40 text-text z-30 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
           >
             <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
               <User />
               <span>{student.name}</span>
             </div>
+            <span className="text-center">{student.schoolClassLabel}</span>
             <span className="text-right tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
           </Link>
         ))}
