@@ -1,46 +1,33 @@
 import type { FC } from 'react';
 import { Button } from '../../components/commons/Button';
-import { useFormContext, useWatch } from 'react-hook-form';
-import type { NewOrderForm } from './types';
 import { ArrowLeft } from 'pixelarticons/react';
 import { useQuery } from '@tanstack/react-query';
 import type { SchoolClass, ShiftId } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
+import { apiUrl } from '../../utils/api';
 
 interface Props {
-  onNext: () => void;
+  onNext: (classId: string) => void;
   onBack: () => void;
+  shiftId: ShiftId | '';
 }
 
-const getSchoolClasses = async (shiftId: ShiftId | '') => {
-  const res = await fetch(`http://localhost:3000/shifts/${shiftId}/classes`);
-  return await res.json();
+type SchoolClassesResponse = {
+  schoolClasses: SchoolClass[];
 };
 
-export const ClassesStep: FC<Props> = ({ onNext, onBack }) => {
-  const { control, setValue } = useFormContext<NewOrderForm>();
+const getSchoolClasses = async (shiftId: ShiftId | ''): Promise<SchoolClassesResponse> => {
+  const res = await fetch(apiUrl(`/shifts/${shiftId}/classes`));
+  return res.json();
+};
 
-  const shiftId = useWatch({
-    control,
-    name: 'shiftId',
-  });
-
-  const { data: schoolClasses, isPending } = useQuery({
+export const ClassesStep: FC<Props> = ({ onNext, onBack, shiftId }) => {
+  const { data: schoolClassesResponse, isPending } = useQuery({
     queryKey: ['schoolClasses', shiftId],
     queryFn: () => getSchoolClasses(shiftId),
   });
 
-  function handleSelectClass(classId: NewOrderForm['classId']) {
-    setValue('classId', classId, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-
-    setValue('order', []);
-    setValue('studentId', '');
-
-    onNext();
-  }
+  const schoolClasses = schoolClassesResponse?.schoolClasses ?? [];
 
   return isPending ? (
     <Loader />
@@ -54,14 +41,14 @@ export const ClassesStep: FC<Props> = ({ onNext, onBack }) => {
         <span aria-hidden="true" />
       </div>
       <div className="grid">
-        {schoolClasses.schoolClasses.map((schoolClass: SchoolClass) => (
+        {schoolClasses.map((schoolClass) => (
           <Button
             key={schoolClass.id}
             type="button"
             variant="ghost"
             size="lg"
             className="bg-primary border-text/40 grid h-auto w-full grid-cols-[minmax(0,1fr)] justify-items-start rounded-none border-t-4 p-4 text-left text-xl whitespace-normal"
-            onClick={() => handleSelectClass(schoolClass.id)}
+            onClick={() => onNext(schoolClass.id)}
           >
             <span>{schoolClass.label}</span>
           </Button>

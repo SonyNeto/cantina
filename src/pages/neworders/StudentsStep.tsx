@@ -1,37 +1,53 @@
 import type { FC } from 'react';
 import { Button } from '../../components/commons/Button';
-import { useFormContext, useWatch } from 'react-hook-form';
-import type { NewOrderForm } from './types';
-import { getStudentsByClassId } from '../../utils/selectors';
+import { useFormContext } from 'react-hook-form';
 import { ArrowLeft } from 'pixelarticons/react';
+import { useQuery } from '@tanstack/react-query';
+import type { ShiftId, Student } from '../../constants/school/types';
+import { Loader } from '../../components/commons/Loader';
+import { apiUrl } from '../../utils/api';
+import type { OrderForm } from '../../constants/canteen/types';
 
 interface Props {
+  shiftId: ShiftId | '';
+  classId: string;
   onNext: () => void;
   onBack: () => void;
 }
 
-export const StudentsStep: FC<Props> = ({ onNext, onBack }) => {
-  const { control, setValue } = useFormContext<NewOrderForm>();
+type StudentsResponse = {
+  students: Student[];
+};
 
-  const classId = useWatch({
-    control,
-    name: 'classId',
+const getStudents = async (shiftId: ShiftId | '', classId: string): Promise<StudentsResponse> => {
+  const res = await fetch(apiUrl(`/shifts/${shiftId}/classes/${classId}/students`));
+  return res.json();
+};
+
+export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) => {
+  const { setValue } = useFormContext<OrderForm>();
+
+  const { data: studentsResponse, isPending } = useQuery({
+    queryKey: ['students', classId],
+    queryFn: () => getStudents(shiftId, classId),
   });
 
-  const students = getStudentsByClassId(classId);
+  const students = studentsResponse?.students ?? [];
 
-  function handleSelectStudent(studentId: NewOrderForm['studentId']) {
+  function handleSelectStudent(studentId: OrderForm['studentId']) {
     setValue('studentId', studentId, {
       shouldDirty: true,
       shouldValidate: true,
     });
 
-    setValue('order', []);
+    setValue('items', []);
 
     onNext();
   }
 
-  return (
+  return isPending ? (
+    <Loader />
+  ) : (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
       <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Button variant={'ghost'} className="justify-self-start" disableHover onClick={onBack}>

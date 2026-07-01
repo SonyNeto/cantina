@@ -1,4 +1,5 @@
 import { useState, type FC } from 'react';
+import { v4 as uuid } from 'uuid';
 import { Button } from '../../components/commons/Button';
 import {
   Accordion,
@@ -6,22 +7,73 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '../../components/commons/Accordion';
-import { MENU } from '../../constants/canteen/menuitemstemp';
 import { Check, PenSquare, Plus } from 'pixelarticons/react';
 import { TrashCan, X } from '../../assets/icons/MenuIcons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Loader } from '../../components/commons/Loader';
+import type { Product } from '../../constants/canteen/types';
+import { apiUrl } from '../../utils/api';
+
+type MenuItemsResponse = {
+  menuItems: Product[];
+};
+
+type CreateMenuItemInput = {
+  label: string;
+  price: number;
+};
+
+type MenuItemResponse = {
+  menuItem: Product;
+};
+
+const getMenuItems = async (): Promise<MenuItemsResponse> => {
+  const res = await fetch(apiUrl('/menu-items'));
+  return res.json();
+};
 
 export const Menu: FC = () => {
-  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
-  return (
+  const { data: menuItemsResponse, isPending } = useQuery({
+    queryKey: ['menuItems'],
+    queryFn: getMenuItems,
+  });
+
+  const createMenuItem = useMutation({
+    mutationFn: async ({ label, price }: CreateMenuItemInput): Promise<MenuItemResponse> => {
+      const res = await fetch(apiUrl('/menu-items'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: uuid(),
+          label,
+          price,
+        }),
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+    },
+  });
+
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const menuItems = menuItemsResponse?.menuItems ?? [];
+
+  return isPending ? (
+    <Loader />
+  ) : (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
       <div className="bg-tertiary grid w-full place-items-center gap-2.5 px-6 py-4 text-xl">
         <span className="text-center">Cardápio</span>
       </div>
 
       <Accordion>
-        {MENU.ITEMS.map((item, idx) => {
-          const isEditing = editingIdx === idx;
+        {menuItems.map((item, idx) => {
+          const isEditing = editingIndex === idx;
 
           return (
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
@@ -29,7 +81,6 @@ export const Menu: FC = () => {
                 {isEditing ? (
                   <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
                     <div className="inline-flex items-center gap-2.5">
-                      <item.icon />
                       <input
                         id={`name-input-${item.label.trim().toLowerCase()}-${idx}`}
                         type="text"
@@ -54,10 +105,9 @@ export const Menu: FC = () => {
                         size="lg"
                         variant="ghost"
                         className="bg-primary border-text/40 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-4 py-8"
-                        disabled={editingIdx !== null}
+                        disabled={editingIndex !== null}
                       >
                         <div className="inline-flex items-center gap-2.5">
-                          <item.icon />
                           <span>{item.label}</span>
                         </div>
                         <span>{`R$${item.price.toFixed(2)}`}</span>
@@ -75,7 +125,7 @@ export const Menu: FC = () => {
                         size="lg"
                         variant="primary"
                         className="w-40 justify-start p-2"
-                        onClick={() => (isEditing ? setEditingIdx(null) : setEditingIdx(idx))}
+                        onClick={() => setEditingIndex(null)}
                       >
                         <Check />
                         <span>Salvar</span>
@@ -85,7 +135,7 @@ export const Menu: FC = () => {
                         size="lg"
                         variant="primary"
                         className="w-40 justify-start p-2"
-                        onClick={() => (isEditing ? setEditingIdx(null) : setEditingIdx(idx))}
+                        onClick={() => setEditingIndex(null)}
                       >
                         <X />
                         <span>Cancelar</span>
@@ -96,7 +146,7 @@ export const Menu: FC = () => {
                       size="lg"
                       variant="primary"
                       className="p-2"
-                      onClick={() => (isEditing ? setEditingIdx(null) : setEditingIdx(idx))}
+                      onClick={() => setEditingIndex(idx)}
                     >
                       <PenSquare />
                       <span>Editar</span>
@@ -112,21 +162,34 @@ export const Menu: FC = () => {
           );
         })}
       </Accordion>
-      {editingIdx !== -1 ? (
+      {editingIndex !== -1 ? (
         <Button
           size="lg"
           className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 px-4 py-3 text-xl"
           variant="ghost"
-          disabled={editingIdx !== null}
-          onClick={() => setEditingIdx(-1)}
+          disabled={editingIndex !== null}
+          onClick={() => setEditingIndex(-1)}
         >
           <Plus />
           Adicionar item
         </Button>
       ) : (
-        <div className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap">
+        <form
+          className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap"
+          onSubmit={(e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.currentTarget);
+            const label = formData.get('label') as string;
+            const price = Number(formData.get('price'));
+
+            createMenuItem.mutate({ label, price });
+            setEditingIndex(null);
+          }}
+        >
           <div>
             <input
+              name="label"
               id={`add-item-name`}
               type="text"
               placeholder="Nome do Item"
@@ -136,21 +199,23 @@ export const Menu: FC = () => {
           <div className="inline-flex items-center gap-1">
             <span>R$</span>
             <input
+              name="price"
               id={`add-item-price`}
               type="number"
+              step="0.01"
               placeholder="Preço"
               className="border-text/40 w-[6ch] border-4 px-2 text-end"
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Button variant="primary" size="sm" onClick={() => setEditingIdx(null)}>
+            <Button type="submit" variant="primary" size="sm">
               <Check />
             </Button>
-            <Button variant="primary" size="sm" onClick={() => setEditingIdx(null)}>
+            <Button variant="primary" size="sm" onClick={() => setEditingIndex(null)}>
               <X />
             </Button>
           </div>
-        </div>
+        </form>
       )}
     </div>
   );

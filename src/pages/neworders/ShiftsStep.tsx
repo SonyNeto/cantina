@@ -1,40 +1,30 @@
-import type { FC } from 'react';
+import { type FC } from 'react';
 import { Button } from '../../components/commons/Button';
-import { useFormContext } from 'react-hook-form';
-import type { NewOrderForm } from './types';
 import { useQuery } from '@tanstack/react-query';
-import type { Shift } from '../../constants/school/types';
+import type { Shift, ShiftId } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
+import { apiUrl } from '../../utils/api';
 
 interface Props {
-  onNext: () => void;
+  onNext: (shiftId: ShiftId) => void;
 }
 
-const getShifts = async () => {
-  const res = await fetch('http://localhost:3000/shifts');
-  return await res.json();
+type ShiftsResponse = {
+  shifts: Shift[];
+};
+
+const getShifts = async (): Promise<ShiftsResponse> => {
+  const res = await fetch(apiUrl('/shifts'));
+  return res.json();
 };
 
 export const ShiftsStep: FC<Props> = ({ onNext }) => {
-  const { data: shifts, isPending } = useQuery({
+  const { data: shiftsResponse, isPending } = useQuery({
     queryKey: ['shifts'],
     queryFn: getShifts,
   });
 
-  const { setValue } = useFormContext<NewOrderForm>();
-
-  function handleSelectShift(shiftId: NewOrderForm['shiftId']) {
-    setValue('shiftId', shiftId, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-
-    setValue('order', []);
-    setValue('classId', '');
-    setValue('studentId', '');
-
-    onNext();
-  }
+  const shifts = shiftsResponse?.shifts ?? [];
 
   return isPending ? (
     <Loader />
@@ -44,14 +34,14 @@ export const ShiftsStep: FC<Props> = ({ onNext }) => {
         <span className="text-center">Escolha um turno</span>
       </div>
       <div className="grid">
-        {shifts.shifts.map((shift: Shift) => (
+        {shifts.map((shift) => (
           <Button
             key={shift.id}
             type="button"
             variant="ghost"
             size="lg"
             className="bg-primary border-text/40 grid h-auto w-full grid-cols-[minmax(0,1fr)] justify-items-start rounded-none border-t-4 p-4 text-left text-xl whitespace-normal"
-            onClick={() => handleSelectShift(shift.id)}
+            onClick={() => onNext(shift.id)}
           >
             <span>{shift.label}</span>
           </Button>
