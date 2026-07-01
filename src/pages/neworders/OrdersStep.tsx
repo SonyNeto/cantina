@@ -1,41 +1,66 @@
-import { useState, type FC } from 'react';
+import { type FC } from 'react';
+import { v4 as uuid } from 'uuid';
 import { Button } from '../../components/commons/Button';
 import { useFormContext, useWatch } from 'react-hook-form';
-import type { NewOrderForm } from './types';
 import { ArrowLeft, Minus, Plus } from 'pixelarticons/react';
-import { MENU } from '../../constants/canteen/menuitemstemp';
-import { toast } from 'sonner';
+import type { OrderForm, Product } from '../../constants/canteen/types';
+import { useQuery } from '@tanstack/react-query';
+import { Loader } from '../../components/commons/Loader';
+import { apiUrl } from '../../utils/api';
 
 interface Props {
   onBack: () => void;
 }
 
-export const OrdersStep: FC<Props> = ({ onBack }) => {
-  const { control, setValue } = useFormContext<NewOrderForm>();
-  const [total, setTotal] = useState<number>(0);
+type MenuItemsResponse = {
+  menuItems: Product[];
+};
 
-  const order =
+const getMenuItems = async (): Promise<MenuItemsResponse> => {
+  const res = await fetch(apiUrl('/menu-items'));
+  return res.json();
+};
+
+export const OrdersStep: FC<Props> = ({ onBack }) => {
+  const { data: menuItemsResponse, isPending } = useQuery({
+    queryKey: ['menuItems'],
+    queryFn: getMenuItems,
+  });
+
+  const { control, setValue } = useFormContext<OrderForm>();
+
+  const items =
     useWatch({
       control,
-      name: 'order',
+      name: 'items',
     }) ?? [];
 
-  function getMenuItemQuantityById(menuItemId: string) {
-    const menuItem = order.find((menuItem) => menuItem.menuItemId === menuItemId);
-    if (!menuItem) return 0;
+  const menuItems = menuItemsResponse?.menuItems ?? [];
 
-    return menuItem.quantity;
+  const total = items.reduce((sum, orderItem) => {
+    const product = menuItems.find((item) => item.id === orderItem.productId);
+
+    return sum + (product?.price ?? 0) * orderItem.quantity;
+  }, 0);
+
+  function getSelectedProductQuantity(productId: string) {
+    const item = items.find((item) => item.productId === productId);
+    if (!item) return 0;
+
+    return item.quantity;
   }
 
-  function increaseQuantity(menuItemId: string) {
-    if (!order.some((menuItem) => menuItem.menuItemId === menuItemId)) {
+  function increaseProductQuantity(productId: string) {
+    if (!items.some((item) => item.productId === productId)) {
       setValue(
-        'order',
+        'items',
         [
-          ...order,
+          ...items,
           {
-            menuItemId,
+            id: uuid(),
+            productId,
             quantity: 1,
+            status: 'cooking',
           },
         ],
         {
@@ -47,29 +72,29 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
       return;
     }
 
-    const updatedOrder = order.map((menuItem) => {
-      if (menuItem.menuItemId !== menuItemId) return menuItem;
+    const updatedItems = items.map((item) => {
+      if (item.productId !== productId) return item;
 
       return {
-        ...menuItem,
-        quantity: menuItem.quantity + 1,
+        ...item,
+        quantity: item.quantity + 1,
       };
     });
 
-    setValue('order', updatedOrder, {
+    setValue('items', updatedItems, {
       shouldDirty: true,
       shouldValidate: true,
     });
   }
 
-  function decreaseQuantity(menuItemId: string) {
-    const menuItem = order.find((menuItem) => menuItem.menuItemId === menuItemId);
-    if (!menuItem) return;
+  function decreaseProductQuantity(productId: string) {
+    const item = items.find((item) => item.productId === productId);
+    if (!item) return;
 
-    if (menuItem.quantity === 1) {
-      const updatedOrder = order.filter((menuItem) => menuItem.menuItemId !== menuItemId);
+    if (item.quantity === 1) {
+      const updatedItems = items.filter((item) => item.productId !== productId);
 
-      setValue('order', updatedOrder, {
+      setValue('items', updatedItems, {
         shouldDirty: true,
         shouldValidate: true,
       });
@@ -77,22 +102,24 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
       return;
     }
 
-    const updatedOrder = order.map((menuItem) => {
-      if (menuItem.menuItemId !== menuItemId) return menuItem;
+    const updatedItems = items.map((item) => {
+      if (item.productId !== productId) return item;
 
       return {
-        ...menuItem,
-        quantity: menuItem.quantity - 1,
+        ...item,
+        quantity: item.quantity - 1,
       };
     });
 
-    setValue('order', updatedOrder, {
+    setValue('items', updatedItems, {
       shouldDirty: true,
       shouldValidate: true,
     });
   }
 
-  return (
+  return isPending ? (
+    <Loader />
+  ) : (
     <>
       <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
         <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10">
@@ -109,8 +136,8 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
           </div>
         </div>
         <div className="grid">
-          {MENU.ITEMS.map((item, idx) => {
-            const quantity = getMenuItemQuantityById(item.id);
+          {menuItems.map((item, idx) => {
+            const quantity = getSelectedProductQuantity(item.id);
 
             return (
               <div
@@ -118,27 +145,20 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
                 className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch_2rem_2rem_1.5ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
               >
                 <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                  <item.icon />
                   <span>{item.label}</span>
                 </div>
                 <span className="text-right tabular-nums">{`R$${item.price.toFixed(2)}`}</span>
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => {
-                    setTotal(Math.max(0, total - item.price));
-                    decreaseQuantity(item.id);
-                  }}
+                  onClick={() => decreaseProductQuantity(item.id)}
                 >
                   <Minus />
                 </Button>
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => {
-                    setTotal(total + item.price);
-                    increaseQuantity(item.id);
-                  }}
+                  onClick={() => increaseProductQuantity(item.id)}
                 >
                   <Plus />
                 </Button>
@@ -150,14 +170,10 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
       </div>
       <div className="sticky bottom-4 flex items-center justify-center">
         <Button
-          type="button"
+          type="submit"
           variant="primary"
           size="xl"
           className="border-text-hover bg-text text-primary border-4"
-          onClick={() => {
-            onBack();
-            toast.success('Pedido realizado com sucesso!');
-          }}
         >
           Concluir
         </Button>

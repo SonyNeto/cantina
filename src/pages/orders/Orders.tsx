@@ -1,23 +1,128 @@
 import type { FC } from 'react';
-import { ORDERS } from '../../constants/canteen/orderstemp';
-import { getStudentById } from '../../utils/selectors';
 import { Check, Download } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
 import { Cooking, X } from '../../assets/icons/MenuIcons';
-import { useQuery } from '@tanstack/react-query';
-import type { SchoolClass } from '../../constants/school/types';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
+import { toast } from 'sonner';
+import { apiUrl } from '../../utils/api';
+import type { Order, Product, Register } from '../../constants/canteen/types';
 
-const getSchoolClasses = async () => {
-  const res = await fetch('http://localhost:3000/classes');
-  return await res.json();
+type OrderWithDetails = {
+  id: string;
+  quantity: number;
+  created_at: string;
+  total: number;
+  status: 'cooking' | 'ready';
+  student: {
+    id: string;
+    name: string;
+  };
+  schoolClass: {
+    id: string;
+    label: string;
+  };
+  product: Product;
+};
+
+type OrdersResponse = {
+  orderItems: OrderWithDetails[];
+};
+
+type RegisterOrderInput = {
+  sourceOrderId: string;
+  product: Product;
+  created_at: string;
+  studentId: string;
+  total: number;
+};
+
+type OrderResponse = {
+  order: Order | null;
+};
+
+type RegisterResponse = {
+  register: Register;
+};
+
+const getOrdersWithDetails = async (): Promise<OrdersResponse> => {
+  const res = await fetch(apiUrl('/orders/items'));
+  return res.json();
 };
 
 export const Orders: FC = () => {
-  const { data: schoolClasses, isPending } = useQuery({
-    queryKey: ['schoolClasses'],
-    queryFn: getSchoolClasses,
+  const queryClient = useQueryClient();
+
+  const { data: ordersResponse, isPending } = useQuery({
+    queryKey: ['orderItems'],
+    queryFn: getOrdersWithDetails,
   });
+
+  const updateOrderStatus = useMutation({
+    mutationFn: async (orderId: string): Promise<OrderResponse> => {
+      const res = await fetch(apiUrl(`/orders/${orderId}/status`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'ready',
+        }),
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orderItems'] });
+    },
+  });
+
+  const deleteOrder = useMutation({
+    mutationFn: async (orderId: string): Promise<OrderResponse> => {
+      const res = await fetch(apiUrl(`/orders/${orderId}`), {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orderItems'] });
+    },
+  });
+
+  const postRegister = useMutation({
+    mutationFn: async ({
+      sourceOrderId,
+      product,
+      created_at,
+      studentId,
+      total,
+    }: RegisterOrderInput): Promise<RegisterResponse> => {
+      const res = await fetch(apiUrl('/registers'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: sourceOrderId,
+          product,
+          created_at,
+          studentId,
+          total,
+        }),
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['registers'] });
+      toast.success('Pedido movido para registro');
+    },
+  });
+
+  const orders = ordersResponse?.orderItems ?? [];
+  const cookingOrders = orders.filter((order) => order.status === 'cooking');
+  const readyOrders = orders.filter((order) => order.status === 'ready');
 
   return isPending ? (
     <Loader />
@@ -29,15 +134,9 @@ export const Orders: FC = () => {
       </div>
 
       <div className="grid">
-        {ORDERS.ORDERS.map((order) => {
-          if (order.status === 'ready') return;
-          const student = getStudentById(order.studentId);
+        {cookingOrders.map((order) => {
+          const student = order.student;
           if (!student) return;
-
-          const studentName = student.name;
-          const studentClass = schoolClasses.schoolClasses.find(
-            (schoolClass: SchoolClass) => (schoolClass.id = student.classId),
-          );
 
           return (
             <div
@@ -45,18 +144,26 @@ export const Orders: FC = () => {
               key={order.id}
             >
               <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                <order.product.icon />
                 <span>{order.product.label}</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-center">{studentName}</span>
-                <span className="text-center">{studentClass.label}</span>
+                <span className="text-center">{order.student.name}</span>
+                <span className="text-center">{order.schoolClass.label}</span>
               </div>
               <div className="flex flex-col items-center gap-1 justify-self-end">
-                <Button size="sm">
+                <Button
+                  size="sm"
+                  onClick={() => updateOrderStatus.mutate(order.id)}
+                >
                   <Check />
                 </Button>
-                <Button size="sm">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    deleteOrder.mutate(order.id);
+                    toast.success('Item removido com sucesso!');
+                  }}
+                >
                   <X />
                 </Button>
               </div>
@@ -71,15 +178,9 @@ export const Orders: FC = () => {
       </div>
 
       <div className="grid">
-        {ORDERS.ORDERS.map((order) => {
-          if (order.status === 'cooking') return;
-          const student = getStudentById(order.studentId);
+        {readyOrders.map((order) => {
+          const student = order.student;
           if (!student) return;
-
-          const studentName = student.name;
-          const studentClass = schoolClasses.schoolClasses.find(
-            (schoolClass: SchoolClass) => (schoolClass.id = student.classId),
-          );
 
           return (
             <div
@@ -87,15 +188,26 @@ export const Orders: FC = () => {
               key={order.id}
             >
               <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                <order.product.icon />
                 <span>{order.product.label}</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-center">{studentName}</span>
-                <span className="text-center">{studentClass.label}</span>
+                <span className="text-center">{order.student.name}</span>
+                <span className="text-center">{order.schoolClass.label}</span>
               </div>
               <div className="flex flex-col items-center gap-1 justify-self-end">
-                <Button size="sm">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    postRegister.mutate({
+                      sourceOrderId: order.id,
+                      product: order.product,
+                      created_at: order.created_at,
+                      studentId: order.student.id,
+                      total: order.total,
+                    });
+                    deleteOrder.mutate(order.id);
+                  }}
+                >
                   <Download />
                 </Button>
               </div>

@@ -1,20 +1,44 @@
 import type { JSX, SVGProps } from 'react';
 
-export interface Item {
+export interface Product {
   id: string;
   label: string;
   price: number;
+}
+
+export interface MenuItem extends Product {
   icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
 }
 
 export interface Register {
   id: string;
-  product: Item;
+  product: Product;
   created_at: string;
   studentId: string;
   total: number;
 }
 
-export interface Order extends Register {
-  status: 'ready' | 'cooking';
+export type OrderStatus = 'cooking' | 'ready';
+
+export interface OrderDraftItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  status: OrderStatus;
+}
+
+export interface Order {
+  id: string;
+  studentId: string;
+  created_at: string;
+  productId: string;
+  quantity: number;
+  status: OrderStatus;
+  total: number;
+}
+
+export interface OrderForm {
+  studentId: string;
+  created_at: string;
+  items: OrderDraftItem[];
 }
