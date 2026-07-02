@@ -13,6 +13,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import type { Product } from '../../constants/canteen/types';
 import { apiUrl } from '../../utils/api';
+import { toast } from 'sonner';
 
 type MenuItemsResponse = {
   menuItems: Product[];
@@ -60,6 +61,42 @@ export const Menu: FC = () => {
     },
   });
 
+  const deleteMenuItem = useMutation({
+    mutationFn: async (id: string): Promise<MenuItemResponse> => {
+      const res = await fetch(apiUrl(`/menu-items/${id}`), {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      toast.success('Item removido com sucesso!');
+    },
+  });
+
+  const updateMenuItem = useMutation({
+    mutationFn: async ({ id, label, price }: Product): Promise<MenuItemResponse> => {
+      const res = await fetch(apiUrl(`/menu-items/${id}`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          label,
+          price,
+        }),
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      toast.success('Item atualizado com sucesso!');
+    },
+  });
+
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const menuItems = menuItemsResponse?.menuItems ?? [];
 
@@ -79,10 +116,24 @@ export const Menu: FC = () => {
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
               <div className="grid">
                 {isEditing ? (
-                  <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
+                  <form 
+                  className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
+                  id={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(e.currentTarget);
+                    const label = formData.get('label') as string;
+                    const price = Number(formData.get('price'));
+
+                    updateMenuItem.mutate({ id: item.id, label, price });
+                    setEditingIndex(null);
+                  }}
+                  >
                     <div className="inline-flex min-w-0 items-center gap-2.5">
                       <input
                         id={`name-input-${item.label.trim().toLowerCase()}-${idx}`}
+                        name="label"
                         type="text"
                         defaultValue={`${item.label}`}
                         className="border-text/40 w-full max-w-[12ch] min-w-0 truncate border-4 px-2"
@@ -92,12 +143,14 @@ export const Menu: FC = () => {
                       <span>R$</span>
                       <input
                         id={`price-input-${item.label.trim().toLowerCase()}-${idx}`}
+                        name="price"
                         type="number"
+                        step="0.01"
                         defaultValue={`${item.price.toFixed(2)}`}
                         className="border-text/40 w-full max-w-[6ch] min-w-0 border-4 px-2 text-end"
                       />
                     </div>
-                  </div>
+                  </form>
                 ) : (
                   <AccordionTrigger
                     render={
@@ -122,10 +175,11 @@ export const Menu: FC = () => {
                   {isEditing ? (
                     <div className="flex flex-col gap-2.5">
                       <Button
+                        type="submit"
+                        form={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
                         size="lg"
                         variant="primary"
                         className="w-40 justify-start p-2"
-                        onClick={() => setEditingIndex(null)}
                       >
                         <Check />
                         <span>Salvar</span>
@@ -152,7 +206,10 @@ export const Menu: FC = () => {
                       <span>Editar</span>
                     </Button>
                   )}
-                  <Button size="lg" variant="primary" className="p-2">
+                  <Button size="lg" variant="primary" className="p-2" onClick={() => {
+                    deleteMenuItem.mutate(item.id);
+                    setEditingIndex(null);
+                  }}>
                     <TrashCan />
                     <span>Excluir</span>
                   </Button>
