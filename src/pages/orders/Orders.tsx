@@ -151,10 +151,7 @@ export const Orders: FC = () => {
                 <span className="text-center">{order.schoolClass.label}</span>
               </div>
               <div className="flex flex-col items-center gap-1 justify-self-end">
-                <Button
-                  size="sm"
-                  onClick={() => updateOrderStatus.mutate(order.id)}
-                >
+                <Button size="sm" onClick={() => updateOrderStatus.mutate(order.id)}>
                   <Check />
                 </Button>
                 <Button

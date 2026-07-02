@@ -9,6 +9,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SchoolClass, Student } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
 import { apiUrl } from '../../utils/api';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from '../../components/commons/Select';
 
 type StudentTotal = {
   id: string;
@@ -94,6 +101,23 @@ export const ResponsibleDetails: FC = () => {
   const responsibleTotals = responsibleRegistersResponse?.responsibleTotals;
   const responsibleStudents = responsibleTotals?.studentsTotals ?? [];
 
+  const classesByShift = schoolClasses.reduce<{
+    morning: SchoolClass[];
+    afternoon: SchoolClass[];
+  }>(
+    (acc, schoolClass) => {
+      acc[schoolClass.shiftId].push(schoolClass);
+      return acc;
+    },
+    {
+      morning: [],
+      afternoon: [],
+    },
+  );
+
+  const morningClasses = classesByShift.morning;
+  const afternoonClasses = classesByShift.afternoon;
+
   if (!responsibleId) {
     return <div>Respnsável não encontrado</div>;
   }
@@ -144,29 +168,47 @@ export const ResponsibleDetails: FC = () => {
             setIsAdding(false);
           }}
         >
-          <div className="flex flex-col items-center gap-2.5">
+          <div className="flex min-w-0 flex-col items-center gap-2.5">
             <input
               name="name"
               id={`add-student-name`}
               type="text"
               placeholder="Nome do aluno"
-              className="border-text/40 w-[20ch] border-4 px-2"
+              className="border-text/40 w-full max-w-[21ch] min-w-0 truncate border-4 px-2"
             />
-            <select
+            <Select
               name="classId"
-              id={`add-student-class`}
-              className="border-text/40 w-[20ch] border-4 px-2"
+              id="add-student-class"
+              items={schoolClasses.map((schoolClass) => ({
+                label: schoolClass.label,
+                value: schoolClass.id,
+              }))}
             >
-              <option value="" disabled>
-                Selecione uma turma
-              </option>
-              {!isSchoolClassesPending &&
-                schoolClasses.map((schoolClass) => (
-                  <option value={schoolClass.id} key={schoolClass.id}>
-                    {schoolClass.label}
-                  </option>
-                ))}
-            </select>
+              <SelectTrigger
+                placeholder="Selecione uma turma"
+                className="w-full max-w-[21ch] min-w-0"
+              />
+              <SelectContent className="">
+                {!isSchoolClassesPending && (
+                  <SelectGroup label="Manhã">
+                    {morningClasses.map((schoolClass) => (
+                      <SelectItem value={schoolClass.id} key={schoolClass.id}>
+                        {schoolClass.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+                {!isSchoolClassesPending && (
+                  <SelectGroup label="Tarde">
+                    {afternoonClasses.map((schoolClass) => (
+                      <SelectItem value={schoolClass.id} key={schoolClass.id}>
+                        {schoolClass.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                )}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex flex-col gap-1.5">
             <Button type="submit" variant="primary" size="sm">

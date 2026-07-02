@@ -79,22 +79,22 @@ export const Menu: FC = () => {
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
               <div className="grid">
                 {isEditing ? (
-                  <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
-                    <div className="inline-flex items-center gap-2.5">
+                  <div className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0">
+                    <div className="inline-flex min-w-0 items-center gap-2.5">
                       <input
                         id={`name-input-${item.label.trim().toLowerCase()}-${idx}`}
                         type="text"
                         defaultValue={`${item.label}`}
-                        className="border-text/40 w-[12ch] border-4 px-2"
+                        className="border-text/40 w-full max-w-[12ch] min-w-0 truncate border-4 px-2"
                       />
                     </div>
-                    <div className="inline-flex items-center gap-1">
+                    <div className="inline-flex min-w-0 items-center gap-1">
                       <span>R$</span>
                       <input
                         id={`price-input-${item.label.trim().toLowerCase()}-${idx}`}
                         type="number"
                         defaultValue={`${item.price.toFixed(2)}`}
-                        className="border-text/40 w-[6ch] border-4 px-2 text-end"
+                        className="border-text/40 w-full max-w-[6ch] min-w-0 border-4 px-2 text-end"
                       />
                     </div>
                   </div>
@@ -175,7 +175,7 @@ export const Menu: FC = () => {
         </Button>
       ) : (
         <form
-          className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap"
+          className="bg-hover/30 border-text/40 z-50 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap"
           onSubmit={(e) => {
             e.preventDefault();
 
@@ -187,16 +187,16 @@ export const Menu: FC = () => {
             setEditingIndex(null);
           }}
         >
-          <div>
+          <div className="min-w-0">
             <input
               name="label"
               id={`add-item-name`}
               type="text"
               placeholder="Nome do Item"
-              className="border-text/40 w-[12ch] border-4 px-2"
+              className="border-text/40 w-full max-w-[12ch] min-w-0 truncate border-4 px-2"
             />
           </div>
-          <div className="inline-flex items-center gap-1">
+          <div className="inline-flex min-w-0 items-center gap-1">
             <span>R$</span>
             <input
               name="price"
@@ -204,7 +204,7 @@ export const Menu: FC = () => {
               type="number"
               step="0.01"
               placeholder="Preço"
-              className="border-text/40 w-[6ch] border-4 px-2 text-end"
+              className="border-text/40 w-full max-w-[6ch] min-w-0 border-4 px-2 text-end"
             />
           </div>
           <div className="flex flex-col gap-1.5">

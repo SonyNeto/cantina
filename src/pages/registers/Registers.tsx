@@ -84,7 +84,7 @@ export const Registers: FC = () => {
 
         {isAdding ? (
           <form
-            className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 rounded-none border-t-4 p-4 text-xl font-medium"
+            className="bg-hover/30 border-text/40 z-50 flex w-full min-w-0 items-center justify-between gap-2.5 rounded-none border-t-4 p-4 text-xl font-medium"
             onSubmit={(e) => {
               e.preventDefault();
 
@@ -95,13 +95,13 @@ export const Registers: FC = () => {
               setIsAdding(false);
             }}
           >
-            <div className="inline-flex items-center gap-2.5">
+            <div className="inline-flex min-w-0 items-center gap-2.5">
               <input
                 name="name"
                 id={`add-responsible-name`}
                 type="text"
                 placeholder="Nome do responsável"
-                className="border-text/40 w-[20ch] border-4 px-2"
+                className="border-text/40 w-full max-w-[20ch] min-w-0 truncate border-4 px-2"
               />
             </div>
             <div className="flex flex-col gap-1.5">
