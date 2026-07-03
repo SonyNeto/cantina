@@ -1,11 +1,13 @@
 import { type FC } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Register } from '../../constants/canteen/types';
 import { Loader } from '../../components/commons/Loader';
 import { apiUrl } from '../../utils/api';
+import PeriodPicker from '../../components/commons/PeriodPicker';
+import { usePeriod } from '../../hooks/usePeriod';
 
 type RegistersResponse = {
   registers: Register[];
@@ -19,9 +21,11 @@ const getStudentRegisters = async (studentId: string): Promise<RegistersResponse
 
 export const StudentDetails: FC = () => {
   const { responsibleId, studentId } = useParams();
+  const [period, setPeriod] = usePeriod();
+  const location = useLocation();
 
   const { data: registersResponse, isPending } = useQuery({
-    queryKey: ['register', studentId],
+    queryKey: ['register', studentId, period],
     queryFn: () => getStudentRegisters(studentId ?? ''),
     enabled: Boolean(studentId),
   });
@@ -44,13 +48,13 @@ export const StudentDetails: FC = () => {
       <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
         <Link
           key="back-responsible-details"
-          to={ROUTES.REGISTERS.DETAIL_PATH(responsibleId)}
+          to={{ pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleId), search: location.search }}
           className="z-30 justify-self-start"
         >
           <ArrowLeft />
         </Link>
         <span className="justify-self-center text-center">{`Pedidos de ${registersResponse?.studentName}`}</span>
-        <span aria-hidden="true" />
+        <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
       </div>
 
       <div className="grid">

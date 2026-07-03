@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { v4 as uuid } from 'uuid';
 import ROUTES from '../../constants/routes';
 import { Button } from '../../components/commons/Button';
@@ -9,6 +9,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { apiUrl } from '../../utils/api';
 import type { Responsible } from '../../constants/school/types';
+import PeriodPicker from '../../components/commons/PeriodPicker';
+import { usePeriod } from '../../hooks/usePeriod';
 
 type ResponsibleRegister = {
   responsibleId: string;
@@ -31,9 +33,11 @@ const getResponsiblesRegisters = async (): Promise<ResponsiblesRegistersResponse
 
 export const Registers: FC = () => {
   const queryClient = useQueryClient();
+  const [period, setPeriod] = usePeriod();
+  const location = useLocation();
 
   const { data: responsiblesRegistersResponse, isPending } = useQuery({
-    queryKey: ['registers', 'responsibles'],
+    queryKey: ['registers', 'responsibles', period],
     queryFn: getResponsiblesRegisters,
   });
 
@@ -52,7 +56,7 @@ export const Registers: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles'] });
+      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', period] });
     },
   });
 
@@ -63,15 +67,20 @@ export const Registers: FC = () => {
     <Loader />
   ) : (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary grid w-full place-items-center gap-2.5 px-6 py-4 text-xl">
-        <span className="text-center">Responsáveis</span>
+      <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+        <span aria-hidden={true} className="col-start-1" />
+        <span className="col-start-2 text-center">Responsáveis</span>
+        <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
       </div>
 
       <div className="grid">
         {responsiblesTotals.map((responsibleTotal) => (
           <Link
             key={responsibleTotal.responsibleId}
-            to={ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId)}
+            to={{
+              pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
+              search: location.search,
+            }}
             className="border-text/40 text-text z-30 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
           >
             <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">

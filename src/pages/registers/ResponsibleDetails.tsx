@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import { v4 as uuid } from 'uuid';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft, Check, User, UserPlus } from 'pixelarticons/react';
@@ -16,6 +16,8 @@ import {
   SelectItem,
   SelectTrigger,
 } from '../../components/commons/Select';
+import { usePeriod } from '../../hooks/usePeriod';
+import PeriodPicker from '../../components/commons/PeriodPicker';
 
 type StudentTotal = {
   id: string;
@@ -62,6 +64,8 @@ const getResponsibleRegisters = async (
 
 export const ResponsibleDetails: FC = () => {
   const queryClient = useQueryClient();
+  const [period, setPeriod] = usePeriod();
+  const location = useLocation();
 
   const { data: schoolClassesResponse, isPending: isSchoolClassesPending } = useQuery({
     queryKey: ['schoolClasses'],
@@ -72,7 +76,7 @@ export const ResponsibleDetails: FC = () => {
   const { responsibleId } = useParams();
 
   const { data: responsibleRegistersResponse, isPending } = useQuery({
-    queryKey: ['registers', responsibleId],
+    queryKey: ['registers', responsibleId, period],
     queryFn: () => getResponsibleRegisters(responsibleId ?? ''),
     enabled: Boolean(responsibleId),
   });
@@ -93,7 +97,7 @@ export const ResponsibleDetails: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', responsibleId] });
+      queryClient.invalidateQueries({ queryKey: ['registers', responsibleId, period] });
     },
   });
 
@@ -127,21 +131,28 @@ export const ResponsibleDetails: FC = () => {
   ) : (
     <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
       <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <Link key="back-registers" to={ROUTES.REGISTERS.ROOT} className="z-30 justify-self-start">
+        <Link
+          key="back-registers"
+          to={{ pathname: ROUTES.REGISTERS.ROOT, search: location.search }}
+          className="z-30 justify-self-start"
+        >
           <ArrowLeft />
         </Link>
         <span className="justify-self-center text-center">{`Alunos de ${responsibleRegistersResponse?.responsibleTotals.responsibleName}`}</span>
-        <span aria-hidden="true" />
+        <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
       </div>
 
       <div className="grid">
         {responsibleStudents.map((student) => (
           <Link
             key={student.id}
-            to={ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
-              responsibleTotals?.responsibleId ?? responsibleId,
-              student.id,
-            )}
+            to={{
+              pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
+                responsibleTotals?.responsibleId ?? responsibleId,
+                student.id,
+              ),
+              search: location.search,
+            }}
             className="border-text/40 text-text z-30 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
           >
             <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">

@@ -116,19 +116,19 @@ export const Menu: FC = () => {
             <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
               <div className="grid">
                 {isEditing ? (
-                  <form 
-                  className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
-                  id={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
-                  onSubmit={(e) => {
-                    e.preventDefault();
+                  <form
+                    className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
+                    id={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
+                    onSubmit={(e) => {
+                      e.preventDefault();
 
-                    const formData = new FormData(e.currentTarget);
-                    const label = formData.get('label') as string;
-                    const price = Number(formData.get('price'));
+                      const formData = new FormData(e.currentTarget);
+                      const label = formData.get('label') as string;
+                      const price = Number(formData.get('price'));
 
-                    updateMenuItem.mutate({ id: item.id, label, price });
-                    setEditingIndex(null);
-                  }}
+                      updateMenuItem.mutate({ id: item.id, label, price });
+                      setEditingIndex(null);
+                    }}
                   >
                     <div className="inline-flex min-w-0 items-center gap-2.5">
                       <input
@@ -206,10 +206,15 @@ export const Menu: FC = () => {
                       <span>Editar</span>
                     </Button>
                   )}
-                  <Button size="lg" variant="primary" className="p-2" onClick={() => {
-                    deleteMenuItem.mutate(item.id);
-                    setEditingIndex(null);
-                  }}>
+                  <Button
+                    size="lg"
+                    variant="primary"
+                    className="p-2"
+                    onClick={() => {
+                      deleteMenuItem.mutate(item.id);
+                      setEditingIndex(null);
+                    }}
+                  >
                     <TrashCan />
                     <span>Excluir</span>
                   </Button>
