@@ -13,7 +13,7 @@ export interface MenuItem extends Product {
 export interface Register {
   id: string;
   product: Product;
-  created_at: string;
+  created_at: Date;
   studentId: string;
   total: number;
 }

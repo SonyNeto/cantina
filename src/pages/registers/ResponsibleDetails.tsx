@@ -16,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from '../../components/commons/Select';
-import { usePeriod } from '../../hooks/usePeriod';
+import { usePeriod, type Period } from '../../hooks/usePeriod';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 
 type StudentTotal = {
@@ -57,8 +57,13 @@ const getSchoolClasses = async (): Promise<SchoolClassesResponse> => {
 
 const getResponsibleRegisters = async (
   responsibleId: string,
+  period: Period,
 ): Promise<ResponsibleRegistersResponse> => {
-  const res = await fetch(apiUrl(`/responsibles/${responsibleId}/registers`));
+  const res = await fetch(
+    apiUrl(
+      `/responsibles/${responsibleId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
+    ),
+  );
   return res.json();
 };
 
@@ -77,7 +82,7 @@ export const ResponsibleDetails: FC = () => {
 
   const { data: responsibleRegistersResponse, isPending } = useQuery({
     queryKey: ['registers', responsibleId, period],
-    queryFn: () => getResponsibleRegisters(responsibleId ?? ''),
+    queryFn: () => getResponsibleRegisters(responsibleId ?? '', period),
     enabled: Boolean(responsibleId),
   });
 

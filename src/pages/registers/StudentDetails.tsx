@@ -7,15 +7,23 @@ import type { Register } from '../../constants/canteen/types';
 import { Loader } from '../../components/commons/Loader';
 import { apiUrl } from '../../utils/api';
 import PeriodPicker from '../../components/commons/PeriodPicker';
-import { usePeriod } from '../../hooks/usePeriod';
+import { usePeriod, type Period } from '../../hooks/usePeriod';
+import dayjs from 'dayjs';
 
 type RegistersResponse = {
   registers: Register[];
   studentName: string;
 };
 
-const getStudentRegisters = async (studentId: string): Promise<RegistersResponse> => {
-  const res = await fetch(apiUrl(`/students/${studentId}/registers`));
+const getStudentRegisters = async (
+  studentId: string,
+  period: Period,
+): Promise<RegistersResponse> => {
+  const res = await fetch(
+    apiUrl(
+      `/students/${studentId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
+    ),
+  );
   return res.json();
 };
 
@@ -26,7 +34,7 @@ export const StudentDetails: FC = () => {
 
   const { data: registersResponse, isPending } = useQuery({
     queryKey: ['register', studentId, period],
-    queryFn: () => getStudentRegisters(studentId ?? ''),
+    queryFn: () => getStudentRegisters(studentId ?? '', period),
     enabled: Boolean(studentId),
   });
 
@@ -60,13 +68,15 @@ export const StudentDetails: FC = () => {
       <div className="grid">
         {studentRegisters.map((register) => (
           <div
-            className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
+            className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_8ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl [&_svg]:size-10 [&_svg]:shrink-0"
             key={register.id}
           >
             <div className="inline-flex items-center gap-2.5">
               <span>{register.product.label}</span>
             </div>
-            <span className="text-center tabular-nums">{register.created_at}</span>
+            <span className="text-center tabular-nums">
+              {dayjs(register.created_at).format('DD/MM/YYYY')}
+            </span>
             <span className="text-right tabular-nums">{`R$${register.total.toFixed(2)}`}</span>
           </div>
         ))}

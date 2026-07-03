@@ -10,7 +10,7 @@ import { Loader } from '../../components/commons/Loader';
 import { apiUrl } from '../../utils/api';
 import type { Responsible } from '../../constants/school/types';
 import PeriodPicker from '../../components/commons/PeriodPicker';
-import { usePeriod } from '../../hooks/usePeriod';
+import { usePeriod, type Period } from '../../hooks/usePeriod';
 
 type ResponsibleRegister = {
   responsibleId: string;
@@ -26,8 +26,12 @@ type ResponsibleResponse = {
   responsible: Responsible;
 };
 
-const getResponsiblesRegisters = async (): Promise<ResponsiblesRegistersResponse> => {
-  const res = await fetch(apiUrl('/registers/responsibles'));
+const getResponsiblesRegisters = async (period: Period): Promise<ResponsiblesRegistersResponse> => {
+  const res = await fetch(
+    apiUrl(
+      `/registers/responsibles?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
+    ),
+  );
   return res.json();
 };
 
@@ -38,7 +42,7 @@ export const Registers: FC = () => {
 
   const { data: responsiblesRegistersResponse, isPending } = useQuery({
     queryKey: ['registers', 'responsibles', period],
-    queryFn: getResponsiblesRegisters,
+    queryFn: () => getResponsiblesRegisters(period),
   });
 
   const createResponsible = useMutation({
