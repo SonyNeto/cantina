@@ -21,7 +21,7 @@ export const Toast: FC = () => {
         unstyled: true,
         classNames: {
           toast:
-            'font-text flex w-fit min-w-80 max-w-[calc(100vw-2rem)] items-center gap-3 rounded border-4 px-4 py-3 shadow-lg sm:min-w-96',
+            'font-text flex w-fit min-w-80 max-w-[calc(100vw-2rem)] items-center justify-center text-center gap-3 rounded border-4 px-4 py-3 shadow-lg sm:min-w-96',
           title: 'text-xl font-medium leading-tight',
           description: 'text-text/80 text-base leading-snug',
           content: 'flex min-w-0 flex-col gap-2',
