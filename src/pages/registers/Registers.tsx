@@ -7,7 +7,7 @@ import { Check, User, UserPlus } from 'pixelarticons/react';
 import { X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 import type { Responsible } from '../../constants/school/types';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
@@ -27,10 +27,8 @@ type ResponsibleResponse = {
 };
 
 const getResponsiblesRegisters = async (period: Period): Promise<ResponsiblesRegistersResponse> => {
-  const res = await fetch(
-    apiUrl(
-      `/registers/responsibles?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
-    ),
+  const res = await apiFetch(
+    `/registers/responsibles?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
   );
   return res.json();
 };
@@ -47,7 +45,7 @@ export const Registers: FC = () => {
 
   const createResponsible = useMutation({
     mutationFn: async (name: string): Promise<ResponsibleResponse> => {
-      const res = await fetch(apiUrl('/responsibles'), {
+      const res = await apiFetch('/responsibles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

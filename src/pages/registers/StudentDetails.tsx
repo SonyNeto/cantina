@@ -5,7 +5,7 @@ import { ArrowLeft } from 'pixelarticons/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Register } from '../../constants/canteen/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import dayjs from 'dayjs';
@@ -19,10 +19,8 @@ const getStudentRegisters = async (
   studentId: string,
   period: Period,
 ): Promise<RegistersResponse> => {
-  const res = await fetch(
-    apiUrl(
-      `/students/${studentId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
-    ),
+  const res = await apiFetch(
+    `/students/${studentId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
   );
   return res.json();
 };

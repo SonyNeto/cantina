@@ -3,7 +3,7 @@ import { Button } from '../../components/commons/Button';
 import { useQuery } from '@tanstack/react-query';
 import type { Shift, ShiftId } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 
 interface Props {
   onNext: (shiftId: ShiftId) => void;
@@ -14,7 +14,7 @@ type ShiftsResponse = {
 };
 
 const getShifts = async (): Promise<ShiftsResponse> => {
-  const res = await fetch(apiUrl('/shifts'));
+  const res = await apiFetch('/shifts');
   return res.json();
 };
 

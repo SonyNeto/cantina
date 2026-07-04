@@ -9,7 +9,7 @@ import type { Order, OrderForm } from '../../constants/canteen/types';
 import dayjs from 'dayjs';
 import type { ShiftId } from '../../constants/school/types';
 import { toast } from 'sonner';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 
 const STEPS = {
   SHIFTS: 'SHIFTS',
@@ -40,7 +40,7 @@ export const NewOrders: FC = () => {
 
   const createOrders = useMutation({
     mutationFn: async (data: OrderForm): Promise<CreateOrdersResponse> => {
-      const res = await fetch(apiUrl('/orders'), {
+      const res = await apiFetch('/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

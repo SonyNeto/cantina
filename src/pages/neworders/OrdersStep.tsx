@@ -6,7 +6,7 @@ import { ArrowLeft, Minus, Plus } from 'pixelarticons/react';
 import type { OrderForm, Product } from '../../constants/canteen/types';
 import { useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 
 interface Props {
   onBack: () => void;
@@ -17,7 +17,7 @@ type MenuItemsResponse = {
 };
 
 const getMenuItems = async (): Promise<MenuItemsResponse> => {
-  const res = await fetch(apiUrl('/menu-items'));
+  const res = await apiFetch('/menu-items');
   return res.json();
 };
 

@@ -5,7 +5,7 @@ import { Cooking, X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { toast } from 'sonner';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 import type { Order, Product, Register } from '../../constants/canteen/types';
 
 type OrderWithDetails = {
@@ -46,7 +46,7 @@ type RegisterResponse = {
 };
 
 const getOrdersWithDetails = async (): Promise<OrdersResponse> => {
-  const res = await fetch(apiUrl('/orders/items'));
+  const res = await apiFetch('/orders/items');
   return res.json();
 };
 
@@ -60,7 +60,7 @@ export const Orders: FC = () => {
 
   const updateOrderStatus = useMutation({
     mutationFn: async (orderId: string): Promise<OrderResponse> => {
-      const res = await fetch(apiUrl(`/orders/${orderId}/status`), {
+      const res = await apiFetch(`/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,7 +78,7 @@ export const Orders: FC = () => {
 
   const deleteOrder = useMutation({
     mutationFn: async (orderId: string): Promise<OrderResponse> => {
-      const res = await fetch(apiUrl(`/orders/${orderId}`), {
+      const res = await apiFetch(`/orders/${orderId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -99,7 +99,7 @@ export const Orders: FC = () => {
       studentId,
       total,
     }: RegisterOrderInput): Promise<RegisterResponse> => {
-      const res = await fetch(apiUrl('/registers'), {
+      const res = await apiFetch('/registers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

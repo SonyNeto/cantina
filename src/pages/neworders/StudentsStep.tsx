@@ -5,7 +5,7 @@ import { ArrowLeft } from 'pixelarticons/react';
 import { useQuery } from '@tanstack/react-query';
 import type { ShiftId, Student } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 import type { OrderForm } from '../../constants/canteen/types';
 
 interface Props {
@@ -20,7 +20,7 @@ type StudentsResponse = {
 };
 
 const getStudents = async (shiftId: ShiftId | '', classId: string): Promise<StudentsResponse> => {
-  const res = await fetch(apiUrl(`/shifts/${shiftId}/classes/${classId}/students`));
+  const res = await apiFetch(`/shifts/${shiftId}/classes/${classId}/students`);
   return res.json();
 };
 

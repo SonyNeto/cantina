@@ -12,7 +12,7 @@ import { TrashCan, X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import type { Product } from '../../constants/canteen/types';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 import { toast } from 'sonner';
 
 type MenuItemsResponse = {
@@ -29,7 +29,7 @@ type MenuItemResponse = {
 };
 
 const getMenuItems = async (): Promise<MenuItemsResponse> => {
-  const res = await fetch(apiUrl('/menu-items'));
+  const res = await apiFetch('/menu-items');
   return res.json();
 };
 
@@ -43,7 +43,7 @@ export const Menu: FC = () => {
 
   const createMenuItem = useMutation({
     mutationFn: async ({ label, price }: CreateMenuItemInput): Promise<MenuItemResponse> => {
-      const res = await fetch(apiUrl('/menu-items'), {
+      const res = await apiFetch('/menu-items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -63,7 +63,7 @@ export const Menu: FC = () => {
 
   const deleteMenuItem = useMutation({
     mutationFn: async (id: string): Promise<MenuItemResponse> => {
-      const res = await fetch(apiUrl(`/menu-items/${id}`), {
+      const res = await apiFetch(`/menu-items/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -79,7 +79,7 @@ export const Menu: FC = () => {
 
   const updateMenuItem = useMutation({
     mutationFn: async ({ id, label, price }: Product): Promise<MenuItemResponse> => {
-      const res = await fetch(apiUrl(`/menu-items/${id}`), {
+      const res = await apiFetch(`/menu-items/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

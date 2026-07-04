@@ -8,7 +8,7 @@ import { X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SchoolClass, Student } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiUrl } from '../../utils/api';
+import { apiFetch } from '../../utils/api';
 import {
   Select,
   SelectContent,
@@ -51,7 +51,7 @@ type StudentResponse = {
 };
 
 const getSchoolClasses = async (): Promise<SchoolClassesResponse> => {
-  const res = await fetch(apiUrl('/classes'));
+  const res = await apiFetch('/classes');
   return res.json();
 };
 
@@ -59,10 +59,8 @@ const getResponsibleRegisters = async (
   responsibleId: string,
   period: Period,
 ): Promise<ResponsibleRegistersResponse> => {
-  const res = await fetch(
-    apiUrl(
-      `/responsibles/${responsibleId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
-    ),
+  const res = await apiFetch(
+    `/responsibles/${responsibleId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
   );
   return res.json();
 };
@@ -88,7 +86,7 @@ export const ResponsibleDetails: FC = () => {
 
   const createStudent = useMutation({
     mutationFn: async ({ name, classId }: CreateStudentInput): Promise<StudentResponse> => {
-      const res = await fetch(apiUrl(`/responsibles/${responsibleId}/students`), {
+      const res = await apiFetch(`/responsibles/${responsibleId}/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
