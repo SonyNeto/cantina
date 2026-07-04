@@ -2,12 +2,14 @@ import { useState, type FC } from 'react';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerSwipeArea } from './commons/Drawer';
 import { Menu } from 'pixelarticons/react';
 import { Button } from './commons/Button';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import NAVMENU from '../constants/navmenu.ts';
 import { NotificationBadge } from './commons/NotificationBadge.tsx';
-import { useQuery } from '@tanstack/react-query';
-import { apiUrl } from '../utils/api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiFetch } from '../utils/api';
 import type { Product } from '../constants/canteen/types';
+import ROUTES from '../constants/routes.ts';
+import { toast } from 'sonner';
 
 type OrderWithDetails = {
   id: string;
@@ -29,14 +31,40 @@ type OrdersResponse = {
 };
 
 const getOrdersWithDetails = async (): Promise<OrdersResponse> => {
-  const res = await fetch(apiUrl('/orders/items'));
+  const res = await apiFetch('/orders/items');
   return res.json();
 };
 
 export const NavBar: FC = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  
   const { data: ordersResponse, isPending } = useQuery({
     queryKey: ['orderItems'],
     queryFn: getOrdersWithDetails,
+  });
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiFetch('/logout', {
+        method: 'GET',
+      });
+
+      if (!res.ok) {
+        throw new Error('Falha ao sair');
+      }
+
+      return null;
+    },
+
+    onSuccess: () => {
+      queryClient.clear();
+      navigate(ROUTES.LOGIN, { replace: true });
+    },
+
+    onError: () => {
+      toast.error('Falha ao realizar logout');
+    },
   });
 
   const orders = ordersResponse?.orderItems ?? [];
@@ -45,7 +73,7 @@ export const NavBar: FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     !isPending && (
-      <Drawer swipeDirection="left" open={isOpen} onOpenChange={setIsOpen}>
+      <Drawer swipeDirection="right" open={isOpen} onOpenChange={setIsOpen}>
         <DrawerSwipeArea
           swipeDirection="right"
           className="fixed top-0 left-0 z-10 h-screen w-[10vw]"
@@ -76,6 +104,9 @@ export const NavBar: FC = () => {
                 </Link>
               );
             })}
+            <Button variant="danger" size="xl" className="self-end w-full rounded-none border-b-4 border-text/40" onClick={() => logoutMutation.mutate()}>
+              Fazer logout
+            </Button>
           </DrawerContent>
 
           <img rel="icon" src="/favicon.png" className="size-10" />

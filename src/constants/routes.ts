@@ -1,5 +1,7 @@
 const ROUTES = {
   HOME: '/',
+  LOGIN: '/login',
+  SIGNUP: '/signup',
   NEWORDERS: 'neworders',
   ORDERS: 'orders',
   MENU: 'menu',

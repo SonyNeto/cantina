@@ -5,3 +5,10 @@ export function apiUrl(path: string) {
 
   return `${API_URL}${normalizedPath}`;
 }
+
+export function apiFetch(path: string, options: RequestInit = {}) {
+  return fetch(apiUrl(path), {
+    ...options,
+    credentials: 'include',
+  });
+}

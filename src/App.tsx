@@ -9,6 +9,9 @@ import { StudentDetails } from './pages/registers/StudentDetails';
 import { Toast } from './components/commons/Toast';
 import { Orders } from './pages/orders/Orders';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { LoginPage } from './pages/auth/LoginPage';
+import { SignupPage } from './pages/auth/SignupPage';
+import { ProtectedRoute } from './pages/auth/ProtectedRoute';
 
 const queryClient = new QueryClient();
 
@@ -17,14 +20,19 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Toast />
       <Routes>
-        <Route element={<Layout />}>
-          <Route path={ROUTES.HOME} element={<NewOrders />} />
-          <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
-          <Route path={ROUTES.ORDERS} element={<Orders />} />
-          <Route path={ROUTES.MENU} element={<Menu />} />
-          <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
-          <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
-          <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
+        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+        <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route path={ROUTES.HOME} element={<NewOrders />} />
+            <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
+            <Route path={ROUTES.ORDERS} element={<Orders />} />
+            <Route path={ROUTES.MENU} element={<Menu />} />
+            <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
+            <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
+            <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
+          </Route>
         </Route>
       </Routes>
     </QueryClientProvider>
