@@ -5,8 +5,9 @@ import { ArrowLeft } from 'pixelarticons/react';
 import { useQuery } from '@tanstack/react-query';
 import type { ShiftId, Student } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
 import type { OrderForm } from '../../constants/canteen/types';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 interface Props {
   shiftId: ShiftId | '';
@@ -20,19 +21,20 @@ type StudentsResponse = {
 };
 
 const getStudents = async (shiftId: ShiftId | '', classId: string): Promise<StudentsResponse> => {
-  const res = await apiFetch(`/shifts/${shiftId}/classes/${classId}/students`);
+  const res = await workspaceApiFetch(`/shifts/${shiftId}/classes/${classId}/students`);
   return res.json();
 };
 
 export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) => {
   const { setValue } = useFormContext<OrderForm>();
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: studentsResponse, isPending } = useQuery({
-    queryKey: ['students', classId],
+  const { data: students = [], isPending } = useQuery({
+    queryKey: ['students', workspaceId, classId],
     queryFn: () => getStudents(shiftId, classId),
+    enabled: Boolean(workspaceId && shiftId && classId),
+    select: (data) => data.students,
   });
-
-  const students = studentsResponse?.students ?? [];
 
   function handleSelectStudent(studentId: OrderForm['studentId']) {
     setValue('studentId', studentId, {

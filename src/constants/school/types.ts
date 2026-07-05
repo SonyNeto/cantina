@@ -1,4 +1,4 @@
-export type ShiftId = 'morning' | 'afternoon';
+export type ShiftId = string;
 
 export interface Shift {
   id: ShiftId;
@@ -9,6 +9,7 @@ export interface SchoolClass {
   id: string;
   label: string;
   shiftId: ShiftId;
+  shiftLabel?: string;
 }
 
 export interface Student {

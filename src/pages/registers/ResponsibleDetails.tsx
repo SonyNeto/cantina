@@ -1,6 +1,5 @@
 import { useState, type FC } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
-import { v4 as uuid } from 'uuid';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft, Check, User, UserPlus } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
@@ -8,7 +7,7 @@ import { X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SchoolClass, Student } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
 import {
   Select,
   SelectContent,
@@ -18,6 +17,7 @@ import {
 } from '../../components/commons/Select';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import PeriodPicker from '../../components/commons/PeriodPicker';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 type StudentTotal = {
   id: string;
@@ -51,7 +51,7 @@ type StudentResponse = {
 };
 
 const getSchoolClasses = async (): Promise<SchoolClassesResponse> => {
-  const res = await apiFetch('/classes');
+  const res = await workspaceApiFetch('/classes');
   return res.json();
 };
 
@@ -59,7 +59,7 @@ const getResponsibleRegisters = async (
   responsibleId: string,
   period: Period,
 ): Promise<ResponsibleRegistersResponse> => {
-  const res = await apiFetch(
+  const res = await workspaceApiFetch(
     `/responsibles/${responsibleId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
   );
   return res.json();
@@ -69,28 +69,31 @@ export const ResponsibleDetails: FC = () => {
   const queryClient = useQueryClient();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: schoolClassesResponse, isPending: isSchoolClassesPending } = useQuery({
-    queryKey: ['schoolClasses'],
+  const { data: schoolClasses = [], isPending: isSchoolClassesPending } = useQuery({
+    queryKey: ['schoolClasses', workspaceId],
     queryFn: getSchoolClasses,
+    enabled: Boolean(workspaceId),
+    select: (data) => data.schoolClasses,
   });
 
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const { responsibleId } = useParams();
 
-  const { data: responsibleRegistersResponse, isPending } = useQuery({
-    queryKey: ['registers', responsibleId, period],
+  const { data: responsibleTotals, isPending } = useQuery({
+    queryKey: ['registers', workspaceId, responsibleId, period],
     queryFn: () => getResponsibleRegisters(responsibleId ?? '', period),
-    enabled: Boolean(responsibleId),
+    enabled: Boolean(workspaceId && responsibleId),
+    select: (data) => data.responsibleTotals,
   });
 
   const createStudent = useMutation({
     mutationFn: async ({ name, classId }: CreateStudentInput): Promise<StudentResponse> => {
-      const res = await apiFetch(`/responsibles/${responsibleId}/students`, {
+      const res = await workspaceApiFetch(`/responsibles/${responsibleId}/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: uuid(),
           name,
           classId,
         }),
@@ -100,30 +103,20 @@ export const ResponsibleDetails: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', responsibleId, period] });
+      queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] });
     },
   });
 
-  const schoolClasses = schoolClassesResponse?.schoolClasses ?? [];
-  const responsibleTotals = responsibleRegistersResponse?.responsibleTotals;
   const responsibleStudents = responsibleTotals?.studentsTotals ?? [];
 
-  const classesByShift = schoolClasses.reduce<{
-    morning: SchoolClass[];
-    afternoon: SchoolClass[];
-  }>(
+  const classesByShift = schoolClasses.reduce<Record<string, SchoolClass[]>>(
     (acc, schoolClass) => {
-      acc[schoolClass.shiftId].push(schoolClass);
+      const shiftLabel = schoolClass.shiftLabel ?? schoolClass.shiftId;
+      acc[shiftLabel] = [...(acc[shiftLabel] ?? []), schoolClass];
       return acc;
     },
-    {
-      morning: [],
-      afternoon: [],
-    },
+    {},
   );
-
-  const morningClasses = classesByShift.morning;
-  const afternoonClasses = classesByShift.afternoon;
 
   if (!responsibleId) {
     return <div>Respnsável não encontrado</div>;
@@ -141,7 +134,7 @@ export const ResponsibleDetails: FC = () => {
         >
           <ArrowLeft />
         </Link>
-        <span className="justify-self-center text-center">{`Alunos de ${responsibleRegistersResponse?.responsibleTotals.responsibleName}`}</span>
+        <span className="justify-self-center text-center">{`Alunos de ${responsibleTotals?.responsibleName}`}</span>
         <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
       </div>
 
@@ -203,24 +196,16 @@ export const ResponsibleDetails: FC = () => {
                 className="w-full max-w-[21ch] min-w-0"
               />
               <SelectContent className="">
-                {!isSchoolClassesPending && (
-                  <SelectGroup label="Manhã">
-                    {morningClasses.map((schoolClass) => (
-                      <SelectItem value={schoolClass.id} key={schoolClass.id}>
-                        {schoolClass.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                )}
-                {!isSchoolClassesPending && (
-                  <SelectGroup label="Tarde">
-                    {afternoonClasses.map((schoolClass) => (
-                      <SelectItem value={schoolClass.id} key={schoolClass.id}>
-                        {schoolClass.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                )}
+                {!isSchoolClassesPending &&
+                  Object.entries(classesByShift).map(([shiftLabel, classes]) => (
+                    <SelectGroup label={shiftLabel} key={shiftLabel}>
+                      {classes.map((schoolClass) => (
+                        <SelectItem value={schoolClass.id} key={schoolClass.id}>
+                          {schoolClass.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
               </SelectContent>
             </Select>
           </div>

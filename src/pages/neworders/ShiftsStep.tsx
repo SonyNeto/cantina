@@ -3,7 +3,8 @@ import { Button } from '../../components/commons/Button';
 import { useQuery } from '@tanstack/react-query';
 import type { Shift, ShiftId } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 interface Props {
   onNext: (shiftId: ShiftId) => void;
@@ -14,17 +15,19 @@ type ShiftsResponse = {
 };
 
 const getShifts = async (): Promise<ShiftsResponse> => {
-  const res = await apiFetch('/shifts');
+  const res = await workspaceApiFetch('/shifts');
   return res.json();
 };
 
 export const ShiftsStep: FC<Props> = ({ onNext }) => {
-  const { data: shiftsResponse, isPending } = useQuery({
-    queryKey: ['shifts'],
-    queryFn: getShifts,
-  });
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const shifts = shiftsResponse?.shifts ?? [];
+  const { data: shifts = [], isPending } = useQuery({
+    queryKey: ['shifts', workspaceId],
+    queryFn: getShifts,
+    enabled: Boolean(workspaceId),
+    select: (data) => data.shifts,
+  });
 
   return isPending ? (
     <Loader />

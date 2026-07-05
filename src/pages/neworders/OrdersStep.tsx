@@ -1,12 +1,12 @@
 import { type FC } from 'react';
-import { v4 as uuid } from 'uuid';
 import { Button } from '../../components/commons/Button';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { ArrowLeft, Minus, Plus } from 'pixelarticons/react';
 import type { OrderForm, Product } from '../../constants/canteen/types';
 import { useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 interface Props {
   onBack: () => void;
@@ -17,14 +17,18 @@ type MenuItemsResponse = {
 };
 
 const getMenuItems = async (): Promise<MenuItemsResponse> => {
-  const res = await apiFetch('/menu-items');
+  const res = await workspaceApiFetch('/menu-items');
   return res.json();
 };
 
 export const OrdersStep: FC<Props> = ({ onBack }) => {
-  const { data: menuItemsResponse, isPending } = useQuery({
-    queryKey: ['menuItems'],
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
+
+  const { data: menuItems = [], isPending } = useQuery({
+    queryKey: ['menuItems', workspaceId],
     queryFn: getMenuItems,
+    enabled: Boolean(workspaceId),
+    select: (data) => data.menuItems,
   });
 
   const { control, setValue } = useFormContext<OrderForm>();
@@ -34,8 +38,6 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
       control,
       name: 'items',
     }) ?? [];
-
-  const menuItems = menuItemsResponse?.menuItems ?? [];
 
   const total = items.reduce((sum, orderItem) => {
     const product = menuItems.find((item) => item.id === orderItem.productId);
@@ -57,7 +59,6 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
         [
           ...items,
           {
-            id: uuid(),
             productId,
             quantity: 1,
             status: 'cooking',

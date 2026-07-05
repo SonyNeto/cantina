@@ -5,8 +5,9 @@ import { Cooking, X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { toast } from 'sonner';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
 import type { Order, Product, Register } from '../../constants/canteen/types';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 type OrderWithDetails = {
   id: string;
@@ -30,7 +31,6 @@ type OrdersResponse = {
 };
 
 type RegisterOrderInput = {
-  sourceOrderId: string;
   product: Product;
   created_at: string;
   studentId: string;
@@ -46,21 +46,24 @@ type RegisterResponse = {
 };
 
 const getOrdersWithDetails = async (): Promise<OrdersResponse> => {
-  const res = await apiFetch('/orders/items');
+  const res = await workspaceApiFetch('/orders/items');
   return res.json();
 };
 
 export const Orders: FC = () => {
   const queryClient = useQueryClient();
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: ordersResponse, isPending } = useQuery({
-    queryKey: ['orderItems'],
+  const { data: orders = [], isPending } = useQuery({
+    queryKey: ['orderItems', workspaceId],
     queryFn: getOrdersWithDetails,
+    enabled: Boolean(workspaceId),
+    select: (data) => data.orderItems,
   });
 
   const updateOrderStatus = useMutation({
     mutationFn: async (orderId: string): Promise<OrderResponse> => {
-      const res = await apiFetch(`/orders/${orderId}/status`, {
+      const res = await workspaceApiFetch(`/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,7 +81,7 @@ export const Orders: FC = () => {
 
   const deleteOrder = useMutation({
     mutationFn: async (orderId: string): Promise<OrderResponse> => {
-      const res = await apiFetch(`/orders/${orderId}`, {
+      const res = await workspaceApiFetch(`/orders/${orderId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -93,17 +96,15 @@ export const Orders: FC = () => {
 
   const postRegister = useMutation({
     mutationFn: async ({
-      sourceOrderId,
       product,
       created_at,
       studentId,
       total,
     }: RegisterOrderInput): Promise<RegisterResponse> => {
-      const res = await apiFetch('/registers', {
+      const res = await workspaceApiFetch('/registers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: sourceOrderId,
           product,
           created_at,
           studentId,
@@ -120,7 +121,6 @@ export const Orders: FC = () => {
     },
   });
 
-  const orders = ordersResponse?.orderItems ?? [];
   const cookingOrders = orders.filter((order) => order.status === 'cooking');
   const readyOrders = orders.filter((order) => order.status === 'ready');
 
@@ -196,7 +196,6 @@ export const Orders: FC = () => {
                   size="sm"
                   onClick={() => {
                     postRegister.mutate({
-                      sourceOrderId: order.id,
                       product: order.product,
                       created_at: order.created_at,
                       studentId: order.student.id,

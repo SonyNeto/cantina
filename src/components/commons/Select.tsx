@@ -42,11 +42,11 @@ const SelectContent = ({ children, className, ...props }: SelectContentProps) =>
         align: 'none',
         fallbackAxisSide: 'none',
       }}
-      sideOffset={2}
-      className="z-50 w-(--anchor-width)"
+      sideOffset={-4}
+      className="z-50 w-[var(--anchor-width)]"
     >
       <SelectPrimitive.Popup
-        className={cn('border-text/40 bg-primary border-4', className)}
+        className={cn('border-text/40 bg-primary w-full border-4', className)}
         {...props}
       >
         <SelectPrimitive.List className="max-h-[calc(var(--available-height)-0.5rem)] overflow-y-auto">

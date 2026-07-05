@@ -1,5 +1,4 @@
 import { useState, type FC } from 'react';
-import { v4 as uuid } from 'uuid';
 import { Button } from '../../components/commons/Button';
 import {
   Accordion,
@@ -12,8 +11,9 @@ import { TrashCan, X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import type { Product } from '../../constants/canteen/types';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
 import { toast } from 'sonner';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 type MenuItemsResponse = {
   menuItems: Product[];
@@ -29,25 +29,27 @@ type MenuItemResponse = {
 };
 
 const getMenuItems = async (): Promise<MenuItemsResponse> => {
-  const res = await apiFetch('/menu-items');
+  const res = await workspaceApiFetch('/menu-items');
   return res.json();
 };
 
 export const Menu: FC = () => {
   const queryClient = useQueryClient();
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: menuItemsResponse, isPending } = useQuery({
-    queryKey: ['menuItems'],
+  const { data: menuItems = [], isPending } = useQuery({
+    queryKey: ['menuItems', workspaceId],
     queryFn: getMenuItems,
+    enabled: Boolean(workspaceId),
+    select: (data) => data.menuItems,
   });
 
   const createMenuItem = useMutation({
     mutationFn: async ({ label, price }: CreateMenuItemInput): Promise<MenuItemResponse> => {
-      const res = await apiFetch('/menu-items', {
+      const res = await workspaceApiFetch('/menu-items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: uuid(),
           label,
           price,
         }),
@@ -63,7 +65,7 @@ export const Menu: FC = () => {
 
   const deleteMenuItem = useMutation({
     mutationFn: async (id: string): Promise<MenuItemResponse> => {
-      const res = await apiFetch(`/menu-items/${id}`, {
+      const res = await workspaceApiFetch(`/menu-items/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -79,7 +81,7 @@ export const Menu: FC = () => {
 
   const updateMenuItem = useMutation({
     mutationFn: async ({ id, label, price }: Product): Promise<MenuItemResponse> => {
-      const res = await apiFetch(`/menu-items/${id}`, {
+      const res = await workspaceApiFetch(`/menu-items/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -98,8 +100,6 @@ export const Menu: FC = () => {
   });
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const menuItems = menuItemsResponse?.menuItems ?? [];
-
   return isPending ? (
     <Loader />
   ) : (

@@ -21,7 +21,6 @@ export interface Register {
 export type OrderStatus = 'cooking' | 'ready';
 
 export interface OrderDraftItem {
-  id: string;
   productId: string;
   quantity: number;
   status: OrderStatus;

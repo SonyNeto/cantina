@@ -1,16 +1,16 @@
 import { useState, type FC } from 'react';
 import { Link, useLocation } from 'react-router';
-import { v4 as uuid } from 'uuid';
 import ROUTES from '../../constants/routes';
 import { Button } from '../../components/commons/Button';
 import { Check, User, UserPlus } from 'pixelarticons/react';
 import { X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
 import type { Responsible } from '../../constants/school/types';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 type ResponsibleRegister = {
   responsibleId: string;
@@ -27,7 +27,7 @@ type ResponsibleResponse = {
 };
 
 const getResponsiblesRegisters = async (period: Period): Promise<ResponsiblesRegistersResponse> => {
-  const res = await apiFetch(
+  const res = await workspaceApiFetch(
     `/registers/responsibles?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
   );
   return res.json();
@@ -37,19 +37,21 @@ export const Registers: FC = () => {
   const queryClient = useQueryClient();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: responsiblesRegistersResponse, isPending } = useQuery({
-    queryKey: ['registers', 'responsibles', period],
+  const { data: responsiblesTotals = [], isPending } = useQuery({
+    queryKey: ['registers', 'responsibles', workspaceId, period],
     queryFn: () => getResponsiblesRegisters(period),
+    enabled: Boolean(workspaceId),
+    select: (data) => data.responsiblesTotals,
   });
 
   const createResponsible = useMutation({
     mutationFn: async (name: string): Promise<ResponsibleResponse> => {
-      const res = await apiFetch('/responsibles', {
+      const res = await workspaceApiFetch('/responsibles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: uuid(),
           name,
         }),
       });
@@ -58,13 +60,11 @@ export const Registers: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', period] });
+      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', workspaceId] });
     },
   });
 
   const [isAdding, setIsAdding] = useState<boolean>(false);
-  const responsiblesTotals = responsiblesRegistersResponse?.responsiblesTotals ?? [];
-
   return isPending ? (
     <Loader />
   ) : (

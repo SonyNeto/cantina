@@ -5,10 +5,11 @@ import { ArrowLeft } from 'pixelarticons/react';
 import { useQuery } from '@tanstack/react-query';
 import type { Register } from '../../constants/canteen/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import dayjs from 'dayjs';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 type RegistersResponse = {
   registers: Register[];
@@ -19,7 +20,7 @@ const getStudentRegisters = async (
   studentId: string,
   period: Period,
 ): Promise<RegistersResponse> => {
-  const res = await apiFetch(
+  const res = await workspaceApiFetch(
     `/students/${studentId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
   );
   return res.json();
@@ -29,19 +30,23 @@ export const StudentDetails: FC = () => {
   const { responsibleId, studentId } = useParams();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: registersResponse, isPending } = useQuery({
-    queryKey: ['register', studentId, period],
+  const { data: studentRegisterDetails, isPending } = useQuery({
+    queryKey: ['register', workspaceId, studentId, period],
     queryFn: () => getStudentRegisters(studentId ?? '', period),
-    enabled: Boolean(studentId),
+    enabled: Boolean(workspaceId && studentId),
+    select: (data) => ({
+      studentName: data.studentName,
+      registers: data.registers.filter((register) => register.studentId === studentId),
+    }),
   });
 
   if (!studentId || !responsibleId) {
     return <div>Aluno não encontrado</div>;
   }
 
-  const studentRegisters =
-    registersResponse?.registers.filter((register) => register.studentId === studentId) ?? [];
+  const studentRegisters = studentRegisterDetails?.registers ?? [];
 
   const total = studentRegisters.reduce((sum, register) => {
     return sum + register.total;
@@ -59,7 +64,7 @@ export const StudentDetails: FC = () => {
         >
           <ArrowLeft />
         </Link>
-        <span className="justify-self-center text-center">{`Pedidos de ${registersResponse?.studentName}`}</span>
+        <span className="justify-self-center text-center">{`Pedidos de ${studentRegisterDetails?.studentName}`}</span>
         <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
       </div>
 

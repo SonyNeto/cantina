@@ -4,7 +4,8 @@ import { ArrowLeft } from 'pixelarticons/react';
 import { useQuery } from '@tanstack/react-query';
 import type { SchoolClass, ShiftId } from '../../constants/school/types';
 import { Loader } from '../../components/commons/Loader';
-import { apiFetch } from '../../utils/api';
+import { workspaceApiFetch } from '../../utils/api';
+import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 interface Props {
   onNext: (classId: string) => void;
@@ -17,17 +18,19 @@ type SchoolClassesResponse = {
 };
 
 const getSchoolClasses = async (shiftId: ShiftId | ''): Promise<SchoolClassesResponse> => {
-  const res = await apiFetch(`/shifts/${shiftId}/classes`);
+  const res = await workspaceApiFetch(`/shifts/${shiftId}/classes`);
   return res.json();
 };
 
 export const ClassesStep: FC<Props> = ({ onNext, onBack, shiftId }) => {
-  const { data: schoolClassesResponse, isPending } = useQuery({
-    queryKey: ['schoolClasses', shiftId],
-    queryFn: () => getSchoolClasses(shiftId),
-  });
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const schoolClasses = schoolClassesResponse?.schoolClasses ?? [];
+  const { data: schoolClasses = [], isPending } = useQuery({
+    queryKey: ['schoolClasses', workspaceId, shiftId],
+    queryFn: () => getSchoolClasses(shiftId),
+    enabled: Boolean(workspaceId && shiftId),
+    select: (data) => data.schoolClasses,
+  });
 
   return isPending ? (
     <Loader />

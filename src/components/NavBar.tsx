@@ -6,10 +6,12 @@ import { Link, useNavigate } from 'react-router';
 import NAVMENU from '../constants/navmenu.ts';
 import { NotificationBadge } from './commons/NotificationBadge.tsx';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiFetch } from '../utils/api';
+import { apiFetch, workspaceApiFetch } from '../utils/api';
 import type { Product } from '../constants/canteen/types';
 import ROUTES from '../constants/routes.ts';
 import { toast } from 'sonner';
+import { WorkspaceSelect } from './WorkspaceSelect.tsx';
+import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
 
 type OrderWithDetails = {
   id: string;
@@ -31,17 +33,21 @@ type OrdersResponse = {
 };
 
 const getOrdersWithDetails = async (): Promise<OrdersResponse> => {
-  const res = await apiFetch('/orders/items');
+  const res = await workspaceApiFetch('/orders/items');
   return res.json();
 };
 
 export const NavBar: FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
+  const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
   
-  const { data: ordersResponse, isPending } = useQuery({
-    queryKey: ['orderItems'],
+  const { data: orders = [], isPending } = useQuery({
+    queryKey: ['orderItems', workspaceId],
     queryFn: getOrdersWithDetails,
+    enabled: Boolean(workspaceId),
+    select: (data) => data.orderItems,
   });
 
   const logoutMutation = useMutation({
@@ -58,6 +64,7 @@ export const NavBar: FC = () => {
     },
 
     onSuccess: () => {
+      clearWorkspace();
       queryClient.clear();
       navigate(ROUTES.LOGIN, { replace: true });
     },
@@ -67,12 +74,11 @@ export const NavBar: FC = () => {
     },
   });
 
-  const orders = ordersResponse?.orderItems ?? [];
   const totalActiveOrders = orders.filter((order) => order.status === 'cooking').length;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
-    !isPending && (
+    (!workspaceId || !isPending) && (
       <Drawer swipeDirection="right" open={isOpen} onOpenChange={setIsOpen}>
         <DrawerSwipeArea
           swipeDirection="right"
@@ -88,6 +94,8 @@ export const NavBar: FC = () => {
           ></DrawerTrigger>
 
           <DrawerContent className="border-text/40 flex h-full flex-col border-r-4">
+            <WorkspaceSelect />
+            
             {NAVMENU.ITEMS.map((item, idx) => {
               const pedidos = item.label === 'Pedidos';
 
