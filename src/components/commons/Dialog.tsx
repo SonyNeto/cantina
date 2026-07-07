@@ -14,18 +14,18 @@ const DialogContent: FC<ComponentProps<typeof DialogPrimitive.Popup>> = ({
   ...props
 }) => (
   <DialogPrimitive.Portal>
-    <DialogPrimitive.Backdrop className="fixed inset-0 z-[80] bg-black/30 backdrop-blur-sm [-webkit-backdrop-filter:blur(6px)] [backdrop-filter:blur(6px)]" />
+    <DialogPrimitive.Backdrop className="bg-text/25 fixed inset-0 z-[80] backdrop-blur-sm [backdrop-filter:blur(6px)] [-webkit-backdrop-filter:blur(6px)]" />
     <DialogPrimitive.Viewport className="fixed inset-0 z-[90] flex items-center justify-center p-4">
       <DialogPrimitive.Popup
         className={cn(
-          'border-text/40 bg-primary flex w-full max-w-sm flex-col overflow-hidden rounded-none border-4 text-xl shadow-md outline-none',
+          'border-border/70 bg-panel flex w-full max-w-sm flex-col overflow-hidden rounded-none border-4 text-xl shadow-[6px_6px_0_var(--color-shadow)] outline-none',
           'data-open:animate-Dialog-in',
           'data-closed:animate-Dialog-out',
           className,
         )}
         {...props}
       >
-        <div className="border-text/40 flex h-14 items-center justify-between gap-3 border-b-4 bg-secondary pl-4 pr-1">
+        <div className="border-border/40 bg-panel-header flex h-14 items-center justify-between gap-3 border-b-4 pr-1 pl-4">
           {title && (
             <DialogPrimitive.Title className="min-w-0 truncate text-xl font-bold">
               {title}
@@ -33,14 +33,14 @@ const DialogContent: FC<ComponentProps<typeof DialogPrimitive.Popup>> = ({
           )}
           <DialogPrimitive.Close
             render={
-              <Button variant="ghost" className="border-text/40 rounded-none border-l-4">
+              <Button variant="ghost" className="border-border/40 rounded-none border-l-4">
                 <X />
               </Button>
             }
           />
         </div>
         {children && (
-          <div className="bg-hover/30 flex w-full min-w-0 flex-col gap-4 p-5 text-xl font-medium">
+          <div className="bg-panel-contrast/50 flex w-full min-w-0 flex-col gap-4 p-5 text-xl font-medium">
             {children}
           </div>
         )}
@@ -51,9 +51,4 @@ const DialogContent: FC<ComponentProps<typeof DialogPrimitive.Popup>> = ({
 
 const DialogDescription = DialogPrimitive.Description;
 
-export {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogDescription,
-};
+export { Dialog, DialogTrigger, DialogContent, DialogDescription };

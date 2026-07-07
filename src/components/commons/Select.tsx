@@ -17,7 +17,7 @@ const Select = SelectPrimitive.Root;
 const SelectTrigger = ({ placeholder, className, ...props }: SelectTriggerProps) => (
   <SelectPrimitive.Trigger
     className={cn(
-      'border-text/40 inline-flex min-w-0 items-center border-4 px-2 whitespace-nowrap',
+      'border-border/45 bg-panel text-text hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 inline-flex min-w-0 items-center rounded-none border-4 px-2 whitespace-nowrap transition-colors outline-none focus-visible:ring-[3px]',
       className,
     )}
     {...props}
@@ -46,7 +46,10 @@ const SelectContent = ({ children, className, ...props }: SelectContentProps) =>
       className="z-50 w-[var(--anchor-width)]"
     >
       <SelectPrimitive.Popup
-        className={cn('border-text/40 bg-primary w-full border-4', className)}
+        className={cn(
+          'border-border/70 bg-panel w-full border-4 shadow-[6px_6px_0_var(--color-shadow)]',
+          className,
+        )}
         {...props}
       >
         <SelectPrimitive.List className="max-h-[calc(var(--available-height)-0.5rem)] overflow-y-auto">
@@ -60,7 +63,7 @@ const SelectContent = ({ children, className, ...props }: SelectContentProps) =>
 const SelectItem = ({ children, className, ...props }: SelectItemProps) => (
   <SelectPrimitive.Item
     className={cn(
-      'hover:bg-text/40 grid w-full grid-cols-[2.5rem_1fr_2.5rem] items-center whitespace-nowrap',
+      'border-border/35 hover:bg-info-soft hover:text-info data-highlighted:bg-info-soft data-highlighted:text-info grid w-full grid-cols-[2.5rem_1fr_2.5rem] items-center border-b-4 whitespace-nowrap outline-none first:border-t-4 last:border-b-0',
       className,
     )}
     {...props}
@@ -76,8 +79,11 @@ const SelectItem = ({ children, className, ...props }: SelectItemProps) => (
 );
 
 const SelectGroup = ({ label, children, className, ...props }: SelectGroupProps) => (
-  <SelectPrimitive.Group className={className} {...props}>
-    <SelectPrimitive.GroupLabel className="bg-secondary w-full truncate text-center text-xl font-medium">
+  <SelectPrimitive.Group
+    className={cn('border-border/35 border-b-4 last:border-b-0', className)}
+    {...props}
+  >
+    <SelectPrimitive.GroupLabel className="bg-panel-header border-border/35 w-full truncate border-b-4 px-2 py-1 text-center text-xl font-bold">
       {label}
     </SelectPrimitive.GroupLabel>
     {children}

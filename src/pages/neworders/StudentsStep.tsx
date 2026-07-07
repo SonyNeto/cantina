@@ -50,22 +50,22 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) =>
   return isPending ? (
     <Loader />
   ) : (
-    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+    <div className="app-panel">
+      <div className="app-panel-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
         <Button variant={'ghost'} className="justify-self-start" disableHover onClick={onBack}>
           <ArrowLeft />
         </Button>
         <span className="justify-self-center text-center">Escolha um aluno</span>
         <span aria-hidden="true" />
       </div>
-      <div className="grid">
+      <div className="app-list">
         {students.map((student) => (
           <Button
             key={student.id}
             type="button"
             variant="ghost"
             size="lg"
-            className="bg-primary border-text/40 grid h-auto w-full grid-cols-[minmax(0,1fr)] justify-items-start rounded-none border-t-4 p-4 text-left text-xl whitespace-normal"
+            className="app-row app-row-action h-auto grid-cols-[minmax(0,1fr)] justify-items-start rounded-none text-left whitespace-normal"
             onClick={() => handleSelectStudent(student.id)}
           >
             <span>{student.name}</span>

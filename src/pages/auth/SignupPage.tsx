@@ -1,17 +1,17 @@
-import { useMutation } from "@tanstack/react-query";
-import type { FC } from "react";
-import { apiFetch } from "../../utils/api";
-import { Button } from "../../components/commons/Button";
-import { toast } from "sonner";
-import { Link, useNavigate } from "react-router";
-import ROUTES from "../../constants/routes";
+import { useMutation } from '@tanstack/react-query';
+import type { FC } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { Button } from '../../components/commons/Button';
+import ROUTES from '../../constants/routes';
+import { apiFetch } from '../../utils/api';
 
 export const SignupPage: FC = () => {
   const navigate = useNavigate();
 
-  const loginMutation = useMutation({
+  const signupMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const res = await apiFetch(`/signup`, {
+      const res = await apiFetch('/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -32,17 +32,17 @@ export const SignupPage: FC = () => {
     },
 
     onError: () => {
-      toast.error('Falha ao realizar cadastro')
+      toast.error('Falha ao realizar cadastro');
     },
   });
 
   return (
-    <div className="h-screen w-screen bg-secondary text-text text-2xl font-medium p-6">
-      <div className="flex bg-primary flex-col items-center gap-4 border-text/70 border-6 w-full h-full pt-[8rem] p-4">
-        <img src="/favicon.png" alt="Logo" className="w-32 h-32 mb-8" />
-        <span className="text-3xl font-bold text-center">Bem-vindo(a) à cantina</span>
+    <main className="bg-secondary flex min-h-screen w-full p-4 text-2xl font-medium sm:p-6">
+      <section className="border-border/70 bg-primary flex w-full flex-1 flex-col items-center justify-center gap-5 border-4 p-4 shadow-[6px_6px_0_var(--color-shadow)]">
+        <img src="/favicon.png" alt="Logo" className="mb-2 size-32" />
+        <h1 className="text-center text-3xl font-bold">Criar acesso</h1>
         <form
-          className="bg-primary border-text/40 border-4 flex flex-col h-fit items-center justify-between gap-2.5 rounded-none p-4"
+          className="border-border/60 bg-panel flex w-full max-w-md flex-col items-stretch gap-3 rounded-none border-4 p-4 shadow-[5px_5px_0_var(--color-shadow)]"
           onSubmit={(e) => {
             e.preventDefault();
 
@@ -50,30 +50,31 @@ export const SignupPage: FC = () => {
             const email = formData.get('email') as string;
             const password = formData.get('password') as string;
 
-            loginMutation.mutate({ email, password });
-          }}>
-            <input
-              name="email"
-              id={`login-email`}
-              type="email"
-              placeholder="E-mail"
-              className="border-text/40 w-full max-w-[21ch] min-w-0 truncate border-4 px-2"
-            />
-            <input
-              name="password"
-              id={`login-password`}
-              type="password"
-              placeholder="Senha"
-              className="border-text/40 w-full max-w-[21ch] min-w-0 truncate border-4 px-2"
-            />
-            <Button type="submit" variant="primary" size="md">
-              Cadastrar-se
-            </Button>
-            <Link to={ROUTES.LOGIN}>
-              Voltar para o login
-            </Link>
+            signupMutation.mutate({ email, password });
+          }}
+        >
+          <input
+            name="email"
+            id="signup-email"
+            type="email"
+            placeholder="E-mail"
+            className="app-input w-full"
+          />
+          <input
+            name="password"
+            id="signup-password"
+            type="password"
+            placeholder="Senha"
+            className="app-input w-full"
+          />
+          <Button type="submit" variant="primary" size="md" className="w-full">
+            Cadastrar-se
+          </Button>
+          <Link to={ROUTES.LOGIN} className="app-link text-center text-xl">
+            Voltar para o login
+          </Link>
         </form>
-      </div>
-    </div>
+      </section>
+    </main>
   );
-}
+};

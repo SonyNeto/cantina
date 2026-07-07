@@ -122,28 +122,28 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
     <Loader />
   ) : (
     <>
-      <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-        <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10">
+      <div className="app-panel">
+        <div className="app-panel-header-accent grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10">
           <Button variant={'ghost'} className="justify-self-start" disableHover onClick={onBack}>
             <ArrowLeft />
           </Button>
           <span className="justify-self-center text-center">Cardápio</span>
           <span aria-hidden="true" />
         </div>
-        <div className="border-text/40 text-text relative flex w-full items-center justify-end gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="app-total-bar justify-end [&_svg]:size-10 [&_svg]:shrink-0">
           <div className="flex gap-5">
             <span>Total: </span>
             <span>{`R$ ${total.toFixed(2)}`}</span>
           </div>
         </div>
-        <div className="grid">
+        <div className="app-list">
           {menuItems.map((item, idx) => {
             const quantity = getSelectedProductQuantity(item.id);
 
             return (
               <div
                 key={`orderitem-${item.label.trim().toLowerCase()}-${idx}`}
-                className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_7ch_2rem_2rem_1.5ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
+                className="app-row grid-cols-[minmax(0,1fr)_7ch_2.5rem_2.5rem_2ch]"
               >
                 <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                   <span>{item.label}</span>
@@ -174,7 +174,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
           type="submit"
           variant="primary"
           size="xl"
-          className="border-text-hover bg-text text-primary border-4"
+          className="border-border/70 shadow-[5px_5px_0_var(--color-shadow)]"
         >
           Concluir
         </Button>

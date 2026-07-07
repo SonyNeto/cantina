@@ -30,7 +30,7 @@ const PopoverContent = ({
 }: PopoverContentProps) => (
   <PopoverPrimitive.Portal>
     {backdrop && (
-      <PopoverPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/20 backdrop-blur-xs" />
+      <PopoverPrimitive.Backdrop className="bg-text/20 fixed inset-0 z-50 backdrop-blur-sm" />
     )}
     <PopoverPrimitive.Positioner
       align={align}
@@ -42,11 +42,15 @@ const PopoverContent = ({
       className={cn(
         'z-60',
         matchTriggerWidth && 'w-[var(--anchor-width)]',
-        centered && '!fixed !inset-0 flex items-center justify-center p-4 !transform-none',
+        centered && '!fixed !inset-0 flex !transform-none items-center justify-center p-4',
       )}
     >
       <PopoverPrimitive.Popup
-        className={cn('shadow-md outline-none', matchTriggerWidth && 'w-full', className)}
+        className={cn(
+          'border-border/60 bg-panel border-4 shadow-[6px_6px_0_var(--color-shadow)] outline-none',
+          matchTriggerWidth && 'w-full',
+          className,
+        )}
         {...props}
       />
     </PopoverPrimitive.Positioner>

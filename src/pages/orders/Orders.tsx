@@ -127,89 +127,85 @@ export const Orders: FC = () => {
   return isPending ? (
     <Loader />
   ) : (
-    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary flex w-full flex-col items-center justify-center px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <span className="text-center">Em preparação</span>
-        <Cooking />
-      </div>
+    <div className="app-page">
+      <div className="app-panel">
+        <div className="app-panel-header-accent flex flex-col items-center justify-center [&_svg]:size-10 [&_svg]:shrink-0">
+          <span className="text-center">Em preparação</span>
+          <Cooking />
+        </div>
 
-      <div className="grid">
-        {cookingOrders.map((order) => {
-          const student = order.student;
-          if (!student) return;
+        <div className="app-list">
+          {cookingOrders.map((order) => {
+            const student = order.student;
+            if (!student) return;
 
-          return (
-            <div
-              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_10ch_5ch] items-center gap-5 border-t-4 px-4 py-3 text-xl"
-              key={order.id}
-            >
-              <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                <span>{order.product.label}</span>
+            return (
+              <div className="app-row grid-cols-[minmax(0,1fr)_10ch_5ch] gap-5" key={order.id}>
+                <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                  <span>{order.product.label}</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-center">{order.student.name}</span>
+                  <span className="text-center">{order.schoolClass.label}</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 justify-self-end">
+                  <Button size="sm" onClick={() => updateOrderStatus.mutate(order.id)}>
+                    <Check />
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      deleteOrder.mutate(order.id);
+                      toast.success('Item removido com sucesso!');
+                    }}
+                  >
+                    <X />
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-col items-center">
-                <span className="text-center">{order.student.name}</span>
-                <span className="text-center">{order.schoolClass.label}</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 justify-self-end">
-                <Button size="sm" onClick={() => updateOrderStatus.mutate(order.id)}>
-                  <Check />
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    deleteOrder.mutate(order.id);
-                    toast.success('Item removido com sucesso!');
-                  }}
-                >
-                  <X />
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      <div className="bg-tertiary flex w-full flex-col items-center justify-center border-t-4 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <span className="text-center">Pronto</span>
-        <Check />
-      </div>
+        <div className="border-border/40 bg-success-soft text-success flex w-full flex-col items-center justify-center border-b-4 px-4 py-4 text-xl font-bold [&_svg]:size-10 [&_svg]:shrink-0">
+          <span className="text-center">Pronto</span>
+          <Check />
+        </div>
 
-      <div className="grid">
-        {readyOrders.map((order) => {
-          const student = order.student;
-          if (!student) return;
+        <div className="app-list">
+          {readyOrders.map((order) => {
+            const student = order.student;
+            if (!student) return;
 
-          return (
-            <div
-              className="border-text/40 text-text grid w-full grid-cols-[minmax(0,1fr)_5ch_7ch] items-center gap-5 border-t-4 px-4 py-3 text-xl"
-              key={order.id}
-            >
-              <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                <span>{order.product.label}</span>
+            return (
+              <div className="app-row grid-cols-[minmax(0,1fr)_5ch_7ch] gap-5" key={order.id}>
+                <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                  <span>{order.product.label}</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-center">{order.student.name}</span>
+                  <span className="text-center">{order.schoolClass.label}</span>
+                </div>
+                <div className="flex flex-col items-center gap-1 justify-self-end">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      postRegister.mutate({
+                        product: order.product,
+                        created_at: order.created_at,
+                        studentId: order.student.id,
+                        total: order.total,
+                      });
+                      deleteOrder.mutate(order.id);
+                    }}
+                  >
+                    <Download />
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-col items-center">
-                <span className="text-center">{order.student.name}</span>
-                <span className="text-center">{order.schoolClass.label}</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 justify-self-end">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    postRegister.mutate({
-                      product: order.product,
-                      created_at: order.created_at,
-                      studentId: order.student.id,
-                      total: order.total,
-                    });
-                    deleteOrder.mutate(order.id);
-                  }}
-                >
-                  <Download />
-                </Button>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

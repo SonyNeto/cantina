@@ -16,7 +16,7 @@ const getWorkspaces = async (): Promise<WorkspacesResponse> => {
 
 export const Layout: FC = () => {
   const setDefaultWorkspace = useWorkspaceStore.getState().setDefaultWorkspace;
-  
+
   const { data: userWorkspaces } = useQuery({
     queryKey: ['workspaces'],
     queryFn: getWorkspaces,
@@ -30,9 +30,9 @@ export const Layout: FC = () => {
   }, [setDefaultWorkspace, userWorkspaces]);
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-auto">
+    <div className="bg-primary flex min-h-screen w-full flex-col overflow-x-hidden">
       <NavBar />
-      <main>
+      <main className="w-full flex-1">
         <Outlet />
       </main>
     </div>

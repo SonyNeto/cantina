@@ -109,14 +109,11 @@ export const ResponsibleDetails: FC = () => {
 
   const responsibleStudents = responsibleTotals?.studentsTotals ?? [];
 
-  const classesByShift = schoolClasses.reduce<Record<string, SchoolClass[]>>(
-    (acc, schoolClass) => {
-      const shiftLabel = schoolClass.shiftLabel ?? schoolClass.shiftId;
-      acc[shiftLabel] = [...(acc[shiftLabel] ?? []), schoolClass];
-      return acc;
-    },
-    {},
-  );
+  const classesByShift = schoolClasses.reduce<Record<string, SchoolClass[]>>((acc, schoolClass) => {
+    const shiftLabel = schoolClass.shiftLabel ?? schoolClass.shiftId;
+    acc[shiftLabel] = [...(acc[shiftLabel] ?? []), schoolClass];
+    return acc;
+  }, {});
 
   if (!responsibleId) {
     return <div>Respnsável não encontrado</div>;
@@ -125,115 +122,117 @@ export const ResponsibleDetails: FC = () => {
   return isPending ? (
     <Loader />
   ) : (
-    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center gap-2.5 px-4 py-4 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <Link
-          key="back-registers"
-          to={{ pathname: ROUTES.REGISTERS.ROOT, search: location.search }}
-          className="z-30 justify-self-start"
-        >
-          <ArrowLeft />
-        </Link>
-        <span className="justify-self-center text-center">{`Alunos de ${responsibleTotals?.responsibleName}`}</span>
-        <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
-      </div>
-
-      <div className="grid">
-        {responsibleStudents.map((student) => (
+    <div className="app-page">
+      <div className="app-panel">
+        <div className="app-panel-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
           <Link
-            key={student.id}
-            to={{
-              pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
-                responsibleTotals?.responsibleId ?? responsibleId,
-                student.id,
-              ),
-              search: location.search,
-            }}
-            className="border-text/40 text-text z-30 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 border-t-4 px-4 py-3 text-xl"
+            key="back-registers"
+            to={{ pathname: ROUTES.REGISTERS.ROOT, search: location.search }}
+            className="z-30 justify-self-start"
           >
-            <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-              <User />
-              <span>{student.name}</span>
-            </div>
-            <span className="text-center">{student.schoolClassLabel}</span>
-            <span className="text-right tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
+            <ArrowLeft />
           </Link>
-        ))}
-      </div>
+          <span className="justify-self-center text-center">{`Alunos de ${responsibleTotals?.responsibleName}`}</span>
+          <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
+        </div>
 
-      {isAdding ? (
-        <form
-          className="bg-hover/30 border-text/40 z-50 flex w-full items-center justify-between gap-2.5 rounded-none border-t-4 p-4 text-xl font-medium"
-          onSubmit={(e) => {
-            e.preventDefault();
-
-            const formData = new FormData(e.currentTarget);
-            const name = formData.get('name') as string;
-            const classId = formData.get('classId') as string;
-
-            createStudent.mutate({ name, classId });
-            setIsAdding(false);
-          }}
-        >
-          <div className="flex min-w-0 flex-col items-center gap-2.5">
-            <input
-              name="name"
-              id={`add-student-name`}
-              type="text"
-              placeholder="Nome do aluno"
-              className="border-text/40 w-full max-w-[21ch] min-w-0 truncate border-4 px-2"
-            />
-            <Select
-              name="classId"
-              id="add-student-class"
-              items={schoolClasses.map((schoolClass) => ({
-                label: schoolClass.label,
-                value: schoolClass.id,
-              }))}
+        <div className="app-list">
+          {responsibleStudents.map((student) => (
+            <Link
+              key={student.id}
+              to={{
+                pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
+                  responsibleTotals?.responsibleId ?? responsibleId,
+                  student.id,
+                ),
+                search: location.search,
+              }}
+              className="app-row app-row-action z-30 grid-cols-[minmax(0,1fr)_7ch_7ch]"
             >
-              <SelectTrigger
-                placeholder="Selecione uma turma"
-                className="w-full max-w-[21ch] min-w-0"
-              />
-              <SelectContent className="">
-                {!isSchoolClassesPending &&
-                  Object.entries(classesByShift).map(([shiftLabel, classes]) => (
-                    <SelectGroup label={shiftLabel} key={shiftLabel}>
-                      {classes.map((schoolClass) => (
-                        <SelectItem value={schoolClass.id} key={schoolClass.id}>
-                          {schoolClass.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Button type="submit" variant="primary" size="sm">
-              <Check />
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => setIsAdding(false)}>
-              <X />
-            </Button>
-          </div>
-        </form>
-      ) : (
-        <Button
-          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 px-4 py-3 text-xl"
-          variant="ghost"
-          size="lg"
-          disabled={isAdding}
-          onClick={() => setIsAdding(true)}
-        >
-          <UserPlus />
-          Adicionar aluno
-        </Button>
-      )}
+              <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                <User />
+                <span>{student.name}</span>
+              </div>
+              <span className="text-center">{student.schoolClassLabel}</span>
+              <span className="text-right tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
+            </Link>
+          ))}
+        </div>
 
-      <div className="border-text/40 text-text relative grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 border-t-4 p-2 text-xl [&_svg]:size-10 [&_svg]:shrink-0">
-        <span className="text-right">Total: </span>
-        <span className="text-right tabular-nums">{`R$${(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
+        {isAdding ? (
+          <form
+            className="app-form-row z-50 flex justify-between rounded-none"
+            onSubmit={(e) => {
+              e.preventDefault();
+
+              const formData = new FormData(e.currentTarget);
+              const name = formData.get('name') as string;
+              const classId = formData.get('classId') as string;
+
+              createStudent.mutate({ name, classId });
+              setIsAdding(false);
+            }}
+          >
+            <div className="flex min-w-0 flex-col items-center gap-2.5">
+              <input
+                name="name"
+                id={`add-student-name`}
+                type="text"
+                placeholder="Nome do aluno"
+                className="app-input w-full max-w-[21ch] truncate"
+              />
+              <Select
+                name="classId"
+                id="add-student-class"
+                items={schoolClasses.map((schoolClass) => ({
+                  label: schoolClass.label,
+                  value: schoolClass.id,
+                }))}
+              >
+                <SelectTrigger
+                  placeholder="Selecione uma turma"
+                  className="w-full max-w-[21ch] min-w-0"
+                />
+                <SelectContent className="">
+                  {!isSchoolClassesPending &&
+                    Object.entries(classesByShift).map(([shiftLabel, classes]) => (
+                      <SelectGroup label={shiftLabel} key={shiftLabel}>
+                        {classes.map((schoolClass) => (
+                          <SelectItem value={schoolClass.id} key={schoolClass.id}>
+                            {schoolClass.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Button type="submit" variant="primary" size="sm">
+                <Check />
+              </Button>
+              <Button variant="primary" size="sm" onClick={() => setIsAdding(false)}>
+                <X />
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <Button
+            className="app-row app-row-action !h-auto !w-full justify-center gap-2.5 rounded-none py-4"
+            variant="ghost"
+            size="lg"
+            disabled={isAdding}
+            onClick={() => setIsAdding(true)}
+          >
+            <UserPlus />
+            Adicionar aluno
+          </Button>
+        )}
+
+        <div className="app-total-bar grid-cols-[minmax(0,1fr)_8ch] [&_svg]:size-10 [&_svg]:shrink-0">
+          <span className="text-right">Total: </span>
+          <span className="text-right tabular-nums">{`R$${(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
+        </div>
       </div>
     </div>
   );

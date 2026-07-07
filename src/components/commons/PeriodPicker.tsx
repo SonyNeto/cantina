@@ -44,11 +44,16 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
   };
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className={className}>
+      <PopoverTrigger
+        className={cn(
+          'border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 size-12 place-items-center self-center justify-self-end rounded-none border-4 transition-colors outline-none focus-visible:ring-[3px] [&_svg]:size-7',
+          className,
+        )}
+      >
         <Calendar2 />
       </PopoverTrigger>
-      <PopoverContent className="bg-primary border-text w-48 border-4 text-xl">
-        <div className="bg-secondary border-text/40 grid grid-cols-[1fr_2fr_1fr] items-center gap-2 border-b-4 p-2">
+      <PopoverContent className="w-52 text-xl">
+        <div className="border-border/40 bg-panel-header grid grid-cols-[1fr_2fr_1fr] items-center gap-2 border-b-4 p-2">
           <Button
             className="justify-self-start"
             variant="ghost"
@@ -67,7 +72,7 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
             <ArrowRight />
           </Button>
         </div>
-        <div className="grid grid-cols-3 items-center gap-2">
+        <div className="bg-panel grid grid-cols-3 items-center gap-2 p-2">
           {MONTHS.map((month, index) => {
             const isSelected = value?.month === index && value?.year === displayYear;
             const isCurrentMonth =
@@ -80,8 +85,8 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
                 size="md"
                 className={cn(
                   'p-2',
-                  isSelected && 'border-text/40 bg-secondary border-4',
-                  !isSelected && isCurrentMonth && 'text-red',
+                  isSelected && 'border-border/40 bg-accent text-primary border-4',
+                  !isSelected && isCurrentMonth && 'text-accent',
                 )}
                 onClick={() => handleMonthSelect(index)}
               >

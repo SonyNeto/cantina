@@ -103,182 +103,184 @@ export const Menu: FC = () => {
   return isPending ? (
     <Loader />
   ) : (
-    <div className="border-text m-6 flex h-fit flex-col overflow-hidden border-4">
-      <div className="bg-tertiary grid w-full place-items-center gap-2.5 px-6 py-4 text-xl">
-        <span className="text-center">Cardápio</span>
-      </div>
+    <div className="app-page">
+      <div className="app-panel">
+        <div className="app-panel-header-accent place-items-center">
+          <span className="text-center">Cardápio</span>
+        </div>
 
-      <Accordion>
-        {menuItems.map((item, idx) => {
-          const isEditing = editingIndex === idx;
+        <Accordion>
+          {menuItems.map((item, idx) => {
+            const isEditing = editingIndex === idx;
 
-          return (
-            <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
-              <div className="grid">
-                {isEditing ? (
-                  <form
-                    className="bg-hover/30 border-text/40 z-50 col-start-1 row-start-1 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-4 py-3 text-xl font-medium whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
-                    id={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-
-                      const formData = new FormData(e.currentTarget);
-                      const label = formData.get('label') as string;
-                      const price = Number(formData.get('price'));
-
-                      updateMenuItem.mutate({ id: item.id, label, price });
-                      setEditingIndex(null);
-                    }}
-                  >
-                    <div className="inline-flex min-w-0 items-center gap-2.5">
-                      <input
-                        id={`name-input-${item.label.trim().toLowerCase()}-${idx}`}
-                        name="label"
-                        type="text"
-                        defaultValue={`${item.label}`}
-                        className="border-text/40 w-full max-w-[12ch] min-w-0 truncate border-4 px-2"
-                      />
-                    </div>
-                    <div className="inline-flex min-w-0 items-center gap-1">
-                      <span>R$</span>
-                      <input
-                        id={`price-input-${item.label.trim().toLowerCase()}-${idx}`}
-                        name="price"
-                        type="number"
-                        step="0.01"
-                        defaultValue={`${item.price.toFixed(2)}`}
-                        className="border-text/40 w-full max-w-[6ch] min-w-0 border-4 px-2 text-end"
-                      />
-                    </div>
-                  </form>
-                ) : (
-                  <AccordionTrigger
-                    render={
-                      <Button
-                        size="lg"
-                        variant="ghost"
-                        className="bg-primary border-text/40 col-start-1 row-start-1 w-full justify-between rounded-none border-t-4 px-4 py-8"
-                        disabled={editingIndex !== null}
-                      >
-                        <div className="inline-flex items-center gap-2.5">
-                          <span>{item.label}</span>
-                        </div>
-                        <span>{`R$${item.price.toFixed(2)}`}</span>
-                      </Button>
-                    }
-                  />
-                )}
-              </div>
-
-              <AccordionContent>
-                <div className="flex items-center gap-2.5">
+            return (
+              <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
+                <div className="grid">
                   {isEditing ? (
-                    <div className="flex flex-col gap-2.5">
-                      <Button
-                        type="submit"
-                        form={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
-                        size="lg"
-                        variant="primary"
-                        className="w-40 justify-start p-2"
-                      >
-                        <Check />
-                        <span>Salvar</span>
-                      </Button>
+                    <form
+                      className="app-form-row z-50 col-start-1 row-start-1 flex min-w-0 justify-between overflow-hidden rounded-none whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
+                      id={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
+                      onSubmit={(e) => {
+                        e.preventDefault();
 
+                        const formData = new FormData(e.currentTarget);
+                        const label = formData.get('label') as string;
+                        const price = Number(formData.get('price'));
+
+                        updateMenuItem.mutate({ id: item.id, label, price });
+                        setEditingIndex(null);
+                      }}
+                    >
+                      <div className="inline-flex min-w-0 items-center gap-2.5">
+                        <input
+                          id={`name-input-${item.label.trim().toLowerCase()}-${idx}`}
+                          name="label"
+                          type="text"
+                          defaultValue={`${item.label}`}
+                          className="app-input w-full max-w-[12ch] truncate"
+                        />
+                      </div>
+                      <div className="inline-flex min-w-0 items-center gap-1">
+                        <span>R$</span>
+                        <input
+                          id={`price-input-${item.label.trim().toLowerCase()}-${idx}`}
+                          name="price"
+                          type="number"
+                          step="0.01"
+                          defaultValue={`${item.price.toFixed(2)}`}
+                          className="app-input w-full max-w-[6ch] text-end"
+                        />
+                      </div>
+                    </form>
+                  ) : (
+                    <AccordionTrigger
+                      render={
+                        <Button
+                          size="lg"
+                          variant="ghost"
+                          className="app-row app-row-action col-start-1 row-start-1 h-auto justify-between rounded-none py-6"
+                          disabled={editingIndex !== null}
+                        >
+                          <div className="inline-flex items-center gap-2.5">
+                            <span>{item.label}</span>
+                          </div>
+                          <span>{`R$${item.price.toFixed(2)}`}</span>
+                        </Button>
+                      }
+                    />
+                  )}
+                </div>
+
+                <AccordionContent>
+                  <div className="flex items-center gap-2.5">
+                    {isEditing ? (
+                      <div className="flex flex-col gap-2.5">
+                        <Button
+                          type="submit"
+                          form={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
+                          size="lg"
+                          variant="primary"
+                          className="w-40 justify-start p-2"
+                        >
+                          <Check />
+                          <span>Salvar</span>
+                        </Button>
+
+                        <Button
+                          size="lg"
+                          variant="primary"
+                          className="w-40 justify-start p-2"
+                          onClick={() => setEditingIndex(null)}
+                        >
+                          <X />
+                          <span>Cancelar</span>
+                        </Button>
+                      </div>
+                    ) : (
                       <Button
                         size="lg"
                         variant="primary"
-                        className="w-40 justify-start p-2"
-                        onClick={() => setEditingIndex(null)}
+                        className="p-2"
+                        onClick={() => setEditingIndex(idx)}
                       >
-                        <X />
-                        <span>Cancelar</span>
+                        <PenSquare />
+                        <span>Editar</span>
                       </Button>
-                    </div>
-                  ) : (
+                    )}
                     <Button
                       size="lg"
                       variant="primary"
                       className="p-2"
-                      onClick={() => setEditingIndex(idx)}
+                      onClick={() => {
+                        deleteMenuItem.mutate(item.id);
+                        setEditingIndex(null);
+                      }}
                     >
-                      <PenSquare />
-                      <span>Editar</span>
+                      <TrashCan />
+                      <span>Excluir</span>
                     </Button>
-                  )}
-                  <Button
-                    size="lg"
-                    variant="primary"
-                    className="p-2"
-                    onClick={() => {
-                      deleteMenuItem.mutate(item.id);
-                      setEditingIndex(null);
-                    }}
-                  >
-                    <TrashCan />
-                    <span>Excluir</span>
-                  </Button>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
-      {editingIndex !== -1 ? (
-        <Button
-          size="lg"
-          className="border-text/40 !h-full !w-full justify-center gap-2.5 rounded-none border-t-4 px-4 py-3 text-xl"
-          variant="ghost"
-          disabled={editingIndex !== null}
-          onClick={() => setEditingIndex(-1)}
-        >
-          <Plus />
-          Adicionar item
-        </Button>
-      ) : (
-        <form
-          className="bg-hover/30 border-text/40 z-50 flex w-full min-w-0 items-center justify-between gap-2.5 overflow-hidden rounded-none border-t-4 px-6 py-3 text-xl font-medium whitespace-nowrap"
-          onSubmit={(e) => {
-            e.preventDefault();
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+        {editingIndex !== -1 ? (
+          <Button
+            size="lg"
+            className="app-row app-row-action !h-auto !w-full justify-center gap-2.5 rounded-none border-b-0 py-4"
+            variant="ghost"
+            disabled={editingIndex !== null}
+            onClick={() => setEditingIndex(-1)}
+          >
+            <Plus />
+            Adicionar item
+          </Button>
+        ) : (
+          <form
+            className="app-form-row z-50 flex min-w-0 justify-between overflow-hidden rounded-none border-b-0 px-6 whitespace-nowrap"
+            onSubmit={(e) => {
+              e.preventDefault();
 
-            const formData = new FormData(e.currentTarget);
-            const label = formData.get('label') as string;
-            const price = Number(formData.get('price'));
+              const formData = new FormData(e.currentTarget);
+              const label = formData.get('label') as string;
+              const price = Number(formData.get('price'));
 
-            createMenuItem.mutate({ label, price });
-            setEditingIndex(null);
-          }}
-        >
-          <div className="min-w-0">
-            <input
-              name="label"
-              id={`add-item-name`}
-              type="text"
-              placeholder="Nome do Item"
-              className="border-text/40 w-full max-w-[12ch] min-w-0 truncate border-4 px-2"
-            />
-          </div>
-          <div className="inline-flex min-w-0 items-center gap-1">
-            <span>R$</span>
-            <input
-              name="price"
-              id={`add-item-price`}
-              type="number"
-              step="0.01"
-              placeholder="Preço"
-              className="border-text/40 w-full max-w-[6ch] min-w-0 border-4 px-2 text-end"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Button type="submit" variant="primary" size="sm">
-              <Check />
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => setEditingIndex(null)}>
-              <X />
-            </Button>
-          </div>
-        </form>
-      )}
+              createMenuItem.mutate({ label, price });
+              setEditingIndex(null);
+            }}
+          >
+            <div className="min-w-0">
+              <input
+                name="label"
+                id={`add-item-name`}
+                type="text"
+                placeholder="Nome do Item"
+                className="app-input w-full max-w-[12ch] truncate"
+              />
+            </div>
+            <div className="inline-flex min-w-0 items-center gap-1">
+              <span>R$</span>
+              <input
+                name="price"
+                id={`add-item-price`}
+                type="number"
+                step="0.01"
+                placeholder="Preço"
+                className="app-input w-full max-w-[6ch] text-end"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Button type="submit" variant="primary" size="sm">
+                <Check />
+              </Button>
+              <Button variant="primary" size="sm" onClick={() => setEditingIndex(null)}>
+                <X />
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 };

@@ -13,20 +13,20 @@ const DrawerContent: FC<ComponentProps<typeof DrawerPrimitive.Content>> = ({
   ...props
 }) => (
   <DrawerPrimitive.Portal>
-    <DrawerPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/10 backdrop-blur-xs" />
+    <DrawerPrimitive.Backdrop className="bg-text/20 fixed inset-0 z-50 backdrop-blur-sm" />
     <DrawerPrimitive.Viewport className="fixed inset-0 z-50">
       <DrawerPrimitive.Popup
         className={cn(
-          'bg-secondary fixed top-0 left-0 z-50 flex h-screen w-full max-w-64 flex-col shadow-lg',
+          'border-border/70 bg-panel fixed top-0 left-0 z-50 flex h-screen w-full max-w-72 flex-col border-r-4 shadow-[6px_0_0_var(--color-shadow)]',
           'data-open:animate-drawer-in',
           'data-closed:animate-drawer-out',
         )}
       >
         <DrawerPrimitive.Content className={className} {...props}>
-          <div className="bg-tertiary border-text/40 flex justify-end border-b-4 p-4">
+          <div className="border-border/40 bg-panel-header flex justify-end border-b-4 p-3">
             <DrawerPrimitive.Close
               render={
-                <Button variant="ghost" size="lg" className="rounded-full hover:text-red-600">
+                <Button variant="ghost" size="lg" className="hover:text-danger rounded-none">
                   <ArrowBarLeft />
                 </Button>
               }

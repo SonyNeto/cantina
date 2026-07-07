@@ -4,20 +4,20 @@ import { cn } from '../../utils/functions';
 
 const variants = {
   primary: {
-    base: 'bg-secondary text-text border-4 border-text/40',
-    hover: 'hover:bg-hover hover:text-text-hover',
+    base: 'bg-accent text-primary border-4 border-border/70',
+    hover: 'hover:bg-accent-hover hover:text-primary',
   },
   ghost: {
     base: 'text-text',
-    hover: 'hover:bg-hover hover:text-text-hover',
+    hover: 'hover:bg-info-soft hover:text-info',
   },
   outlined: {
-    base: 'border border-text/40 text-text',
+    base: 'border-4 border-border/45 bg-panel text-text',
     hover: 'hover:bg-hover hover:text-text-hover',
   },
   danger: {
-    base: 'bg-red-100 text-red-700',
-    hover: 'hover:bg-red-200 hover:text-red-900',
+    base: 'bg-danger-soft text-danger border-4 border-danger/60',
+    hover: 'hover:bg-danger hover:text-primary',
   },
 };
 
@@ -49,7 +49,7 @@ export const Button: FC<Props> = ({
       variants[variant].base,
       !disableHover && variants[variant].hover,
       sizes[size],
-      'inline-flex z-30 cursor-pointer items-center justify-center rounded font-medium whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+      'z-30 inline-flex cursor-pointer items-center justify-center rounded-none font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-accent/35 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
       className,
     ),
     ...(nativeButton ? { type: 'button' } : {}),

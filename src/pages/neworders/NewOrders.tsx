@@ -71,9 +71,9 @@ export const NewOrders: FC = () => {
   }
 
   return (
-    <div className="flex flex-col justify-center">
+    <div className="app-page">
       <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
           {step === STEPS.SHIFTS && (
             <ShiftsStep
               onNext={(selectedShiftId) => {
