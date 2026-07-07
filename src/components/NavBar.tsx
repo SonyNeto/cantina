@@ -1,8 +1,8 @@
 import { useState, type FC } from 'react';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerSwipeArea } from './commons/Drawer';
-import { Menu, UserPlus } from 'pixelarticons/react';
+import { Logout, Menu } from 'pixelarticons/react';
 import { Button } from './commons/Button';
-import { Link, useNavigate } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import NAVMENU from '../constants/navmenu.ts';
 import { NotificationBadge } from './commons/NotificationBadge.tsx';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -12,7 +12,6 @@ import ROUTES from '../constants/routes.ts';
 import { toast } from 'sonner';
 import { WorkspaceSelect } from './WorkspaceSelect.tsx';
 import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
-import { Dialog, DialogContent, DialogTrigger } from './commons/Dialog.tsx';
 
 type OrderWithDetails = {
   id: string;
@@ -43,8 +42,7 @@ export const NavBar: FC = () => {
   const navigate = useNavigate();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
-  const [inviteLink, setInviteLink] = useState<string>('');
-  
+
   const { data: orders = [], isPending } = useQuery({
     queryKey: ['orderItems', workspaceId],
     queryFn: getOrdersWithDetails,
@@ -76,34 +74,6 @@ export const NavBar: FC = () => {
     },
   });
 
-  const getInviteToken = useMutation({
-    mutationFn: async () => {
-      const res = await workspaceApiFetch('/invites', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Falha criar convite');
-      }
-
-      return res.json();
-    },
-
-    onSuccess: (data) => {
-      const token = data.token;
-      const link = `${window.location.origin}/invite/${token}`;
-
-      setInviteLink(link);
-    },
-
-    onError: () => {
-      toast.error('Falha criar convite');
-    },
-  });
-
   const totalActiveOrders = orders.filter((order) => order.status === 'cooking').length;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -112,69 +82,49 @@ export const NavBar: FC = () => {
       <Drawer swipeDirection="right" open={isOpen} onOpenChange={setIsOpen}>
         <DrawerSwipeArea
           swipeDirection="right"
-          className="fixed top-0 left-0 z-10 h-screen w-[10vw]"
+          className="fixed top-0 left-0 z-10 h-screen w-5 sm:w-8"
         />
-        <div className="bg-secondary border-text/40 sticky top-0 left-0 z-50 flex w-screen flex-col flex-row justify-between border-b-4 p-4">
+        <div className="border-border/35 bg-panel-header sticky top-0 left-0 z-50 flex h-[4.5rem] w-full items-center justify-between border-b-4 px-4 shadow-[0_4px_0_var(--color-shadow)]">
           <DrawerTrigger
             render={
-              <Button size="lg" className="z-50 self-start rounded-full" variant="ghost">
+              <Button size="lg" className="z-50 rounded-none" variant="ghost">
                 <Menu />
               </Button>
             }
           ></DrawerTrigger>
 
-          <DrawerContent className="border-text/40 flex h-full flex-col border-r-4">
+          <DrawerContent className="flex h-full flex-col">
             <WorkspaceSelect />
-            <Dialog>
-              <DialogTrigger
-                render={
-                  <Button
-                    size="md"
-                    variant="ghost"
-                    className="border-text/40 inline-flex rounded-none border-b-4"
-                    onClick={() => getInviteToken.mutate()}
-                  />
-                }
-              >
-                <UserPlus />
-                <span>Convidar membro</span>
-              </DialogTrigger>
-              <DialogContent title="Convidar membro">
-                <input
-                  type="text"
-                  value={inviteLink}
-                  readOnly
-                  className="border-text/40 bg-primary text-text placeholder:text-text/50 h-12 w-full min-w-0 border-4 px-3 text-xl outline-none focus-visible:ring-[3px]"
-                />
-                <Button
-                  size="md"
-                  variant="primary"
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(inviteLink);
-                    toast.success('Link copiado');
-                  }}
-                >
-                  Copiar link
-                </Button>
-              </DialogContent>
-            </Dialog>
             {NAVMENU.ITEMS.map((item, idx) => {
               const pedidos = item.label === 'Pedidos';
 
               return (
-                <Link
+                <NavLink
                   key={`navmenu-${item.label.trim().toLowerCase()}-${idx}`}
                   to={item.route}
-                  className="border-text/40 hover:bg-hover text-text hover:text-text-hover relative inline-flex w-full items-center gap-2.5 border-b-4 p-4 text-xl whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
+                  className={({ isActive }) =>
+                    [
+                      'border-border/35 relative inline-flex w-full items-center gap-2.5 border-b-4 px-4 py-4 text-xl whitespace-nowrap transition-colors outline-none [&_svg]:size-9 [&_svg]:shrink-0',
+                      isActive
+                        ? 'bg-info-soft text-info'
+                        : 'text-text hover:bg-info-soft hover:text-info focus-visible:bg-info-soft focus-visible:text-info',
+                    ].join(' ')
+                  }
                   onClick={() => setIsOpen(false)}
                 >
                   <item.icon width={12} height={12} />
                   {item.label}
                   {pedidos && <NotificationBadge count={totalActiveOrders} />}
-                </Link>
+                </NavLink>
               );
             })}
-            <Button variant="danger" size="xl" className="self-end w-full rounded-none border-b-4 border-text/40" onClick={() => logoutMutation.mutate()}>
+            <Button
+              variant="ghost"
+              size="lg"
+              className="text-danger hover:bg-danger-soft hover:text-danger mt-auto w-full justify-start rounded-none px-4 py-4 text-xl [&_svg]:size-9"
+              onClick={() => logoutMutation.mutate()}
+            >
+              <Logout />
               Fazer logout
             </Button>
           </DrawerContent>
