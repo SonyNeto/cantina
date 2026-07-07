@@ -12,6 +12,7 @@ import ROUTES from '../constants/routes.ts';
 import { toast } from 'sonner';
 import { WorkspaceSelect } from './WorkspaceSelect.tsx';
 import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
+import { canAccessWorkspaceRole } from '../utils/workspaceAccess.ts';
 
 type OrderWithDetails = {
   id: string;
@@ -41,6 +42,7 @@ export const NavBar: FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
+  const workspaceRole = useWorkspaceStore((state) => state.workspace?.role);
   const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
 
   const { data: orders = [], isPending } = useQuery({
@@ -95,7 +97,9 @@ export const NavBar: FC = () => {
 
           <DrawerContent className="flex h-full flex-col">
             <WorkspaceSelect />
-            {NAVMENU.ITEMS.map((item, idx) => {
+            {NAVMENU.ITEMS.filter((item) =>
+              canAccessWorkspaceRole(workspaceRole, item.accessLevel),
+            ).map((item, idx) => {
               const pedidos = item.label === 'Pedidos';
 
               return (

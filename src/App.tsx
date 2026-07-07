@@ -13,6 +13,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { ProtectedRoute } from './pages/auth/ProtectedRoute';
 import { Invites } from './pages/invites/Invites';
+import { ProtectedAdminRoute } from './pages/auth/ProtectedAdminRoute';
 
 const queryClient = new QueryClient();
 
@@ -30,10 +31,12 @@ function App() {
             <Route path={ROUTES.HOME} element={<NewOrders />} />
             <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
             <Route path={ROUTES.ORDERS} element={<Orders />} />
-            <Route path={ROUTES.MENU} element={<Menu />} />
-            <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
-            <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
-            <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
+            <Route element={<ProtectedAdminRoute />}>
+              <Route path={ROUTES.MENU} element={<Menu />} />
+              <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
+              <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
+              <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

@@ -8,6 +8,7 @@ import { Button } from './commons/Button';
 import { Dialog, DialogContent, DialogTrigger } from './commons/Dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger } from './commons/Select';
 import { useWorkspaceStore, type Workspace } from '../stores/useWorkspaceStore';
+import { canManageWorkspace } from '../utils/workspaceAccess';
 
 type WorkspacesResponse = {
   workspaces: Workspace[];
@@ -29,6 +30,7 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace);
   const setDefaultWorkspace = useWorkspaceStore.getState().setDefaultWorkspace;
   const [inviteLink, setInviteLink] = useState<string>('');
+  const canInviteMembers = canManageWorkspace(selectedWorkspace?.role);
 
   const { data: userWorkspaces, isPending } = useQuery({
     queryKey: ['workspaces'],
@@ -183,37 +185,38 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
         </DialogContent>
       </Dialog>
 
-      <Dialog>
-        <DialogTrigger
-          render={
+      {canInviteMembers && (
+        <Dialog>
+          <DialogTrigger
+            render={
+              <Button
+                size="md"
+                variant="ghost"
+                className="text-muted hover:bg-accent-soft hover:text-accent grid h-12 w-full grid-cols-[2.5rem_minmax(0,1fr)] rounded-none px-3"
+                onClick={() => getInviteToken.mutate()}
+              />
+            }
+          >
+            <UserPlus className="col-start-1 justify-self-end" />
+            <span className="col-start-2 min-w-0 truncate text-center text-lg font-medium">
+              Convidar membro
+            </span>
+          </DialogTrigger>
+          <DialogContent title="Convidar membro">
+            <input type="text" value={inviteLink} readOnly className="app-input w-full" />
             <Button
               size="md"
-              variant="ghost"
-              disabled={!selectedWorkspace}
-              className="text-muted hover:bg-accent-soft hover:text-accent grid h-12 w-full grid-cols-[2.5rem_minmax(0,1fr)] rounded-none px-3"
-              onClick={() => getInviteToken.mutate()}
-            />
-          }
-        >
-          <UserPlus className="col-start-1 justify-self-end" />
-          <span className="col-start-2 min-w-0 truncate text-center text-lg font-medium">
-            Convidar membro
-          </span>
-        </DialogTrigger>
-        <DialogContent title="Convidar membro">
-          <input type="text" value={inviteLink} readOnly className="app-input w-full" />
-          <Button
-            size="md"
-            variant="primary"
-            onClick={async () => {
-              await navigator.clipboard.writeText(inviteLink);
-              toast.success('Link copiado');
-            }}
-          >
-            Copiar link
-          </Button>
-        </DialogContent>
-      </Dialog>
+              variant="primary"
+              onClick={async () => {
+                await navigator.clipboard.writeText(inviteLink);
+                toast.success('Link copiado');
+              }}
+            >
+              Copiar link
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
