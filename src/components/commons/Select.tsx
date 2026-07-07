@@ -63,7 +63,7 @@ const SelectContent = ({ children, className, ...props }: SelectContentProps) =>
 const SelectItem = ({ children, className, ...props }: SelectItemProps) => (
   <SelectPrimitive.Item
     className={cn(
-      'border-border/35 hover:bg-info-soft hover:text-info data-highlighted:bg-info-soft data-highlighted:text-info grid w-full grid-cols-[2.5rem_1fr_2.5rem] items-center border-b-4 whitespace-nowrap outline-none first:border-t-4 last:border-b-0',
+      'border-border/35 hover:bg-info-soft hover:text-info data-highlighted:bg-info-soft data-highlighted:text-info grid w-full grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center border-b-4 whitespace-nowrap outline-none first:border-t-4 last:border-b-0',
       className,
     )}
     {...props}
@@ -71,7 +71,7 @@ const SelectItem = ({ children, className, ...props }: SelectItemProps) => (
     <SelectPrimitive.ItemIndicator className="col-start-1 flex justify-end">
       <Check />
     </SelectPrimitive.ItemIndicator>
-    <SelectPrimitive.ItemText className="col-start-2 flex justify-center truncate text-xl font-medium">
+    <SelectPrimitive.ItemText className="col-start-2 min-w-0 truncate text-center text-xl font-medium">
       {children}
     </SelectPrimitive.ItemText>
     <span className="col-start-3" aria-hidden={true} />

@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { Navigate, Outlet, useLocation } from "react-router";
-import { apiFetch } from "../../utils/api";
-import { Loader } from "../../components/commons/Loader";
-import ROUTES from "../../constants/routes";
+import { useQuery } from '@tanstack/react-query';
+import { Navigate, Outlet, useLocation } from 'react-router';
+import { apiFetch } from '../../utils/api';
+import { Loader } from '../../components/commons/Loader';
+import ROUTES from '../../constants/routes';
 
 export const ProtectedRoute = () => {
   const location = useLocation();
@@ -17,7 +17,7 @@ export const ProtectedRoute = () => {
       }
 
       return null;
-    }, 
+    },
     retry: false,
   });
 
@@ -27,5 +27,5 @@ export const ProtectedRoute = () => {
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 
-  return <Outlet />
-}
+  return <Outlet />;
+};

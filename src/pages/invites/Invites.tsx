@@ -1,18 +1,18 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { FC } from "react";
-import { useNavigate, useParams } from "react-router";
-import { Button } from "../../components/commons/Button";
-import { Dialog, DialogContent } from "../../components/commons/Dialog";
-import { apiFetch } from "../../utils/api";
-import { toast } from "sonner";
-import ROUTES from "../../constants/routes";
-import { Loader } from "../../components/commons/Loader";
+import { useMutation, useQuery } from '@tanstack/react-query';
+import type { FC } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { Button } from '../../components/commons/Button';
+import { Dialog, DialogContent } from '../../components/commons/Dialog';
+import { apiFetch } from '../../utils/api';
+import { toast } from 'sonner';
+import ROUTES from '../../constants/routes';
+import { Loader } from '../../components/commons/Loader';
 
 type InviteResponse = {
-  workspaceName: string,
-  workspaceId: string,
-  role: 'admin' | 'member',
-}
+  workspaceName: string;
+  workspaceId: string;
+  role: 'admin' | 'member';
+};
 
 const getOrdersWithDetails = async (token: string): Promise<InviteResponse> => {
   const res = await apiFetch(`/invites/${token}`);
@@ -28,7 +28,7 @@ export const Invites: FC = () => {
     queryFn: () => getOrdersWithDetails(token ?? ''),
     enabled: Boolean(token),
   });
-  
+
   const postInviteResponse = useMutation({
     mutationFn: async () => {
       const res = await apiFetch(`/invites/${token}`, {
@@ -56,8 +56,8 @@ export const Invites: FC = () => {
   });
 
   return isPending ? (
-      <Loader />
-    ) : (
+    <Loader />
+  ) : (
     <main className="bg-primary min-h-screen">
       <Dialog open={true} onOpenChange={() => navigate(ROUTES.HOME)}>
         <DialogContent title="Convite para instituição">
@@ -67,9 +67,14 @@ export const Invites: FC = () => {
             </p>
           </div>
 
-          <Button size="md" variant="primary" className="w-full rounded-none" onClick={() => {
-            postInviteResponse.mutate();
-          }}>
+          <Button
+            size="md"
+            variant="primary"
+            className="w-full rounded-none"
+            onClick={() => {
+              postInviteResponse.mutate();
+            }}
+          >
             Aceitar convite
           </Button>
         </DialogContent>

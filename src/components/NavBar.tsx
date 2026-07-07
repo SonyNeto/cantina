@@ -100,7 +100,7 @@ export const NavBar: FC = () => {
             {NAVMENU.ITEMS.filter((item) =>
               canAccessWorkspaceRole(workspaceRole, item.accessLevel),
             ).map((item, idx) => {
-              const pedidos = item.label === 'Pedidos';
+              const orders = item.label === 'Pedidos';
 
               return (
                 <NavLink
@@ -118,7 +118,7 @@ export const NavBar: FC = () => {
                 >
                   <item.icon width={12} height={12} />
                   {item.label}
-                  {pedidos && <NotificationBadge count={totalActiveOrders} />}
+                  {orders && <NotificationBadge count={totalActiveOrders} />}
                 </NavLink>
               );
             })}
