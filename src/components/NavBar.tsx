@@ -1,6 +1,6 @@
 import { useState, type FC } from 'react';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerSwipeArea } from './commons/Drawer';
-import { Menu } from 'pixelarticons/react';
+import { Menu, UserPlus } from 'pixelarticons/react';
 import { Button } from './commons/Button';
 import { Link, useNavigate } from 'react-router';
 import NAVMENU from '../constants/navmenu.ts';
@@ -12,6 +12,7 @@ import ROUTES from '../constants/routes.ts';
 import { toast } from 'sonner';
 import { WorkspaceSelect } from './WorkspaceSelect.tsx';
 import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
+import { Dialog, DialogContent, DialogTrigger } from './commons/Dialog.tsx';
 
 type OrderWithDetails = {
   id: string;
@@ -42,6 +43,7 @@ export const NavBar: FC = () => {
   const navigate = useNavigate();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
+  const [inviteLink, setInviteLink] = useState<string>('');
   
   const { data: orders = [], isPending } = useQuery({
     queryKey: ['orderItems', workspaceId],
@@ -74,6 +76,34 @@ export const NavBar: FC = () => {
     },
   });
 
+  const getInviteToken = useMutation({
+    mutationFn: async () => {
+      const res = await workspaceApiFetch('/invites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Falha criar convite');
+      }
+
+      return res.json();
+    },
+
+    onSuccess: (data) => {
+      const token = data.token;
+      const link = `${window.location.origin}/invite/${token}`;
+
+      setInviteLink(link);
+    },
+
+    onError: () => {
+      toast.error('Falha criar convite');
+    },
+  });
+
   const totalActiveOrders = orders.filter((order) => order.status === 'cooking').length;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -95,7 +125,39 @@ export const NavBar: FC = () => {
 
           <DrawerContent className="border-text/40 flex h-full flex-col border-r-4">
             <WorkspaceSelect />
-            
+            <Dialog>
+              <DialogTrigger
+                render={
+                  <Button
+                    size="md"
+                    variant="ghost"
+                    className="border-text/40 inline-flex rounded-none border-b-4"
+                    onClick={() => getInviteToken.mutate()}
+                  />
+                }
+              >
+                <UserPlus />
+                <span>Convidar membro</span>
+              </DialogTrigger>
+              <DialogContent title="Convidar membro">
+                <input
+                  type="text"
+                  value={inviteLink}
+                  readOnly
+                  className="border-text/40 bg-primary text-text placeholder:text-text/50 h-12 w-full min-w-0 border-4 px-3 text-xl outline-none focus-visible:ring-[3px]"
+                />
+                <Button
+                  size="md"
+                  variant="primary"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(inviteLink);
+                    toast.success('Link copiado');
+                  }}
+                >
+                  Copiar link
+                </Button>
+              </DialogContent>
+            </Dialog>
             {NAVMENU.ITEMS.map((item, idx) => {
               const pedidos = item.label === 'Pedidos';
 

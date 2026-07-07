@@ -2,6 +2,7 @@ const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   SIGNUP: '/signup',
+  INVITE: '/invite/:token',
   NEWORDERS: 'neworders',
   ORDERS: 'orders',
   MENU: 'menu',

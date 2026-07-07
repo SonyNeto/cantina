@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginPage } from './pages/auth/LoginPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { ProtectedRoute } from './pages/auth/ProtectedRoute';
+import { Invites } from './pages/invites/Invites';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
+            <Route path={ROUTES.INVITE} element={<Invites />} />
             <Route path={ROUTES.HOME} element={<NewOrders />} />
             <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
             <Route path={ROUTES.ORDERS} element={<Orders />} />
