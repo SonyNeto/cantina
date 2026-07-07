@@ -18,6 +18,8 @@ import {
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 type StudentTotal = {
   id: string;
@@ -64,6 +66,11 @@ const getResponsibleRegisters = async (
   );
   return res.json();
 };
+
+const createStudentSchema = z.object({
+  name: z.string().trim().min(1, 'Informe o nome do aluno'),
+  classId: z.string().trim().min(1, 'Selecione uma turma'),
+});
 
 export const ResponsibleDetails: FC = () => {
   const queryClient = useQueryClient();
@@ -166,10 +173,17 @@ export const ResponsibleDetails: FC = () => {
               e.preventDefault();
 
               const formData = new FormData(e.currentTarget);
-              const name = formData.get('name') as string;
-              const classId = formData.get('classId') as string;
+              const result = createStudentSchema.safeParse({
+                name: String(formData.get('name') ?? ''),
+                classId: String(formData.get('classId') ?? ''),
+              });
 
-              createStudent.mutate({ name, classId });
+              if (!result.success) {
+                toast.error(result.error.issues[0].message);
+                return;
+              }
+
+              createStudent.mutate(result.data);
               setIsAdding(false);
             }}
           >

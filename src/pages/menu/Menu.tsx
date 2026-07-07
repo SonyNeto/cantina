@@ -14,6 +14,7 @@ import type { Product } from '../../constants/canteen/types';
 import { workspaceApiFetch } from '../../utils/api';
 import { toast } from 'sonner';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { z } from 'zod';
 
 type MenuItemsResponse = {
   menuItems: Product[];
@@ -32,6 +33,19 @@ const getMenuItems = async (): Promise<MenuItemsResponse> => {
   const res = await workspaceApiFetch('/menu-items');
   return res.json();
 };
+
+const priceSchema = z
+  .string()
+  .trim()
+  .min(1, 'Informe o preço')
+  .transform((value) => Number(value.replace(',', '.')))
+  .refine((value) => Number.isFinite(value), 'Informe um preço válido')
+  .refine((value) => value > 0, 'O preço deve ser maior que zero');
+
+const menuItemSchema = z.object({
+  label: z.string().trim().min(1, 'Informe o nome do item'),
+  price: priceSchema,
+});
 
 export const Menu: FC = () => {
   const queryClient = useQueryClient();
@@ -124,10 +138,17 @@ export const Menu: FC = () => {
                         e.preventDefault();
 
                         const formData = new FormData(e.currentTarget);
-                        const label = formData.get('label') as string;
-                        const price = Number(formData.get('price'));
+                        const result = menuItemSchema.safeParse({
+                          label: String(formData.get('label') ?? ''),
+                          price: String(formData.get('price') ?? ''),
+                        });
 
-                        updateMenuItem.mutate({ id: item.id, label, price });
+                        if (!result.success) {
+                          toast.error(result.error.issues[0].message);
+                          return;
+                        }
+
+                        updateMenuItem.mutate({ id: item.id, ...result.data });
                         setEditingIndex(null);
                       }}
                     >
@@ -243,10 +264,17 @@ export const Menu: FC = () => {
               e.preventDefault();
 
               const formData = new FormData(e.currentTarget);
-              const label = formData.get('label') as string;
-              const price = Number(formData.get('price'));
+              const result = menuItemSchema.safeParse({
+                label: String(formData.get('label') ?? ''),
+                price: String(formData.get('price') ?? ''),
+              });
 
-              createMenuItem.mutate({ label, price });
+              if (!result.success) {
+                toast.error(result.error.issues[0].message);
+                return;
+              }
+
+              createMenuItem.mutate(result.data);
               setEditingIndex(null);
             }}
           >

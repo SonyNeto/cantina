@@ -11,6 +11,8 @@ import type { Responsible } from '../../constants/school/types';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 type ResponsibleRegister = {
   responsibleId: string;
@@ -32,6 +34,10 @@ const getResponsiblesRegisters = async (period: Period): Promise<ResponsiblesReg
   );
   return res.json();
 };
+
+const createResponsibleSchema = z.object({
+  name: z.string().trim().min(1, 'Informe o nome do responsável'),
+});
 
 export const Registers: FC = () => {
   const queryClient = useQueryClient();
@@ -101,9 +107,16 @@ export const Registers: FC = () => {
                 e.preventDefault();
 
                 const formData = new FormData(e.currentTarget);
-                const name = formData.get('name') as string;
+                const result = createResponsibleSchema.safeParse({
+                  name: String(formData.get('name') ?? ''),
+                });
 
-                createResponsible.mutate(name);
+                if (!result.success) {
+                  toast.error(result.error.issues[0].message);
+                  return;
+                }
+
+                createResponsible.mutate(result.data.name);
                 setIsAdding(false);
               }}
             >

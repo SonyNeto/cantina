@@ -5,6 +5,12 @@ import { toast } from 'sonner';
 import { Button } from '../../components/commons/Button';
 import ROUTES from '../../constants/routes';
 import { apiFetch } from '../../utils/api';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.email('E-mail invalido'),
+  password: z.string().min(4, 'A senha deve ter pelo menos 4 caracteres'),
+});
 
 export const LoginPage: FC = () => {
   const navigate = useNavigate();
@@ -21,7 +27,9 @@ export const LoginPage: FC = () => {
       });
 
       if (!res.ok) {
-        throw new Error('Falha ao realizar login');
+        const data = await res.json().catch(() => null);
+
+        throw new Error(data?.message ?? 'Falha ao realizar login');
       }
 
       return null;
@@ -31,8 +39,10 @@ export const LoginPage: FC = () => {
       navigate(ROUTES.HOME);
     },
 
-    onError: () => {
-      toast.error('Falha ao realizar login');
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Falha ao realizar login';
+
+      toast.error(message);
     },
   });
 
@@ -50,7 +60,17 @@ export const LoginPage: FC = () => {
             const email = formData.get('email') as string;
             const password = formData.get('password') as string;
 
-            loginMutation.mutate({ email, password });
+            const result = loginSchema.safeParse({
+              email,
+              password,
+            });
+
+            if (!result.success) {
+              toast.error(result.error.issues[0].message);
+              return;
+            }
+
+            loginMutation.mutate(result.data);
           }}
         >
           <input

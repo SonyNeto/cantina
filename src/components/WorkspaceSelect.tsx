@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTrigger } from './commons/Dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger } from './commons/Select';
 import { useWorkspaceStore, type Workspace } from '../stores/useWorkspaceStore';
 import { canManageWorkspace } from '../utils/workspaceAccess';
+import { z } from 'zod';
 
 type WorkspacesResponse = {
   workspaces: Workspace[];
@@ -23,6 +24,10 @@ const getWorkspaces = async (): Promise<WorkspacesResponse> => {
   const res = await apiFetch('/workspaces');
   return res.json();
 };
+
+const createWorkspaceSchema = z.object({
+  name: z.string().trim().min(1, 'Informe o nome da instituição'),
+});
 
 export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) => {
   const queryClient = useQueryClient();
@@ -161,9 +166,16 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
               e.preventDefault();
 
               const formData = new FormData(e.currentTarget);
-              const name = formData.get('name') as string;
+              const result = createWorkspaceSchema.safeParse({
+                name: String(formData.get('name') ?? ''),
+              });
 
-              postWorkspace.mutate(name);
+              if (!result.success) {
+                toast.error(result.error.issues[0].message);
+                return;
+              }
+
+              postWorkspace.mutate(result.data.name);
             }}
           >
             <input

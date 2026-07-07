@@ -5,6 +5,23 @@ import { toast } from 'sonner';
 import { Button } from '../../components/commons/Button';
 import ROUTES from '../../constants/routes';
 import { apiFetch } from '../../utils/api';
+import { z } from 'zod';
+
+const signupSchema = z
+  .object({
+    email: z.email(),
+    password: z.string().min(4, 'A senha deve ter pelo menos 4 caracteres'),
+    confirmPassword: z.string().min(4, 'A senha deve ter pelo menos 4 caracteres'),
+  })
+  .superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'As senhas não correspondem',
+        path: ['confirmPassword'],
+      });
+    }
+  });
 
 export const SignupPage: FC = () => {
   const navigate = useNavigate();
@@ -28,6 +45,7 @@ export const SignupPage: FC = () => {
     },
 
     onSuccess: () => {
+      toast.success('Cadastro realizado com sucesso');
       navigate(ROUTES.LOGIN);
     },
 
@@ -49,6 +67,18 @@ export const SignupPage: FC = () => {
             const formData = new FormData(e.currentTarget);
             const email = formData.get('email') as string;
             const password = formData.get('password') as string;
+            const confirmPassword = formData.get('confirmPassword') as string;
+
+            const result = signupSchema.safeParse({
+              email,
+              password,
+              confirmPassword,
+            });
+
+            if (!result.success) {
+              toast.error(result.error.issues[0].message);
+              return;
+            }
 
             signupMutation.mutate({ email, password });
           }}
@@ -65,6 +95,13 @@ export const SignupPage: FC = () => {
             id="signup-password"
             type="password"
             placeholder="Senha"
+            className="app-input w-full"
+          />
+          <input
+            name="confirmPassword"
+            id="signup-confirmPassword"
+            type="password"
+            placeholder="Confirme a senha"
             className="app-input w-full"
           />
           <Button type="submit" variant="primary" size="md" className="w-full">

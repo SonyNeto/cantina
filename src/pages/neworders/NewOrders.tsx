@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import type { ShiftId } from '../../constants/school/types';
 import { toast } from 'sonner';
 import { workspaceApiFetch } from '../../utils/api';
+import { z } from 'zod';
 
 const STEPS = {
   SHIFTS: 'SHIFTS',
@@ -23,6 +24,20 @@ type Step = (typeof STEPS)[keyof typeof STEPS];
 type CreateOrdersResponse = {
   orders: Order[];
 };
+
+const orderFormSchema = z.object({
+  studentId: z.string().trim().min(1, 'Selecione um aluno'),
+  created_at: z.string().trim().min(1, 'Informe a data do pedido'),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().trim().min(1, 'Selecione um item'),
+        quantity: z.number().int().positive('A quantidade deve ser maior que zero'),
+        status: z.enum(['cooking', 'ready']),
+      }),
+    )
+    .min(1, 'Adicione pelo menos um item ao pedido'),
+});
 
 export const NewOrders: FC = () => {
   const [step, setStep] = useState<Step>(STEPS.SHIFTS);
@@ -67,7 +82,14 @@ export const NewOrders: FC = () => {
   });
 
   function onSubmit(data: OrderForm) {
-    createOrders.mutate(data);
+    const result = orderFormSchema.safeParse(data);
+
+    if (!result.success) {
+      toast.error(result.error.issues[0].message);
+      return;
+    }
+
+    createOrders.mutate(result.data);
   }
 
   return (
