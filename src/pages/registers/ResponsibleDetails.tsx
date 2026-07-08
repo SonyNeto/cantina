@@ -144,26 +144,28 @@ export const ResponsibleDetails: FC = () => {
         </div>
 
         <div className="app-list">
-          {responsibleStudents.map((student) => (
-            <Link
-              key={student.id}
-              to={{
-                pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
-                  responsibleTotals?.responsibleId ?? responsibleId,
-                  student.id,
-                ),
-                search: location.search,
-              }}
-              className="app-row app-row-action z-30 grid-cols-[minmax(0,1fr)_7ch_7ch]"
-            >
-              <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                <User />
-                <span>{student.name}</span>
-              </div>
-              <span className="text-center">{student.schoolClassLabel}</span>
-              <span className="text-right tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
-            </Link>
-          ))}
+          {responsibleStudents
+            .sort((student1, student2) => student1.name.localeCompare(student2.name))
+            .map((student) => (
+              <Link
+                key={student.id}
+                to={{
+                  pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
+                    responsibleTotals?.responsibleId ?? responsibleId,
+                    student.id,
+                  ),
+                  search: location.search,
+                }}
+                className="app-row app-row-action z-30 grid-cols-[minmax(0,1fr)_7ch_7ch]"
+              >
+                <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                  <User />
+                  <span>{student.name}</span>
+                </div>
+                <span className="text-center">{student.schoolClassLabel}</span>
+                <span className="text-right tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
+              </Link>
+            ))}
         </div>
 
         {isAdding ? (

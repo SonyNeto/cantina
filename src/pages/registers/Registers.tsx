@@ -83,22 +83,26 @@ export const Registers: FC = () => {
         </div>
 
         <div className="app-list">
-          {responsiblesTotals.map((responsibleTotal) => (
-            <Link
-              key={responsibleTotal.responsibleId}
-              to={{
-                pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
-                search: location.search,
-              }}
-              className="app-row app-row-action z-30 grid-cols-[minmax(0,1fr)_7ch]"
-            >
-              <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                <User />
-                <span>{responsibleTotal.responsibleName}</span>
-              </div>
-              <span className="text-right tabular-nums">{`R$${responsibleTotal.total.toFixed(2)}`}</span>
-            </Link>
-          ))}
+          {responsiblesTotals
+            .sort((responsible1, responsible2) =>
+              responsible1.responsibleName.localeCompare(responsible2.responsibleName),
+            )
+            .map((responsibleTotal) => (
+              <Link
+                key={responsibleTotal.responsibleId}
+                to={{
+                  pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
+                  search: location.search,
+                }}
+                className="app-row app-row-action z-30 grid-cols-[minmax(0,1fr)_7ch]"
+              >
+                <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                  <User />
+                  <span>{responsibleTotal.responsibleName}</span>
+                </div>
+                <span className="text-right tabular-nums">{`R$${responsibleTotal.total.toFixed(2)}`}</span>
+              </Link>
+            ))}
 
           {isAdding ? (
             <form
