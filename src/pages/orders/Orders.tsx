@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { workspaceApiFetch } from '../../utils/api';
 import type { Order, Product, Register } from '../../constants/canteen/types';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { Dialog, DialogTrigger, DialogContent } from '../../components/commons/Dialog';
 
 type OrderWithDetails = {
   id: string;
@@ -152,15 +153,23 @@ export const Orders: FC = () => {
                   <Button size="sm" onClick={() => updateOrderStatus.mutate(order.id)}>
                     <Check />
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      deleteOrder.mutate(order.id);
-                      toast.success('Item removido com sucesso!');
-                    }}
-                  >
-                    <X />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger render={<Button size="sm" variant="primary" />}>
+                      <X />
+                    </DialogTrigger>
+                    <DialogContent title="Atenção">
+                      <span>Tem certeza que deseja excluir o pedido?</span>
+                      <Button
+                        onClick={() => {
+                          deleteOrder.mutate(order.id);
+                          toast.success('Item removido com sucesso!');
+                        }}
+                      >
+                        <Check />
+                        <span>Sim</span>
+                      </Button>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             );
