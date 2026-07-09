@@ -13,7 +13,7 @@ const DrawerContent: FC<ComponentProps<typeof DrawerPrimitive.Content>> = ({
   ...props
 }) => (
   <DrawerPrimitive.Portal>
-    <DrawerPrimitive.Backdrop className="bg-text/20 fixed inset-0 z-50 backdrop-blur-sm" />
+    <DrawerPrimitive.Backdrop className="bg-black/50 fixed inset-0 z-50" />
     <DrawerPrimitive.Viewport className="fixed inset-0 z-50">
       <DrawerPrimitive.Popup
         className={cn(

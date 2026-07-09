@@ -110,7 +110,7 @@ body {
   }
 
   .app-panel-header {
-    @apply border-border/40 bg-panel-header text-text grid w-full items-center gap-2.5 border-b-4 px-4 py-4 text-xl font-bold;
+    @apply border-border/40 bg-panel-header text-text grid w-full items-center gap-4 border-b-4 px-4 py-4 text-xl font-bold;
   }
 
   .app-panel-header-accent {
