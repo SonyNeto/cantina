@@ -1,13 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ComponentPropsWithRef } from 'react';
 import { toast } from 'sonner';
+import { Check } from 'pixelarticons/react';
 import type { Product } from '../../../constants/canteen/types';
 import { workspaceApiFetch } from '../../../utils/api';
 import { Button } from '../../../components/commons/Button';
-import { Check } from 'pixelarticons/react';
 import { X } from '../../../assets/icons/MenuIcons';
+import { cn } from '../../../utils/functions';
 import { menuItemSchema } from './menuItemSchema';
 
-type CreateMenuItemInput = {
+type MenuItemInput = {
+  id?: string;
   label: string;
   price: number;
 };
@@ -16,16 +19,28 @@ type MenuItemResponse = {
   menuItem: Product;
 };
 
-type AddMenuItemFormProps = {
+type MenuItemFormProps = ComponentPropsWithRef<'form'> & {
   workspaceId: string | undefined;
+  itemId?: string;
   onClose: () => void;
+  method?: 'post' | 'update';
+  defaultLabel?: string;
+  defaultPrice?: number;
 };
 
-export const AddMenuItemForm = ({ workspaceId, onClose }: AddMenuItemFormProps) => {
+export const MenuItemForm = ({
+  className,
+  workspaceId,
+  itemId,
+  onClose,
+  method = 'post',
+  defaultLabel,
+  defaultPrice,
+}: MenuItemFormProps) => {
   const queryClient = useQueryClient();
 
   const createMenuItem = useMutation({
-    mutationFn: async ({ label, price }: CreateMenuItemInput): Promise<MenuItemResponse> => {
+    mutationFn: async ({ label, price }: MenuItemInput): Promise<MenuItemResponse> => {
       const res = await workspaceApiFetch('/menu-items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,9 +59,33 @@ export const AddMenuItemForm = ({ workspaceId, onClose }: AddMenuItemFormProps) 
     },
   });
 
+  const updateMenuItem = useMutation({
+    mutationFn: async ({ id, label, price }: MenuItemInput): Promise<MenuItemResponse> => {
+      const res = await workspaceApiFetch(`/menu-items/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          label,
+          price,
+        }),
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menuItems', workspaceId] });
+      toast.success('Item atualizado com sucesso!');
+      onClose();
+    },
+  });
+
   return (
     <form
-      className="app-form-row z-50 flex min-w-0 justify-between overflow-hidden rounded-none px-6 whitespace-nowrap"
+      className={cn(
+        'app-form-row z-50 flex min-w-0 justify-between overflow-hidden rounded-none px-6 whitespace-nowrap',
+        className,
+      )}
       onSubmit={(e) => {
         e.preventDefault();
 
@@ -61,15 +100,22 @@ export const AddMenuItemForm = ({ workspaceId, onClose }: AddMenuItemFormProps) 
           return;
         }
 
-        createMenuItem.mutate(result.data);
+        if (method === 'post') {
+          createMenuItem.mutate(result.data);
+        }
+
+        if (method === 'update') {
+          updateMenuItem.mutate({ id: itemId, ...result.data });
+        }
       }}
     >
       <div className="min-w-0">
         <input
           name="label"
-          id="add-item-name"
+          id={itemId ? `item-name-${itemId}` : 'add-item-name'}
           type="text"
           placeholder="Nome do Item"
+          defaultValue={defaultLabel}
           className="app-input w-full max-w-[12ch] truncate"
         />
       </div>
@@ -77,10 +123,11 @@ export const AddMenuItemForm = ({ workspaceId, onClose }: AddMenuItemFormProps) 
         <span>R$</span>
         <input
           name="price"
-          id="add-item-price"
+          id={itemId ? `item-price-${itemId}` : 'add-item-price'}
           type="number"
           step="0.01"
           placeholder="Preço"
+          defaultValue={defaultPrice?.toFixed(2)}
           className="app-input w-full max-w-[6ch] text-end"
         />
       </div>

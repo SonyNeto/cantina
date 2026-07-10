@@ -13,29 +13,37 @@ import {
   SelectItem,
   SelectTrigger,
 } from '../../../components/commons/Select';
+import { cn } from '../../../utils/functions';
+import type { ComponentPropsWithRef } from 'react';
 
 type SchoolClassesResponse = {
   schoolClasses: SchoolClass[];
 };
 
-type CreateStudentInput = {
+type StudentInput = {
   name: string;
   classId: string;
+  studentId?: string;
 };
 
 type StudentResponse = {
   student: Student;
 };
 
-type AddStudentFormProps = {
+type StudentFormProps = ComponentPropsWithRef<'form'> & {
   workspaceId: string | undefined;
   responsibleId: string;
+  studentId?: string;
   onClose: () => void;
+  method?: 'post' | 'update';
+  defaultName?: string;
+  defaultClass?: string;
 };
 
-const createStudentSchema = z.object({
+const studentSchema = z.object({
   name: z.string().trim().min(1, 'Informe o nome do aluno'),
   classId: z.string().trim().min(1, 'Selecione uma turma'),
+  studentId: z.string().optional(),
 });
 
 const getSchoolClasses = async (): Promise<SchoolClassesResponse> => {
@@ -43,7 +51,16 @@ const getSchoolClasses = async (): Promise<SchoolClassesResponse> => {
   return res.json();
 };
 
-export const AddStudentForm = ({ workspaceId, responsibleId, onClose }: AddStudentFormProps) => {
+export const StudentForm = ({
+  className,
+  workspaceId,
+  responsibleId,
+  studentId,
+  onClose,
+  method = 'post',
+  defaultName,
+  defaultClass,
+}: StudentFormProps) => {
   const queryClient = useQueryClient();
 
   const { data: schoolClasses = [], isPending: isSchoolClassesPending } = useQuery({
@@ -53,8 +70,29 @@ export const AddStudentForm = ({ workspaceId, responsibleId, onClose }: AddStude
     select: (data) => data.schoolClasses,
   });
 
+  const updateStudent = useMutation({
+    mutationFn: async ({ name, classId, studentId }: StudentInput): Promise<StudentResponse> => {
+      const res = await workspaceApiFetch(`/responsibles/${responsibleId}/students/${studentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          classId,
+        }),
+      });
+
+      return res.json();
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] });
+      toast.success('Aluno atualizado com sucesso!');
+      onClose();
+    },
+  });
+
   const createStudent = useMutation({
-    mutationFn: async ({ name, classId }: CreateStudentInput): Promise<StudentResponse> => {
+    mutationFn: async ({ name, classId }: StudentInput): Promise<StudentResponse> => {
       const res = await workspaceApiFetch(`/responsibles/${responsibleId}/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,17 +116,19 @@ export const AddStudentForm = ({ workspaceId, responsibleId, onClose }: AddStude
     acc[shiftLabel] = [...(acc[shiftLabel] ?? []), schoolClass];
     return acc;
   }, {});
+  const defaultClassId = schoolClasses.find((schoolClass) => schoolClass.id === defaultClass)?.id;
 
   return (
     <form
-      className="app-form-row z-50 flex justify-between rounded-none"
+      className={cn('app-form-row z-50 flex justify-center rounded-none', className)}
       onSubmit={(e) => {
         e.preventDefault();
 
         const formData = new FormData(e.currentTarget);
-        const result = createStudentSchema.safeParse({
+        const result = studentSchema.safeParse({
           name: String(formData.get('name') ?? ''),
           classId: String(formData.get('classId') ?? ''),
+          studentId,
         });
 
         if (!result.success) {
@@ -96,7 +136,13 @@ export const AddStudentForm = ({ workspaceId, responsibleId, onClose }: AddStude
           return;
         }
 
-        createStudent.mutate(result.data);
+        if (method === 'post') {
+          createStudent.mutate(result.data);
+        }
+
+        if (method === 'update') {
+          updateStudent.mutate(result.data);
+        }
       }}
     >
       <div className="flex min-w-0 flex-col items-center gap-2.5">
@@ -105,23 +151,33 @@ export const AddStudentForm = ({ workspaceId, responsibleId, onClose }: AddStude
           id="add-student-name"
           type="text"
           placeholder="Nome do aluno"
+          defaultValue={defaultName}
           className="app-input w-full max-w-[21ch] truncate"
         />
-        <Select
-          name="classId"
-          id="add-student-class"
-          items={schoolClasses.map((schoolClass) => ({
-            label: schoolClass.label,
-            value: schoolClass.id,
-          }))}
-        >
-          <SelectTrigger
-            placeholder="Selecione uma turma"
-            className="w-full max-w-[21ch] min-w-0"
-          />
-          <SelectContent className="">
-            {!isSchoolClassesPending &&
-              Object.entries(classesByShift).map(([shiftLabel, classes]) => (
+        {isSchoolClassesPending ? (
+          <Select key="loading-school-classes" disabled>
+            <SelectTrigger
+              placeholder="Carregando turmas..."
+              className="w-full max-w-[21ch] min-w-0"
+            />
+          </Select>
+        ) : (
+          <Select
+            key={defaultClassId ?? 'empty-school-class'}
+            name="classId"
+            id="add-student-class"
+            defaultValue={defaultClassId}
+            items={schoolClasses.map((schoolClass) => ({
+              label: schoolClass.label,
+              value: schoolClass.id,
+            }))}
+          >
+            <SelectTrigger
+              placeholder="Selecione uma turma"
+              className="w-full max-w-[21ch] min-w-0"
+            />
+            <SelectContent className="">
+              {Object.entries(classesByShift).map(([shiftLabel, classes]) => (
                 <SelectGroup label={shiftLabel} key={shiftLabel}>
                   {classes.map((schoolClass) => (
                     <SelectItem value={schoolClass.id} key={schoolClass.id}>
@@ -130,8 +186,9 @@ export const AddStudentForm = ({ workspaceId, responsibleId, onClose }: AddStude
                   ))}
                 </SelectGroup>
               ))}
-          </SelectContent>
-        </Select>
+            </SelectContent>
+          </Select>
+        )}
       </div>
       <div className="flex flex-col gap-1.5">
         <Button type="submit" variant="primary" size="sm">

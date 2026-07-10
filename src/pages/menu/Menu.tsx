@@ -1,21 +1,16 @@
 import { useState, type FC } from 'react';
-import { Button } from '../../components/commons/Button';
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '../../components/commons/Accordion';
 import { Check, PenSquare, Plus } from 'pixelarticons/react';
-import { TrashCan, X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Button } from '../../components/commons/Button';
+import { Dialog, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 import { Loader } from '../../components/commons/Loader';
+import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
+import { TrashCan } from '../../assets/icons/MenuIcons';
 import type { Product } from '../../constants/canteen/types';
 import { workspaceApiFetch } from '../../utils/api';
-import { toast } from 'sonner';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { AddMenuItemForm } from './components/AddMenuItemForm';
-import { menuItemSchema } from './components/menuItemSchema';
+import { MenuItemForm } from './components/MenuItemForm';
 
 type MenuItemsResponse = {
   menuItems: Product[];
@@ -35,6 +30,10 @@ const getMenuItems = async (): Promise<MenuItemsResponse> => {
 export const Menu: FC = () => {
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
+  const [formPosition, setFormPosition] = useState<FormPosition>(null);
+  const isAdding = formPosition !== null;
 
   const { data: menuItems = [], isPending } = useQuery({
     queryKey: ['menuItems', workspaceId],
@@ -54,34 +53,10 @@ export const Menu: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      queryClient.invalidateQueries({ queryKey: ['menuItems', workspaceId] });
       toast.success('Item removido com sucesso!');
     },
   });
-
-  const updateMenuItem = useMutation({
-    mutationFn: async ({ id, label, price }: Product): Promise<MenuItemResponse> => {
-      const res = await workspaceApiFetch(`/menu-items/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          label,
-          price,
-        }),
-      });
-
-      return res.json();
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['menuItems'] });
-      toast.success('Item atualizado com sucesso!');
-    },
-  });
-
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [formPosition, setFormPosition] = useState<FormPosition>(null);
-  const isAdding = formPosition !== null;
 
   return isPending ? (
     <Loader />
@@ -94,8 +69,12 @@ export const Menu: FC = () => {
           <Button
             variant="ghost"
             className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 transition-colors outline-none focus-visible:ring-[3px] [&_svg]:size-7"
-            disabled={isAdding || editingIndex !== null}
-            onClick={() => setFormPosition('top')}
+            disabled={isAdding}
+            onClick={() => {
+              setFormPosition('top');
+              setEditingIndex(null);
+              setDrawerOpenIndex(null);
+            }}
             aria-label="Adicionar item"
             title="Adicionar item"
           >
@@ -103,152 +82,97 @@ export const Menu: FC = () => {
           </Button>
         </div>
 
-        {formPosition === 'top' && (
-          <AddMenuItemForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
-        )}
+        <div className="app-list">
+          {formPosition === 'top' && (
+            <MenuItemForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
+          )}
 
-        <Accordion>
           {menuItems.map((item, idx) => {
             const isEditing = editingIndex === idx;
+            const isDrawerOpen = drawerOpenIndex === idx;
 
             return (
-              <AccordionItem key={`menuitem-${item.label.trim().toLowerCase()}-${idx}`}>
-                <div className="grid">
-                  {isEditing ? (
-                    <form
-                      className="app-form-row z-50 col-start-1 row-start-1 flex min-w-0 justify-between overflow-hidden rounded-none whitespace-nowrap [&_svg]:size-10 [&_svg]:shrink-0"
-                      id={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
-                      onSubmit={(e) => {
-                        e.preventDefault();
+              <div key={item.id} className="app-row relative isolate overflow-hidden !p-0">
+                {isEditing ? (
+                  <MenuItemForm
+                    className="relative z-10 !border-0"
+                    workspaceId={workspaceId}
+                    itemId={item.id}
+                    method="update"
+                    defaultLabel={item.label}
+                    defaultPrice={item.price}
+                    onClose={() => {
+                      setEditingIndex(null);
+                      setDrawerOpenIndex(idx);
+                    }}
+                  />
+                ) : (
+                  <div className="relative z-10 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 px-4 py-3">
+                    <span className="min-w-0 truncate">{item.label}</span>
+                    <span className="text-center tabular-nums">{`R$${item.price.toFixed(2)}`}</span>
+                  </div>
+                )}
 
-                        const formData = new FormData(e.currentTarget);
-                        const result = menuItemSchema.safeParse({
-                          label: String(formData.get('label') ?? ''),
-                          price: String(formData.get('price') ?? ''),
-                        });
+                <SwipeActionRow
+                  open={isDrawerOpen}
+                  onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
+                >
+                  <Button
+                    onClick={() => {
+                      setEditingIndex(isEditing ? null : idx);
+                      setDrawerOpenIndex(isDrawerOpen ? null : idx);
+                      setFormPosition(null);
+                    }}
+                    disabled={isEditing}
+                  >
+                    <PenSquare />
+                  </Button>
 
-                        if (!result.success) {
-                          toast.error(result.error.issues[0].message);
-                          return;
-                        }
-
-                        updateMenuItem.mutate({ id: item.id, ...result.data });
-                        setEditingIndex(null);
-                      }}
-                    >
-                      <div className="inline-flex min-w-0 items-center gap-2.5">
-                        <input
-                          id={`name-input-${item.label.trim().toLowerCase()}-${idx}`}
-                          name="label"
-                          type="text"
-                          defaultValue={`${item.label}`}
-                          className="app-input w-full max-w-[12ch] truncate"
-                        />
-                      </div>
-                      <div className="inline-flex min-w-0 items-center gap-1">
-                        <span>R$</span>
-                        <input
-                          id={`price-input-${item.label.trim().toLowerCase()}-${idx}`}
-                          name="price"
-                          type="number"
-                          step="0.01"
-                          defaultValue={`${item.price.toFixed(2)}`}
-                          className="app-input w-full max-w-[6ch] text-end"
-                        />
-                      </div>
-                    </form>
-                  ) : (
-                    <AccordionTrigger
-                      render={
-                        <Button
-                          size="lg"
-                          variant="ghost"
-                          className="app-row app-row-action col-start-1 row-start-1 h-auto justify-between rounded-none py-6"
-                          disabled={editingIndex !== null || isAdding}
-                        >
-                          <div className="inline-flex items-center gap-2.5">
-                            <span>{item.label}</span>
-                          </div>
-                          <span>{`R$${item.price.toFixed(2)}`}</span>
-                        </Button>
-                      }
-                    />
-                  )}
-                </div>
-
-                <AccordionContent>
-                  <div className="flex items-center gap-2.5">
-                    {isEditing ? (
-                      <div className="flex flex-col gap-2.5">
-                        <Button
-                          type="submit"
-                          form={`edit-item-form-${item.label.trim().toLowerCase()}-${idx}`}
-                          size="lg"
-                          variant="primary"
-                          className="w-40 justify-start p-2"
-                        >
-                          <Check />
-                          <span>Salvar</span>
-                        </Button>
-
-                        <Button
-                          size="lg"
-                          variant="primary"
-                          className="w-40 justify-start p-2"
-                          onClick={() => setEditingIndex(null)}
-                        >
-                          <X />
-                          <span>Cancelar</span>
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        size="lg"
-                        variant="primary"
-                        className="p-2"
-                        onClick={() => {
-                          setEditingIndex(idx);
-                          setFormPosition(null);
-                        }}
-                      >
-                        <PenSquare />
-                        <span>Editar</span>
-                      </Button>
-                    )}
-                    <Button
-                      size="lg"
-                      variant="primary"
-                      className="p-2"
-                      onClick={() => {
-                        deleteMenuItem.mutate(item.id);
-                        setEditingIndex(null);
-                        setFormPosition(null);
-                      }}
+                  <Dialog>
+                    <DialogTrigger
+                      render={<Button size="md" variant="primary" disabled={isEditing} />}
                     >
                       <TrashCan />
-                      <span>Excluir</span>
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+                    </DialogTrigger>
+                    <DialogContent title="Atenção">
+                      <span>Tem certeza que deseja excluir o item?</span>
+                      <Button
+                        onClick={() => {
+                          deleteMenuItem.mutate(item.id);
+                          setEditingIndex(null);
+                          setFormPosition(null);
+                          setDrawerOpenIndex(null);
+                        }}
+                      >
+                        <Check />
+                        <span>Sim</span>
+                      </Button>
+                    </DialogContent>
+                  </Dialog>
+                </SwipeActionRow>
+              </div>
             );
           })}
-        </Accordion>
 
-        {formPosition === 'bottom' ? (
-          <AddMenuItemForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
-        ) : (
-          <Button
-            size="lg"
-            className="app-row app-row-action !h-auto !w-full justify-center gap-2.5 rounded-none border-b-0 py-4"
-            variant="ghost"
-            disabled={isAdding || editingIndex !== null}
-            onClick={() => setFormPosition('bottom')}
-          >
-            <Plus />
-            Adicionar item
-          </Button>
-        )}
+          {formPosition === 'bottom' ? (
+            <MenuItemForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
+          ) : (
+            <Button
+              size="lg"
+              className="app-row app-row-action !h-auto !w-full justify-center gap-2.5 rounded-none py-4"
+              variant="ghost"
+              disabled={isAdding}
+              onClick={() => {
+                setFormPosition('bottom');
+                setEditingIndex(null);
+                setDrawerOpenIndex(null);
+              }}
+            >
+              <Plus />
+              Adicionar item
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

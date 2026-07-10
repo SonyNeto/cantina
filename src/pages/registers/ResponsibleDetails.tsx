@@ -1,19 +1,24 @@
 import { useState, type FC } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
-import { ArrowLeft, User, UserPlus } from 'pixelarticons/react';
+import { ArrowLeft, Check, PenSquare, User, UserPlus } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { workspaceApiFetch } from '../../utils/api';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { AddStudentForm } from './components/AddStudentForm';
+import { StudentForm } from './components/StudentForm';
+import { TrashCan } from '../../assets/icons/MenuIcons';
+import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
+import { Dialog, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
+import { toast } from 'sonner';
 
 type StudentTotal = {
   id: string;
   name: string;
+  schoolClassId: string;
   schoolClassLabel: string;
   total: number;
 };
@@ -42,12 +47,15 @@ const getResponsibleRegisters = async (
 };
 
 export const ResponsibleDetails: FC = () => {
+  const queryClient = useQueryClient();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [formPosition, setFormPosition] = useState<FormPosition>(null);
   const { responsibleId } = useParams();
   const isAdding = formPosition !== null;
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
 
   const { data: responsibleTotals, isPending } = useQuery({
     queryKey: ['registers', workspaceId, responsibleId, period],
@@ -57,6 +65,26 @@ export const ResponsibleDetails: FC = () => {
   });
 
   const responsibleStudents = responsibleTotals?.studentsTotals ?? [];
+
+  const deleteStudent = useMutation({
+    mutationFn: async ({
+      responsibleId,
+      studentId,
+    }: {
+      responsibleId: string;
+      studentId: string;
+    }): Promise<void> => {
+      await workspaceApiFetch(`/responsibles/${responsibleId}/students/${studentId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] });
+      toast.success('Aluno removido com sucesso!');
+    },
+  });
 
   if (!responsibleId) {
     return <div>Respnsável não encontrado</div>;
@@ -80,7 +108,11 @@ export const ResponsibleDetails: FC = () => {
             variant="ghost"
             className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 transition-colors outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
-            onClick={() => setFormPosition('top')}
+            onClick={() => {
+              setFormPosition('top');
+              setEditingIndex(null);
+              setDrawerOpenIndex(null);
+            }}
             aria-label="Adicionar aluno"
             title="Adicionar aluno"
           >
@@ -91,7 +123,7 @@ export const ResponsibleDetails: FC = () => {
 
         <div className="app-list">
           {formPosition === 'top' && (
-            <AddStudentForm
+            <StudentForm
               workspaceId={workspaceId}
               responsibleId={responsibleId}
               onClose={() => setFormPosition(null)}
@@ -99,29 +131,85 @@ export const ResponsibleDetails: FC = () => {
           )}
           {responsibleStudents
             .sort((student1, student2) => student1.name.localeCompare(student2.name))
-            .map((student) => (
-              <Link
-                key={student.id}
-                to={{
-                  pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
-                    responsibleTotals?.responsibleId ?? responsibleId,
-                    student.id,
-                  ),
-                  search: location.search,
-                }}
-                className="app-row app-row-action z-30 grid-cols-[minmax(0,1fr)_7ch_7ch]"
-              >
-                <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                  <User />
-                  <span>{student.name}</span>
+            .map((student, idx) => {
+              const isEditing = editingIndex === idx;
+              const isDrawerOpen = drawerOpenIndex === idx;
+
+              return (
+                <div key={student.id} className="app-row relative isolate overflow-hidden !p-0">
+                  {isEditing ? (
+                    <StudentForm
+                      className="relative z-10 !border-0"
+                      workspaceId={workspaceId}
+                      responsibleId={responsibleId}
+                      studentId={student.id}
+                      method="update"
+                      defaultName={student.name}
+                      defaultClass={student.schoolClassId}
+                      onClose={() => {
+                        setEditingIndex(null);
+                        setDrawerOpenIndex(idx);
+                      }}
+                    />
+                  ) : (
+                    <Link
+                      to={{
+                        pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
+                          responsibleTotals?.responsibleId ?? responsibleId,
+                          student.id,
+                        ),
+                        search: location.search,
+                      }}
+                      className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 px-4 py-3"
+                    >
+                      <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                        <User />
+                        <span>{student.name}</span>
+                      </div>
+                      <span className="text-center">{student.schoolClassLabel}</span>
+                      <span className="text-center tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
+                    </Link>
+                  )}
+                  <SwipeActionRow
+                    open={isDrawerOpen}
+                    onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
+                  >
+                    <Button
+                      onClick={() => {
+                        setEditingIndex(isEditing ? null : idx);
+                        setDrawerOpenIndex(isDrawerOpen ? null : idx);
+                        setFormPosition(null);
+                      }}
+                      disabled={isEditing}
+                    >
+                      <PenSquare />
+                    </Button>
+
+                    <Dialog>
+                      <DialogTrigger
+                        render={<Button size="md" variant="primary" disabled={isEditing} />}
+                      >
+                        <TrashCan />
+                      </DialogTrigger>
+                      <DialogContent title="Atenção">
+                        <span>Tem certeza que deseja excluir o aluno?</span>
+                        <Button
+                          onClick={() =>
+                            deleteStudent.mutate({ responsibleId, studentId: student.id })
+                          }
+                        >
+                          <Check />
+                          <span>Sim</span>
+                        </Button>
+                      </DialogContent>
+                    </Dialog>
+                  </SwipeActionRow>
                 </div>
-                <span className="text-center">{student.schoolClassLabel}</span>
-                <span className="text-right tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
-              </Link>
-            ))}
+              );
+            })}
 
           {formPosition === 'bottom' ? (
-            <AddStudentForm
+            <StudentForm
               workspaceId={workspaceId}
               responsibleId={responsibleId}
               onClose={() => setFormPosition(null)}
@@ -132,7 +220,11 @@ export const ResponsibleDetails: FC = () => {
               variant="ghost"
               size="lg"
               disabled={isAdding}
-              onClick={() => setFormPosition('bottom')}
+              onClick={() => {
+                setFormPosition('bottom');
+                setEditingIndex(null);
+                setDrawerOpenIndex(null);
+              }}
             >
               <UserPlus />
               Adicionar aluno
