@@ -5,7 +5,7 @@ import { cn } from '../../utils/functions';
 interface SwipeActionRowProps extends ComponentPropsWithoutRef<'div'> {
   swipeDirection?: 'right' | 'left';
   children: ReactNode;
-  open?: boolean,
+  open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
@@ -30,23 +30,24 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
   });
 
   return (
-    <div 
+    <div
       className={cn(
         'absolute inset-y-0 right-0 z-40 flex h-full',
         'transition-transform duration-200',
-        open
-          ? 'translate-x-0 ease-in'
-          : 'translate-x-[calc(100%-1rem)] ease-out',
+        open ? 'translate-x-0 ease-in' : 'translate-x-[calc(100%-1rem)] ease-out',
       )}
     >
       <button
         {...swipeHandlers}
         type="button"
-        className="bg-border h-full w-4 shrink-0 touch-pan-y cursor-pointer"
+        className="bg-border h-full w-4 shrink-0 cursor-pointer touch-pan-y"
         onClick={() => onOpenChange?.(!open)}
       />
       <div
-        className={cn('bg-panel-contrast flex h-full w-34 items-center justify-center gap-2', className)}
+        className={cn(
+          'bg-panel-contrast flex h-full w-34 items-center justify-center gap-2',
+          className,
+        )}
         inert={!open}
         aria-hidden={!open}
       >

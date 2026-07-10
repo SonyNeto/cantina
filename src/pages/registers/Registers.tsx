@@ -9,9 +9,9 @@ import { workspaceApiFetch } from '../../utils/api';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { AddResponsibleForm } from './components/AddResponsibleForm';
+import { ResponsibleForm } from './components/ResponsibleForm';
 import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
-import { TrashCan, X } from '../../assets/icons/MenuIcons';
+import { TrashCan } from '../../assets/icons/MenuIcons';
 import { Dialog, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 import { toast } from 'sonner';
 
@@ -63,7 +63,11 @@ export const Registers: FC = () => {
             variant="ghost"
             className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 transition-colors outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
-            onClick={() => setFormPosition('top')}
+            onClick={() => {
+              setFormPosition('top');
+              setEditingIndex(null);
+              setDrawerOpenIndex(null);
+            }}
             aria-label="Adicionar responsável"
             title="Adicionar responsável"
           >
@@ -74,7 +78,7 @@ export const Registers: FC = () => {
 
         <div className="app-list">
           {formPosition === 'top' && (
-            <AddResponsibleForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
+            <ResponsibleForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
           )}
           {responsiblesTotals
             .sort((responsible1, responsible2) =>
@@ -90,31 +94,17 @@ export const Registers: FC = () => {
                   className="app-row relative isolate overflow-hidden !p-0"
                 >
                   {isEditing ? (
-                    <form
-                      className="app-form-row relative z-10 grid-cols-[minmax(0,1fr)_7ch] rounded-none !border-0 px-4 py-3"
-                      onSubmit={(event) => event.preventDefault()}
-                    >
-                      <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                        <User />
-                        <input
-                          name="name"
-                          type="text"
-                          defaultValue={responsibleTotal.responsibleName}
-                          className="app-input w-full max-w-[20ch] truncate"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <Button type="submit" variant="primary" size="sm">
-                          <Check />
-                        </Button>
-                        <Button variant="primary" size="sm" onClick={() => {
-                          setEditingIndex(null);
-                          setDrawerOpenIndex(idx);
-                        }}>
-                          <X />
-                        </Button>
-                      </div>
-                    </form>
+                    <ResponsibleForm
+                      className="relative z-10 !border-0"
+                      workspaceId={workspaceId}
+                      responsibleId={responsibleTotal.responsibleId}
+                      method="update"
+                      defaultName={responsibleTotal.responsibleName}
+                      onClose={() => {
+                        setEditingIndex(null);
+                        setDrawerOpenIndex(idx);
+                      }}
+                    />
                   ) : (
                     <Link
                       to={{
@@ -127,20 +117,29 @@ export const Registers: FC = () => {
                         <User />
                         <span>{responsibleTotal.responsibleName}</span>
                       </div>
+                      <span className="text-center tabular-nums">{`R$${responsibleTotal.total.toFixed(2)}`}</span>
                     </Link>
                   )}
 
-                  <SwipeActionRow open={isDrawerOpen} onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}>
-                    <Button onClick={() => {
-                      setEditingIndex(isEditing ? null : idx);
-                      setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                    }}
-                    disabled={isEditing}>
+                  <SwipeActionRow
+                    open={isDrawerOpen}
+                    onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
+                  >
+                    <Button
+                      onClick={() => {
+                        setEditingIndex(isEditing ? null : idx);
+                        setDrawerOpenIndex(isDrawerOpen ? null : idx);
+                        setFormPosition(null);
+                      }}
+                      disabled={isEditing}
+                    >
                       <PenSquare />
                     </Button>
 
                     <Dialog>
-                      <DialogTrigger render={<Button size="md" variant="primary" disabled={isEditing} />}>
+                      <DialogTrigger
+                        render={<Button size="md" variant="primary" disabled={isEditing} />}
+                      >
                         <TrashCan />
                       </DialogTrigger>
                       <DialogContent title="Atenção">
@@ -161,14 +160,18 @@ export const Registers: FC = () => {
             })}
 
           {formPosition === 'bottom' ? (
-            <AddResponsibleForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
+            <ResponsibleForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
           ) : (
             <Button
               className="app-row app-row-action !h-auto !w-full justify-center gap-2.5 rounded-none py-4"
               variant="ghost"
               size="lg"
               disabled={isAdding}
-              onClick={() => setFormPosition('bottom')}
+              onClick={() => {
+                setFormPosition('bottom');
+                setEditingIndex(null);
+                setDrawerOpenIndex(null);
+              }}
             >
               <UserPlus />
               Adicionar responsável
