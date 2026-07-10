@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { Button } from '../../components/commons/Button';
 import { Check, PenSquare, User, UserPlus } from 'pixelarticons/react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { workspaceApiFetch } from '../../utils/api';
 import PeriodPicker from '../../components/commons/PeriodPicker';
@@ -35,6 +35,7 @@ const getResponsiblesRegisters = async (period: Period): Promise<ResponsiblesReg
 };
 
 export const Registers: FC = () => {
+  const queryClient = useQueryClient();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
@@ -49,6 +50,20 @@ export const Registers: FC = () => {
     queryFn: () => getResponsiblesRegisters(period),
     enabled: Boolean(workspaceId),
     select: (data) => data.responsiblesTotals,
+  });
+
+  const deleteResponsible = useMutation({
+    mutationFn: async (responsibleId: string): Promise<void> => {
+      await workspaceApiFetch(`/responsibles/${responsibleId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', workspaceId] });
+      toast.success('Responsável removido com sucesso!');
+    },
   });
 
   return isPending ? (
@@ -146,7 +161,10 @@ export const Registers: FC = () => {
                         <span>Tem certeza que deseja excluir o responsável?</span>
                         <Button
                           onClick={() => {
-                            toast.success('Responsável removido com sucesso!');
+                            deleteResponsible.mutate(responsibleTotal.responsibleId);
+                            setEditingIndex(null);
+                            setFormPosition(null);
+                            setDrawerOpenIndex(null);
                           }}
                         >
                           <Check />

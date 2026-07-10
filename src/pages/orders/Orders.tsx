@@ -92,6 +92,7 @@ export const Orders: FC = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orderItems'] });
+      toast.success('Item removido com sucesso!');
     },
   });
 
@@ -162,7 +163,6 @@ export const Orders: FC = () => {
                       <Button
                         onClick={() => {
                           deleteOrder.mutate(order.id);
-                          toast.success('Item removido com sucesso!');
                         }}
                       >
                         <Check />

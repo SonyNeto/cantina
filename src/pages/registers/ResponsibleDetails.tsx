@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft, Check, PenSquare, User, UserPlus } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { workspaceApiFetch } from '../../utils/api';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
@@ -47,6 +47,7 @@ const getResponsibleRegisters = async (
 };
 
 export const ResponsibleDetails: FC = () => {
+  const queryClient = useQueryClient();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
@@ -64,6 +65,26 @@ export const ResponsibleDetails: FC = () => {
   });
 
   const responsibleStudents = responsibleTotals?.studentsTotals ?? [];
+
+  const deleteStudent = useMutation({
+    mutationFn: async ({
+      responsibleId,
+      studentId,
+    }: {
+      responsibleId: string;
+      studentId: string;
+    }): Promise<void> => {
+      await workspaceApiFetch(`/responsibles/${responsibleId}/students/${studentId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] });
+      toast.success('Aluno removido com sucesso!');
+    },
+  });
 
   if (!responsibleId) {
     return <div>Respnsável não encontrado</div>;
@@ -173,9 +194,9 @@ export const ResponsibleDetails: FC = () => {
                       <DialogContent title="Atenção">
                         <span>Tem certeza que deseja excluir o aluno?</span>
                         <Button
-                          onClick={() => {
-                            toast.success('Aluno removido com sucesso!');
-                          }}
+                          onClick={() =>
+                            deleteStudent.mutate({ responsibleId, studentId: student.id })
+                          }
                         >
                           <Check />
                           <span>Sim</span>

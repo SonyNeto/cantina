@@ -120,7 +120,7 @@ export const StudentForm = ({
 
   return (
     <form
-      className={cn('app-form-row justify-center z-50 flex rounded-none', className)}
+      className={cn('app-form-row z-50 flex justify-center rounded-none', className)}
       onSubmit={(e) => {
         e.preventDefault();
 
