@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { Link, useLocation, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft, Check, PenSquare, User, UserPlus } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
@@ -48,6 +48,7 @@ const getResponsibleRegisters = async (
 
 export const ResponsibleDetails: FC = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
@@ -152,27 +153,30 @@ export const ResponsibleDetails: FC = () => {
                       }}
                     />
                   ) : (
-                    <Link
-                      to={{
-                        pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
-                          responsibleTotals?.responsibleId ?? responsibleId,
-                          student.id,
-                        ),
-                        search: location.search,
-                      }}
-                      className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 px-4 py-3"
-                    >
+                    <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 px-4 py-3">
                       <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                         <User />
                         <span>{student.name}</span>
                       </div>
                       <span className="text-center">{student.schoolClassLabel}</span>
                       <span className="text-center tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
-                    </Link>
+                    </div>
                   )}
                   <SwipeActionRow
+                    handleWidth={16}
+                    openWidth={136}
                     open={isDrawerOpen}
                     onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
+                    captureInteractions={!isEditing}
+                    onTap={() =>
+                      navigate({
+                        pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
+                          responsibleTotals?.responsibleId ?? responsibleId,
+                          student.id,
+                        ),
+                        search: location.search,
+                      })
+                    }
                   >
                     <Button
                       onClick={() => {

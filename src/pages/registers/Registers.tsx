@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { Link, useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { Button } from '../../components/commons/Button';
 import { Check, PenSquare, User, UserPlus } from 'pixelarticons/react';
@@ -36,6 +36,7 @@ const getResponsiblesRegisters = async (period: Period): Promise<ResponsiblesReg
 
 export const Registers: FC = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
@@ -121,24 +122,27 @@ export const Registers: FC = () => {
                       }}
                     />
                   ) : (
-                    <Link
-                      to={{
-                        pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
-                        search: location.search,
-                      }}
-                      className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 px-4 py-3"
-                    >
+                    <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 px-4 py-3">
                       <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                         <User />
                         <span>{responsibleTotal.responsibleName}</span>
                       </div>
                       <span className="text-center tabular-nums">{`R$${responsibleTotal.total.toFixed(2)}`}</span>
-                    </Link>
+                    </div>
                   )}
 
                   <SwipeActionRow
+                    handleWidth={16}
+                    openWidth={136}
                     open={isDrawerOpen}
                     onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
+                    onTap={() =>
+                      navigate({
+                        pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
+                        search: location.search,
+                      })
+                    }
+                    captureInteractions={!isEditing}
                   >
                     <Button
                       onClick={() => {

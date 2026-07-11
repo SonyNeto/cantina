@@ -49,7 +49,7 @@ export const Button: FC<Props> = ({
       variants[variant].base,
       !disableHover && variants[variant].hover,
       sizes[size],
-      'z-30 inline-flex cursor-pointer items-center justify-center rounded-none font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-accent/35 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0',
+      'z-30 inline-flex cursor-pointer items-center justify-center rounded-none font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-accent/35 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_*]:pointer-events-none [&_svg]:shrink-0',
       className,
     ),
     ...(nativeButton ? { type: 'button' } : {}),

@@ -114,8 +114,11 @@ export const Menu: FC = () => {
                 )}
 
                 <SwipeActionRow
+                  handleWidth={16}
+                  openWidth={136}
                   open={isDrawerOpen}
                   onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
+                  captureInteractions={!isEditing}
                 >
                   <Button
                     onClick={() => {
