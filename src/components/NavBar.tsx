@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { WorkspaceSelect } from './WorkspaceSelect.tsx';
 import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
 import { canAccessWorkspaceRole } from '../utils/workspaceAccess.ts';
+import { ThemeSwitch } from './ThemeSwitch.tsx';
 
 type OrderWithDetails = {
   id: string;
@@ -133,7 +134,10 @@ export const NavBar: FC = () => {
             </Button>
           </DrawerContent>
 
-          <img rel="icon" src="/favicon.png" className="size-10" />
+          <div className="inline-flex items-center gap-5">
+            <ThemeSwitch />
+            <img rel="icon" src="/favicon.png" className="size-10" />
+          </div>
         </div>
       </Drawer>
     )

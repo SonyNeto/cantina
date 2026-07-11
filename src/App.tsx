@@ -14,8 +14,13 @@ import { SignupPage } from './pages/auth/SignupPage';
 import { ProtectedRoute } from './pages/auth/ProtectedRoute';
 import { Invites } from './pages/invites/Invites';
 import { ProtectedAdminRoute } from './pages/auth/ProtectedAdminRoute';
+import { getSavedTheme } from './utils/functions';
 
 const queryClient = new QueryClient();
+
+const isDark = getSavedTheme();
+document.documentElement.classList.toggle('dark', isDark);
+localStorage.setItem('theme', isDark ? 'dark' : 'light');
 
 function App() {
   return (
