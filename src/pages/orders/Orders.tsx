@@ -6,13 +6,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { toast } from 'sonner';
 import { workspaceApiFetch } from '../../utils/api';
-import type { Order, Product, Register } from '../../constants/canteen/types';
+import type { OrderItem, Product, Register } from '../../constants/canteen/types';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { Dialog, DialogTrigger, DialogContent } from '../../components/commons/Dialog';
 
-type OrderWithDetails = {
+type OrderItemWithDetails = {
   id: string;
-  quantity: number;
+  orderId: string;
   created_at: string;
   total: number;
   status: 'cooking' | 'ready';
@@ -28,26 +28,27 @@ type OrderWithDetails = {
 };
 
 type OrdersResponse = {
-  orderItems: OrderWithDetails[];
+  orderItems: OrderItemWithDetails[];
 };
 
 type RegisterOrderInput = {
   product: Product;
   created_at: string;
   studentId: string;
-  quantity: number;
   total: number;
+  orderId: string;
+  itemId: string;
 };
 
-type OrderResponse = {
-  order: Order | null;
+type ItemResponse = {
+  item: OrderItem | null;
 };
 
 type RegisterResponse = {
   register: Register;
 };
 
-const getOrdersWithDetails = async (): Promise<OrdersResponse> => {
+const getOrderItemsWithDetails = async (): Promise<OrdersResponse> => {
   const res = await workspaceApiFetch('/orders/items');
   return res.json();
 };
@@ -56,16 +57,19 @@ export const Orders: FC = () => {
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: orders = [], isPending } = useQuery({
+  const { data: items = [], isPending } = useQuery({
     queryKey: ['orderItems', workspaceId],
-    queryFn: getOrdersWithDetails,
+    queryFn: getOrderItemsWithDetails,
     enabled: Boolean(workspaceId),
     select: (data) => data.orderItems,
   });
 
-  const updateOrderStatus = useMutation({
-    mutationFn: async (orderId: string): Promise<OrderResponse> => {
-      const res = await workspaceApiFetch(`/orders/${orderId}/status`, {
+  const updateOrderItemStatus = useMutation({
+    mutationFn: async ({
+      orderId,
+      itemId,
+    }: Pick<RegisterOrderInput, 'orderId' | 'itemId'>): Promise<ItemResponse> => {
+      const res = await workspaceApiFetch(`/orders/${orderId}/items/${itemId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -81,9 +85,12 @@ export const Orders: FC = () => {
     },
   });
 
-  const deleteOrder = useMutation({
-    mutationFn: async (orderId: string): Promise<OrderResponse> => {
-      const res = await workspaceApiFetch(`/orders/${orderId}`, {
+  const deleteOrderItem = useMutation({
+    mutationFn: async ({
+      orderId,
+      itemId,
+    }: Pick<RegisterOrderInput, 'orderId' | 'itemId'>): Promise<ItemResponse> => {
+      const res = await workspaceApiFetch(`/orders/${orderId}/items/${itemId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -101,8 +108,9 @@ export const Orders: FC = () => {
       product,
       created_at,
       studentId,
-      quantity,
       total,
+      orderId,
+      itemId,
     }: RegisterOrderInput): Promise<RegisterResponse> => {
       const res = await workspaceApiFetch('/registers', {
         method: 'POST',
@@ -111,12 +119,18 @@ export const Orders: FC = () => {
           product,
           created_at,
           studentId,
-          quantity,
           total,
         }),
       });
 
-      return res.json();
+      if (!res.ok) {
+        throw new Error('Erro ao mover entrada para registro');
+      }
+
+      const register = await res.json();
+      await deleteOrderItem.mutateAsync({ orderId, itemId });
+
+      return register;
     },
 
     onSuccess: () => {
@@ -125,8 +139,8 @@ export const Orders: FC = () => {
     },
   });
 
-  const cookingOrders = orders.filter((order) => order.status === 'cooking');
-  const readyOrders = orders.filter((order) => order.status === 'ready');
+  const cookingItems = items.filter((item) => item.status === 'cooking');
+  const readyItems = items.filter((item) => item.status === 'ready');
 
   return isPending ? (
     <Loader />
@@ -139,22 +153,26 @@ export const Orders: FC = () => {
         </div>
 
         <div className="app-list">
-          {cookingOrders.map((order) => {
-            const student = order.student;
+          {cookingItems.map((item) => {
+            const student = item.student;
             if (!student) return;
 
             return (
-              <div className="app-row grid-cols-[minmax(0,1fr)_10ch_5ch] gap-5" key={order.id}>
+              <div className="app-row grid-cols-[minmax(0,1fr)_10ch_5ch] gap-5" key={item.id}>
                 <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                  <span className="text-danger font-bold">{order.quantity}x</span>
-                  <span>{order.product.label}</span>
+                  <span>{item.product.label}</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-center">{order.student.name}</span>
-                  <span className="text-center">{order.schoolClass.label}</span>
+                  <span className="text-center">{item.student.name}</span>
+                  <span className="text-center">{item.schoolClass.label}</span>
                 </div>
                 <div className="flex flex-col items-center gap-1 justify-self-end">
-                  <Button size="sm" onClick={() => updateOrderStatus.mutate(order.id)}>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      updateOrderItemStatus.mutate({ orderId: item.orderId, itemId: item.id })
+                    }
+                  >
                     <Check />
                   </Button>
                   <Dialog>
@@ -165,7 +183,7 @@ export const Orders: FC = () => {
                       <span>Tem certeza que deseja excluir o pedido?</span>
                       <Button
                         onClick={() => {
-                          deleteOrder.mutate(order.id);
+                          deleteOrderItem.mutate({ orderId: item.orderId, itemId: item.id });
                           toast.success('Item removido com sucesso!');
                         }}
                       >
@@ -186,32 +204,31 @@ export const Orders: FC = () => {
         </div>
 
         <div className="app-list">
-          {readyOrders.map((order) => {
-            const student = order.student;
+          {readyItems.map((item) => {
+            const student = item.student;
             if (!student) return;
 
             return (
-              <div className="app-row grid-cols-[minmax(0,1fr)_5ch_7ch] gap-5" key={order.id}>
+              <div className="app-row grid-cols-[minmax(0,1fr)_5ch_7ch] gap-5" key={item.id}>
                 <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                  <span className="text-danger font-bold">{order.quantity}x</span>
-                  <span>{order.product.label}</span>
+                  <span>{item.product.label}</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-center">{order.student.name}</span>
-                  <span className="text-center">{order.schoolClass.label}</span>
+                  <span className="text-center">{item.student.name}</span>
+                  <span className="text-center">{item.schoolClass.label}</span>
                 </div>
                 <div className="flex flex-col items-center gap-1 justify-self-end">
                   <Button
                     size="sm"
                     onClick={() => {
                       postRegister.mutate({
-                        product: order.product,
-                        created_at: order.created_at,
-                        studentId: order.student.id,
-                        quantity: order.quantity,
-                        total: order.total,
+                        product: item.product,
+                        created_at: item.created_at,
+                        studentId: item.student.id,
+                        total: item.total,
+                        orderId: item.orderId,
+                        itemId: item.id,
                       });
-                      deleteOrder.mutate(order.id);
                     }}
                   >
                     <Download />

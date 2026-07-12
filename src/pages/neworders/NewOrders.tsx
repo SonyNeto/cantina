@@ -22,7 +22,7 @@ const STEPS = {
 type Step = (typeof STEPS)[keyof typeof STEPS];
 
 type CreateOrdersResponse = {
-  orders: Order[];
+  order: Order;
 };
 
 const orderFormSchema = z.object({
@@ -32,7 +32,6 @@ const orderFormSchema = z.object({
     .array(
       z.object({
         productId: z.string().trim().min(1, 'Selecione um item'),
-        quantity: z.number().int().positive('A quantidade deve ser maior que zero'),
         status: z.enum(['cooking', 'ready']),
       }),
     )

@@ -15,9 +15,8 @@ import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
 import { canAccessWorkspaceRole } from '../utils/workspaceAccess.ts';
 import { ThemeSwitch } from './ThemeSwitch.tsx';
 
-type OrderWithDetails = {
+type OrderItemWithDetails = {
   id: string;
-  quantity: number;
   status: 'cooking' | 'ready';
   student: {
     id: string;
@@ -31,10 +30,10 @@ type OrderWithDetails = {
 };
 
 type OrdersResponse = {
-  orderItems: OrderWithDetails[];
+  orderItems: OrderItemWithDetails[];
 };
 
-const getOrdersWithDetails = async (): Promise<OrdersResponse> => {
+const getOrderItemsWithDetails = async (): Promise<OrdersResponse> => {
   const res = await workspaceApiFetch('/orders/items');
   return res.json();
 };
@@ -46,9 +45,9 @@ export const NavBar: FC = () => {
   const workspaceRole = useWorkspaceStore((state) => state.workspace?.role);
   const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
 
-  const { data: orders = [], isPending } = useQuery({
+  const { data: items = [], isPending } = useQuery({
     queryKey: ['orderItems', workspaceId],
-    queryFn: getOrdersWithDetails,
+    queryFn: getOrderItemsWithDetails,
     enabled: Boolean(workspaceId),
     select: (data) => data.orderItems,
   });
@@ -77,7 +76,7 @@ export const NavBar: FC = () => {
     },
   });
 
-  const totalActiveOrders = orders.filter((order) => order.status === 'cooking').length;
+  const totalActiveItems = items.filter((item) => item.status === 'cooking').length;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
@@ -119,7 +118,7 @@ export const NavBar: FC = () => {
                 >
                   <item.icon width={12} height={12} />
                   {item.label}
-                  {orders && <NotificationBadge count={totalActiveOrders} />}
+                  {orders && <NotificationBadge count={totalActiveItems} />}
                 </NavLink>
               );
             })}

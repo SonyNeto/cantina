@@ -169,6 +169,10 @@ body {
     @apply grid w-full;
   }
 
+  .app-group {
+    @apply !border-b-0;
+  }
+
   .app-list > :last-child {
     @apply border-b-0;
   }

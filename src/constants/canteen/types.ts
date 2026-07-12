@@ -15,30 +15,32 @@ export interface Register {
   product: Product;
   created_at: Date;
   studentId: string;
-  quantity: string;
   total: number;
 }
 
 export type OrderStatus = 'cooking' | 'ready';
 
-export interface OrderDraftItem {
+export interface OrderItemDraft {
   productId: string;
-  quantity: number;
   status: OrderStatus;
+}
+
+export interface OrderItem {
+  id: string;
+  product: Product;
+  status: OrderStatus;
+  total: number;
 }
 
 export interface Order {
   id: string;
   studentId: string;
   created_at: string;
-  productId: string;
-  quantity: number;
-  status: OrderStatus;
-  total: number;
+  items: OrderItem[];
 }
 
 export interface OrderForm {
   studentId: string;
   created_at: string;
-  items: OrderDraftItem[];
+  items: OrderItemDraft[];
 }

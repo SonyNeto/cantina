@@ -11,8 +11,10 @@ import { usePeriod, type Period } from '../../hooks/usePeriod';
 import dayjs from 'dayjs';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
+type RegistersByDate = Record<string, Register[]>;
+
 type RegistersResponse = {
-  registers: Register[];
+  registersByDate: RegistersByDate[];
   studentName: string;
 };
 
@@ -23,6 +25,7 @@ const getStudentRegisters = async (
   const res = await workspaceApiFetch(
     `/students/${studentId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
   );
+
   return res.json();
 };
 
@@ -38,7 +41,7 @@ export const StudentDetails: FC = () => {
     enabled: Boolean(workspaceId && studentId),
     select: (data) => ({
       studentName: data.studentName,
-      registers: data.registers.filter((register) => register.studentId === studentId),
+      registersByDate: data.registersByDate,
     }),
   });
 
@@ -46,10 +49,14 @@ export const StudentDetails: FC = () => {
     return <div>Aluno não encontrado</div>;
   }
 
-  const studentRegisters = studentRegisterDetails?.registers ?? [];
+  const registersByDate = studentRegisterDetails?.registersByDate ?? [];
 
-  const total = studentRegisters.reduce((sum, register) => {
-    return sum + register.total;
+  const total = registersByDate.reduce((sum, group) => {
+    const registers = Object.values(group).flat();
+
+    const groupTotal = registers.reduce((subtotal, register) => subtotal + register.total, 0);
+
+    return sum + groupTotal;
   }, 0);
 
   return isPending ? (
@@ -68,23 +75,36 @@ export const StudentDetails: FC = () => {
           <span className="justify-self-center text-center">{`Pedidos de ${studentRegisterDetails?.studentName}`}</span>
           <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
         </div>
+        
+        <div className="">
+          {registersByDate.map((group) => {
+            const entry = Object.entries(group)[0];
 
-        <div className="app-list">
-          {studentRegisters.map((register) => (
-            <div
-              className="app-row grid-cols-[minmax(0,1fr)_8ch_7ch] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
-              key={register.id}
-            >
-              <div className="inline-flex items-center gap-2.5">
-                <span className="text-danger font-bold">{register.quantity}x</span>
-                <span>{register.product.label}</span>
+            if (!entry) return null;
+
+            const [date, registers] = entry;
+            return (
+              <div key={date} className="app-list">
+                <div className="text-xl px-4 py-1 text-muted bg-secondary/35 border-border/70 border-b-4">
+                  {dayjs(date).format('DD/MM')}
+                </div>
+
+                <div className="app-group">
+                  {registers.map((register) => (
+                    <div
+                      className="app-row grid-cols-[minmax(0,1fr)_7ch] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
+                      key={register.id}
+                    >
+                      <div className="inline-flex items-center gap-2.5">
+                        <span>{register.product.label}</span>
+                      </div>
+                      <span className="text-right tabular-nums">{`R$${register.total.toFixed(2)}`}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <span className="text-center tabular-nums">
-                {dayjs(register.created_at).format('DD/MM/YYYY')}
-              </span>
-              <span className="text-right tabular-nums">{`R$${register.total.toFixed(2)}`}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="app-total-bar justify-end [&_svg]:size-10">

@@ -42,80 +42,32 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
   const total = items.reduce((sum, orderItem) => {
     const product = menuItems.find((item) => item.id === orderItem.productId);
 
-    return sum + (product?.price ?? 0) * orderItem.quantity;
+    return sum + (product?.price ?? 0);
   }, 0);
 
   function getSelectedProductQuantity(productId: string) {
-    const item = items.find((item) => item.productId === productId);
-    if (!item) return 0;
-
-    return item.quantity;
+    return items.filter((item) => item.productId === productId).length;
   }
 
   function increaseProductQuantity(productId: string) {
-    if (!items.some((item) => item.productId === productId)) {
-      setValue(
-        'items',
-        [
-          ...items,
-          {
-            productId,
-            quantity: 1,
-            status: 'cooking',
-          },
-        ],
-        {
-          shouldDirty: true,
-          shouldValidate: true,
-        },
-      );
-
-      return;
-    }
-
-    const updatedItems = items.map((item) => {
-      if (item.productId !== productId) return item;
-
-      return {
-        ...item,
-        quantity: item.quantity + 1,
-      };
-    });
-
-    setValue('items', updatedItems, {
+    setValue('items', [...items, { productId, status: 'cooking' }], {
       shouldDirty: true,
       shouldValidate: true,
     });
   }
 
   function decreaseProductQuantity(productId: string) {
-    const item = items.find((item) => item.productId === productId);
-    if (!item) return;
+    const itemIndex = items.findLastIndex((item) => item.productId === productId);
+    if (itemIndex === -1) return;
 
-    if (item.quantity === 1) {
-      const updatedItems = items.filter((item) => item.productId !== productId);
-
-      setValue('items', updatedItems, {
+    setValue(
+      'items',
+      items.filter((_, index) => index !== itemIndex),
+      {
         shouldDirty: true,
         shouldValidate: true,
-      });
-
-      return;
-    }
-
-    const updatedItems = items.map((item) => {
-      if (item.productId !== productId) return item;
-
-      return {
-        ...item,
-        quantity: item.quantity - 1,
-      };
-    });
-
-    setValue('items', updatedItems, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+      },
+    );
   }
 
   return isPending ? (
