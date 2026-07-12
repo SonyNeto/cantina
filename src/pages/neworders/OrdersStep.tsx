@@ -50,7 +50,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
   }
 
   function increaseProductQuantity(productId: string) {
-    setValue('items', [...items, { productId, status: 'cooking' }], {
+    setValue('items', [...items, { productId }], {
       shouldDirty: true,
       shouldValidate: true,
     });

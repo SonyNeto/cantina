@@ -32,7 +32,6 @@ const orderFormSchema = z.object({
     .array(
       z.object({
         productId: z.string().trim().min(1, 'Selecione um item'),
-        status: z.enum(['cooking', 'ready']),
       }),
     )
     .min(1, 'Adicione pelo menos um item ao pedido'),
@@ -72,7 +71,7 @@ export const NewOrders: FC = () => {
     onSuccess: () => {
       toast.success('Pedido realizado com sucesso!');
       setStep(STEPS.STUDENTS);
-      queryClient.invalidateQueries({ queryKey: ['orderItems'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
 
     onError: () => {

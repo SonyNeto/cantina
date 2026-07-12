@@ -15,21 +15,18 @@ export interface Register {
   product: Product;
   created_at: Date;
   studentId: string;
-  total: number;
 }
 
 export type OrderStatus = 'cooking' | 'ready';
 
 export interface OrderItemDraft {
   productId: string;
-  status: OrderStatus;
 }
 
 export interface OrderItem {
   id: string;
   product: Product;
   status: OrderStatus;
-  total: number;
 }
 
 export interface Order {

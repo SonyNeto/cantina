@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { toast } from 'sonner';
 import { workspaceApiFetch } from '../../utils/api';
-import type { OrderItem, Product, Register } from '../../constants/canteen/types';
+import type { OrderItem, Register } from '../../constants/canteen/types';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { Dialog, DialogTrigger, DialogContent } from '../../components/commons/Dialog';
 
@@ -14,28 +14,31 @@ type OrderItemWithDetails = {
   id: string;
   orderId: string;
   created_at: string;
-  total: number;
   status: 'cooking' | 'ready';
   student: {
     id: string;
     name: string;
-  };
+  } | null;
   schoolClass: {
     id: string;
     label: string;
-  };
-  product: Product;
+  } | null;
+  product: OrderItem['product'];
+};
+
+type OrderWithDetails = {
+  id: string;
+  created_at: string;
+  student: OrderItemWithDetails['student'];
+  schoolClass: OrderItemWithDetails['schoolClass'];
+  items: OrderItem[];
 };
 
 type OrdersResponse = {
-  orderItems: OrderItemWithDetails[];
+  orders: OrderWithDetails[];
 };
 
-type RegisterOrderInput = {
-  product: Product;
-  created_at: string;
-  studentId: string;
-  total: number;
+type OrderItemParams = {
   orderId: string;
   itemId: string;
 };
@@ -48,8 +51,8 @@ type RegisterResponse = {
   register: Register;
 };
 
-const getOrderItemsWithDetails = async (): Promise<OrdersResponse> => {
-  const res = await workspaceApiFetch('/orders/items');
+const getOrders = async (): Promise<OrdersResponse> => {
+  const res = await workspaceApiFetch('/orders');
   return res.json();
 };
 
@@ -57,18 +60,25 @@ export const Orders: FC = () => {
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: items = [], isPending } = useQuery({
-    queryKey: ['orderItems', workspaceId],
-    queryFn: getOrderItemsWithDetails,
+  const { data: orders = [], isPending } = useQuery({
+    queryKey: ['orders', workspaceId],
+    queryFn: getOrders,
     enabled: Boolean(workspaceId),
-    select: (data) => data.orderItems,
+    select: (data) => data.orders,
   });
 
+  const items = orders.flatMap((order) =>
+    order.items.map((item) => ({
+      ...item,
+      orderId: order.id,
+      created_at: order.created_at,
+      student: order.student,
+      schoolClass: order.schoolClass,
+    })),
+  );
+
   const updateOrderItemStatus = useMutation({
-    mutationFn: async ({
-      orderId,
-      itemId,
-    }: Pick<RegisterOrderInput, 'orderId' | 'itemId'>): Promise<ItemResponse> => {
+    mutationFn: async ({ orderId, itemId }: OrderItemParams): Promise<ItemResponse> => {
       const res = await workspaceApiFetch(`/orders/${orderId}/items/${itemId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -81,15 +91,12 @@ export const Orders: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orderItems'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
 
   const deleteOrderItem = useMutation({
-    mutationFn: async ({
-      orderId,
-      itemId,
-    }: Pick<RegisterOrderInput, 'orderId' | 'itemId'>): Promise<ItemResponse> => {
+    mutationFn: async ({ orderId, itemId }: OrderItemParams): Promise<ItemResponse> => {
       const res = await workspaceApiFetch(`/orders/${orderId}/items/${itemId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -99,41 +106,25 @@ export const Orders: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orderItems'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
 
   const postRegister = useMutation({
-    mutationFn: async ({
-      product,
-      created_at,
-      studentId,
-      total,
-      orderId,
-      itemId,
-    }: RegisterOrderInput): Promise<RegisterResponse> => {
-      const res = await workspaceApiFetch('/registers', {
+    mutationFn: async ({ orderId, itemId }: OrderItemParams): Promise<RegisterResponse> => {
+      const res = await workspaceApiFetch(`/orders/${orderId}/items/${itemId}/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product,
-          created_at,
-          studentId,
-          total,
-        }),
       });
 
       if (!res.ok) {
-        throw new Error('Erro ao mover entrada para registro');
+        throw new Error('Erro ao mover item para registro');
       }
 
-      const register = await res.json();
-      await deleteOrderItem.mutateAsync({ orderId, itemId });
-
-      return register;
+      return res.json();
     },
 
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['registers'] });
       toast.success('Pedido movido para registro');
     },
@@ -155,7 +146,8 @@ export const Orders: FC = () => {
         <div className="app-list">
           {cookingItems.map((item) => {
             const student = item.student;
-            if (!student) return;
+            const schoolClass = item.schoolClass;
+            if (!student || !schoolClass) return;
 
             return (
               <div className="app-row grid-cols-[minmax(0,1fr)_10ch_5ch] gap-5" key={item.id}>
@@ -163,8 +155,8 @@ export const Orders: FC = () => {
                   <span>{item.product.label}</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-center">{item.student.name}</span>
-                  <span className="text-center">{item.schoolClass.label}</span>
+                  <span className="text-center">{student.name}</span>
+                  <span className="text-center">{schoolClass.label}</span>
                 </div>
                 <div className="flex flex-col items-center gap-1 justify-self-end">
                   <Button
@@ -206,7 +198,8 @@ export const Orders: FC = () => {
         <div className="app-list">
           {readyItems.map((item) => {
             const student = item.student;
-            if (!student) return;
+            const schoolClass = item.schoolClass;
+            if (!student || !schoolClass) return;
 
             return (
               <div className="app-row grid-cols-[minmax(0,1fr)_5ch_7ch] gap-5" key={item.id}>
@@ -214,18 +207,14 @@ export const Orders: FC = () => {
                   <span>{item.product.label}</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-center">{item.student.name}</span>
-                  <span className="text-center">{item.schoolClass.label}</span>
+                  <span className="text-center">{student.name}</span>
+                  <span className="text-center">{schoolClass.label}</span>
                 </div>
                 <div className="flex flex-col items-center gap-1 justify-self-end">
                   <Button
                     size="sm"
                     onClick={() => {
                       postRegister.mutate({
-                        product: item.product,
-                        created_at: item.created_at,
-                        studentId: item.student.id,
-                        total: item.total,
                         orderId: item.orderId,
                         itemId: item.id,
                       });

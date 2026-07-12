@@ -11,10 +11,8 @@ import { usePeriod, type Period } from '../../hooks/usePeriod';
 import dayjs from 'dayjs';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
-type RegistersByDate = Record<string, Register[]>;
-
 type RegistersResponse = {
-  registersByDate: RegistersByDate[];
+  registersByDate: Record<string, Register[]>;
   studentName: string;
 };
 
@@ -51,13 +49,9 @@ export const StudentDetails: FC = () => {
 
   const registersByDate = studentRegisterDetails?.registersByDate ?? [];
 
-  const total = registersByDate.reduce((sum, group) => {
-    const registers = Object.values(group).flat();
-
-    const groupTotal = registers.reduce((subtotal, register) => subtotal + register.total, 0);
-
-    return sum + groupTotal;
-  }, 0);
+  const total = Object.values(registersByDate)
+    .flat()
+    .reduce((sum, register) => sum + register.product.price, 0);
 
   return isPending ? (
     <Loader />
@@ -77,15 +71,10 @@ export const StudentDetails: FC = () => {
         </div>
         
         <div className="">
-          {registersByDate.map((group) => {
-            const entry = Object.entries(group)[0];
-
-            if (!entry) return null;
-
-            const [date, registers] = entry;
+          {Object.entries(registersByDate).map(([date, registers]) => {
             return (
               <div key={date} className="app-list">
-                <div className="text-xl px-4 py-1 text-muted bg-secondary/35 border-border/70 border-b-4">
+                <div className="text-xl px-4 py-1 text-muted bg-secondary/35 border-border/15 border-b-4">
                   {dayjs(date).format('DD/MM')}
                 </div>
 
@@ -98,7 +87,7 @@ export const StudentDetails: FC = () => {
                       <div className="inline-flex items-center gap-2.5">
                         <span>{register.product.label}</span>
                       </div>
-                      <span className="text-right tabular-nums">{`R$${register.total.toFixed(2)}`}</span>
+                      <span className="text-right tabular-nums">{`R$${register.product.price.toFixed(2)}`}</span>
                     </div>
                   ))}
                 </div>

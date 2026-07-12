@@ -7,7 +7,6 @@ import NAVMENU from '../constants/navmenu.ts';
 import { NotificationBadge } from './commons/NotificationBadge.tsx';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, workspaceApiFetch } from '../utils/api';
-import type { Product } from '../constants/canteen/types';
 import ROUTES from '../constants/routes.ts';
 import { toast } from 'sonner';
 import { WorkspaceSelect } from './WorkspaceSelect.tsx';
@@ -15,26 +14,18 @@ import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
 import { canAccessWorkspaceRole } from '../utils/workspaceAccess.ts';
 import { ThemeSwitch } from './ThemeSwitch.tsx';
 
-type OrderItemWithDetails = {
-  id: string;
-  status: 'cooking' | 'ready';
-  student: {
-    id: string;
-    name: string;
-  };
-  schoolClass: {
-    id: string;
-    label: string;
-  };
-  product: Product;
+type OrderWithItems = {
+  items: {
+    status: 'cooking' | 'ready';
+  }[];
 };
 
 type OrdersResponse = {
-  orderItems: OrderItemWithDetails[];
+  orders: OrderWithItems[];
 };
 
-const getOrderItemsWithDetails = async (): Promise<OrdersResponse> => {
-  const res = await workspaceApiFetch('/orders/items');
+const getOrders = async (): Promise<OrdersResponse> => {
+  const res = await workspaceApiFetch('/orders');
   return res.json();
 };
 
@@ -45,11 +36,11 @@ export const NavBar: FC = () => {
   const workspaceRole = useWorkspaceStore((state) => state.workspace?.role);
   const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
 
-  const { data: items = [], isPending } = useQuery({
-    queryKey: ['orderItems', workspaceId],
-    queryFn: getOrderItemsWithDetails,
+  const { data: orders = [], isPending } = useQuery({
+    queryKey: ['orders', workspaceId],
+    queryFn: getOrders,
     enabled: Boolean(workspaceId),
-    select: (data) => data.orderItems,
+    select: (data) => data.orders,
   });
 
   const logoutMutation = useMutation({
@@ -76,7 +67,9 @@ export const NavBar: FC = () => {
     },
   });
 
-  const totalActiveItems = items.filter((item) => item.status === 'cooking').length;
+  const totalActiveItems = orders.reduce((total, order) => {
+    return total + order.items.filter((item) => item.status === 'cooking').length;
+  }, 0);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
