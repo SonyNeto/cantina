@@ -35,6 +35,7 @@ type RegisterOrderInput = {
   product: Product;
   created_at: string;
   studentId: string;
+  quantity: number;
   total: number;
 };
 
@@ -100,6 +101,7 @@ export const Orders: FC = () => {
       product,
       created_at,
       studentId,
+      quantity,
       total,
     }: RegisterOrderInput): Promise<RegisterResponse> => {
       const res = await workspaceApiFetch('/registers', {
@@ -109,6 +111,7 @@ export const Orders: FC = () => {
           product,
           created_at,
           studentId,
+          quantity,
           total,
         }),
       });
@@ -143,6 +146,7 @@ export const Orders: FC = () => {
             return (
               <div className="app-row grid-cols-[minmax(0,1fr)_10ch_5ch] gap-5" key={order.id}>
                 <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                  <span className="text-danger font-bold">{order.quantity}x</span>
                   <span>{order.product.label}</span>
                 </div>
                 <div className="flex flex-col items-center">
@@ -189,6 +193,7 @@ export const Orders: FC = () => {
             return (
               <div className="app-row grid-cols-[minmax(0,1fr)_5ch_7ch] gap-5" key={order.id}>
                 <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                  <span className="text-danger font-bold">{order.quantity}x</span>
                   <span>{order.product.label}</span>
                 </div>
                 <div className="flex flex-col items-center">
@@ -203,6 +208,7 @@ export const Orders: FC = () => {
                         product: order.product,
                         created_at: order.created_at,
                         studentId: order.student.id,
+                        quantity: order.quantity,
                         total: order.total,
                       });
                       deleteOrder.mutate(order.id);

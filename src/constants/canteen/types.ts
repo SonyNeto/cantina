@@ -15,6 +15,7 @@ export interface Register {
   product: Product;
   created_at: Date;
   studentId: string;
+  quantity: string;
   total: number;
 }
 

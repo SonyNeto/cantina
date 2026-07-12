@@ -76,6 +76,7 @@ export const StudentDetails: FC = () => {
               key={register.id}
             >
               <div className="inline-flex items-center gap-2.5">
+                <span className="text-danger font-bold">{register.quantity}x</span>
                 <span>{register.product.label}</span>
               </div>
               <span className="text-center tabular-nums">
