@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { workspaceApiFetch } from '../../utils/api';
 import type { OrderItem, Register } from '../../constants/canteen/types';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { Dialog, DialogTrigger, DialogContent } from '../../components/commons/Dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogClose } from '../../components/commons/Dialog';
 
 type OrderItemWithDetails = {
   id: string;
@@ -107,6 +107,11 @@ export const Orders: FC = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast.success('Item removido com sucesso!');
+    },
+
+    onError: () => {
+      toast.error('Não foi possível remover o item.');
     },
   });
 
@@ -173,15 +178,18 @@ export const Orders: FC = () => {
                     </DialogTrigger>
                     <DialogContent title="Atenção">
                       <span>Tem certeza que deseja excluir o pedido?</span>
-                      <Button
-                        onClick={() => {
-                          deleteOrderItem.mutate({ orderId: item.orderId, itemId: item.id });
-                          toast.success('Item removido com sucesso!');
-                        }}
+                      <DialogClose
+                        render={
+                          <Button
+                            onClick={() => {
+                              deleteOrderItem.mutate({ orderId: item.orderId, itemId: item.id });
+                            }}
+                          />
+                        }
                       >
                         <Check />
                         <span>Sim</span>
-                      </Button>
+                      </DialogClose>
                     </DialogContent>
                   </Dialog>
                 </div>

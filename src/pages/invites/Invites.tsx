@@ -71,6 +71,7 @@ export const Invites: FC = () => {
             size="md"
             variant="primary"
             className="w-full rounded-none"
+            disabled={postInviteResponse.isPending}
             onClick={() => {
               postInviteResponse.mutate();
             }}

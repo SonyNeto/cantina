@@ -12,7 +12,7 @@ import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { ResponsibleForm } from './components/ResponsibleForm';
 import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
 import { TrashCan } from '../../assets/icons/MenuIcons';
-import { Dialog, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 import { toast } from 'sonner';
 
 type ResponsibleRegister = {
@@ -163,17 +163,21 @@ export const Registers: FC = () => {
                       </DialogTrigger>
                       <DialogContent title="Atenção">
                         <span>Tem certeza que deseja excluir o responsável?</span>
-                        <Button
-                          onClick={() => {
-                            deleteResponsible.mutate(responsibleTotal.responsibleId);
-                            setEditingIndex(null);
-                            setFormPosition(null);
-                            setDrawerOpenIndex(null);
-                          }}
+                        <DialogClose
+                          render={
+                            <Button
+                              onClick={() => {
+                                deleteResponsible.mutate(responsibleTotal.responsibleId);
+                                setEditingIndex(null);
+                                setFormPosition(null);
+                                setDrawerOpenIndex(null);
+                              }}
+                            />
+                          }
                         >
                           <Check />
                           <span>Sim</span>
-                        </Button>
+                        </DialogClose>
                       </DialogContent>
                     </Dialog>
                   </SwipeActionRow>

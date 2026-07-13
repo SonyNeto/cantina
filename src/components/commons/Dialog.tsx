@@ -49,6 +49,7 @@ const DialogContent: FC<ComponentProps<typeof DialogPrimitive.Popup>> = ({
   </DialogPrimitive.Portal>
 );
 
+const DialogClose = DialogPrimitive.Close;
 const DialogDescription = DialogPrimitive.Description;
 
-export { Dialog, DialogTrigger, DialogContent, DialogDescription };
+export { Dialog, DialogTrigger, DialogContent, DialogClose, DialogDescription };

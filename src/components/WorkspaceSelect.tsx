@@ -190,6 +190,7 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
               size="md"
               type="submit"
               className="w-full shrink-0 rounded-none px-3"
+              disabled={postWorkspace.isPending}
             >
               Criar
             </Button>

@@ -3,7 +3,7 @@ import { Check, PenSquare, Plus } from 'pixelarticons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '../../components/commons/Button';
-import { Dialog, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 import { Loader } from '../../components/commons/Loader';
 import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
 import { TrashCan } from '../../assets/icons/MenuIcons';
@@ -139,17 +139,21 @@ export const Menu: FC = () => {
                     </DialogTrigger>
                     <DialogContent title="Atenção">
                       <span>Tem certeza que deseja excluir o item?</span>
-                      <Button
-                        onClick={() => {
-                          deleteMenuItem.mutate(item.id);
-                          setEditingIndex(null);
-                          setFormPosition(null);
-                          setDrawerOpenIndex(null);
-                        }}
+                      <DialogClose
+                        render={
+                          <Button
+                            onClick={() => {
+                              deleteMenuItem.mutate(item.id);
+                              setEditingIndex(null);
+                              setFormPosition(null);
+                              setDrawerOpenIndex(null);
+                            }}
+                          />
+                        }
                       >
                         <Check />
                         <span>Sim</span>
-                      </Button>
+                      </DialogClose>
                     </DialogContent>
                   </Dialog>
                 </SwipeActionRow>

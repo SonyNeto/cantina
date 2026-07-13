@@ -4,7 +4,6 @@ import { CloudMoon, CloudSun } from 'pixelarticons/react';
 import { getSavedTheme } from '../utils/functions';
 
 export const ThemeSwitch: FC = () => {
-  
   const [isDark, setIsDark] = useState<boolean>(getSavedTheme());
 
   useEffect(() => {

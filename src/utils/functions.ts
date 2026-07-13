@@ -4,7 +4,7 @@ import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-};
+}
 
 export function getSavedTheme() {
   const savedTheme = localStorage.getItem('theme');
@@ -14,4 +14,4 @@ export function getSavedTheme() {
   }
 
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
-};
+}

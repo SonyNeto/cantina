@@ -12,7 +12,7 @@ import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { StudentForm } from './components/StudentForm';
 import { TrashCan } from '../../assets/icons/MenuIcons';
 import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
-import { Dialog, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 import { toast } from 'sonner';
 
 type StudentTotal = {
@@ -197,14 +197,18 @@ export const ResponsibleDetails: FC = () => {
                       </DialogTrigger>
                       <DialogContent title="Atenção">
                         <span>Tem certeza que deseja excluir o aluno?</span>
-                        <Button
-                          onClick={() =>
-                            deleteStudent.mutate({ responsibleId, studentId: student.id })
+                        <DialogClose
+                          render={
+                            <Button
+                              onClick={() =>
+                                deleteStudent.mutate({ responsibleId, studentId: student.id })
+                              }
+                            />
                           }
                         >
                           <Check />
                           <span>Sim</span>
-                        </Button>
+                        </DialogClose>
                       </DialogContent>
                     </Dialog>
                   </SwipeActionRow>

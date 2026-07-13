@@ -69,12 +69,12 @@ export const StudentDetails: FC = () => {
           <span className="justify-self-center text-center">{`Pedidos de ${studentRegisterDetails?.studentName}`}</span>
           <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
         </div>
-        
+
         <div className="">
           {Object.entries(registersByDate).map(([date, registers]) => {
             return (
               <div key={date} className="app-list">
-                <div className="text-xl px-4 py-1 text-muted bg-secondary/35 border-border/15 border-b-4">
+                <div className="text-muted bg-secondary/35 border-border/15 border-b-4 px-4 py-1 text-xl">
                   {dayjs(date).format('DD/MM')}
                 </div>
 
