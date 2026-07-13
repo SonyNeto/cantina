@@ -163,10 +163,52 @@ export const ResponsibleDetails: FC = () => {
                     </div>
                   )}
                   <SwipeActionRow
-                    handleWidth={16}
-                    openWidth={136}
-                    open={isDrawerOpen}
-                    onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
+                    right={{
+                      render: (
+                        <>
+                          <Button
+                            onClick={() => {
+                              setEditingIndex(isEditing ? null : idx);
+                              setDrawerOpenIndex(isDrawerOpen ? null : idx);
+                              setFormPosition(null);
+                            }}
+                            disabled={isEditing}
+                          >
+                            <PenSquare />
+                          </Button>
+
+                          <Dialog>
+                            <DialogTrigger
+                              render={<Button size="md" variant="primary" disabled={isEditing} />}
+                            >
+                              <TrashCan />
+                            </DialogTrigger>
+                            <DialogContent title="Atenção">
+                              <span>Tem certeza que deseja excluir o aluno?</span>
+                              <DialogClose
+                                render={
+                                  <Button
+                                    onClick={() =>
+                                      deleteStudent.mutate({
+                                        responsibleId,
+                                        studentId: student.id,
+                                      })
+                                    }
+                                  />
+                                }
+                              >
+                                <Check />
+                                <span>Sim</span>
+                              </DialogClose>
+                            </DialogContent>
+                          </Dialog>
+                        </>
+                      ),
+                      handleWidth: 16,
+                      openWidth: 136,
+                    }}
+                    openSide={isDrawerOpen ? 'right' : null}
+                    onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
                     captureInteractions={!isEditing}
                     onTap={() =>
                       navigate({
@@ -177,41 +219,7 @@ export const ResponsibleDetails: FC = () => {
                         search: location.search,
                       })
                     }
-                  >
-                    <Button
-                      onClick={() => {
-                        setEditingIndex(isEditing ? null : idx);
-                        setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                        setFormPosition(null);
-                      }}
-                      disabled={isEditing}
-                    >
-                      <PenSquare />
-                    </Button>
-
-                    <Dialog>
-                      <DialogTrigger
-                        render={<Button size="md" variant="primary" disabled={isEditing} />}
-                      >
-                        <TrashCan />
-                      </DialogTrigger>
-                      <DialogContent title="Atenção">
-                        <span>Tem certeza que deseja excluir o aluno?</span>
-                        <DialogClose
-                          render={
-                            <Button
-                              onClick={() =>
-                                deleteStudent.mutate({ responsibleId, studentId: student.id })
-                              }
-                            />
-                          }
-                        >
-                          <Check />
-                          <span>Sim</span>
-                        </DialogClose>
-                      </DialogContent>
-                    </Dialog>
-                  </SwipeActionRow>
+                  />
                 </div>
               );
             })}

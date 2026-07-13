@@ -114,49 +114,54 @@ export const Menu: FC = () => {
                 )}
 
                 <SwipeActionRow
-                  handleWidth={16}
-                  openWidth={136}
-                  open={isDrawerOpen}
-                  onOpenChange={() => setDrawerOpenIndex(isDrawerOpen ? null : idx)}
-                  captureInteractions={!isEditing}
-                >
-                  <Button
-                    onClick={() => {
-                      setEditingIndex(isEditing ? null : idx);
-                      setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                      setFormPosition(null);
-                    }}
-                    disabled={isEditing}
-                  >
-                    <PenSquare />
-                  </Button>
+                  right={{
+                    render: (
+                      <>
+                        <Button
+                          onClick={() => {
+                            setEditingIndex(isEditing ? null : idx);
+                            setDrawerOpenIndex(isDrawerOpen ? null : idx);
+                            setFormPosition(null);
+                          }}
+                          disabled={isEditing}
+                        >
+                          <PenSquare />
+                        </Button>
 
-                  <Dialog>
-                    <DialogTrigger
-                      render={<Button size="md" variant="primary" disabled={isEditing} />}
-                    >
-                      <TrashCan />
-                    </DialogTrigger>
-                    <DialogContent title="Atenção">
-                      <span>Tem certeza que deseja excluir o item?</span>
-                      <DialogClose
-                        render={
-                          <Button
-                            onClick={() => {
-                              deleteMenuItem.mutate(item.id);
-                              setEditingIndex(null);
-                              setFormPosition(null);
-                              setDrawerOpenIndex(null);
-                            }}
-                          />
-                        }
-                      >
-                        <Check />
-                        <span>Sim</span>
-                      </DialogClose>
-                    </DialogContent>
-                  </Dialog>
-                </SwipeActionRow>
+                        <Dialog>
+                          <DialogTrigger
+                            render={<Button size="md" variant="primary" disabled={isEditing} />}
+                          >
+                            <TrashCan />
+                          </DialogTrigger>
+                          <DialogContent title="Atenção">
+                            <span>Tem certeza que deseja excluir o item?</span>
+                            <DialogClose
+                              render={
+                                <Button
+                                  onClick={() => {
+                                    deleteMenuItem.mutate(item.id);
+                                    setEditingIndex(null);
+                                    setFormPosition(null);
+                                    setDrawerOpenIndex(null);
+                                  }}
+                                />
+                              }
+                            >
+                              <Check />
+                              <span>Sim</span>
+                            </DialogClose>
+                          </DialogContent>
+                        </Dialog>
+                      </>
+                    ),
+                    handleWidth: 16,
+                    openWidth: 136,
+                  }}
+                  openSide={isDrawerOpen ? 'right' : null}
+                  onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
+                  captureInteractions={!isEditing}
+                />
               </div>
             );
           })}

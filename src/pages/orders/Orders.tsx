@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { Check, Download } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
 import { Cooking, X } from '../../assets/icons/MenuIcons';
@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import { workspaceApiFetch } from '../../utils/api';
 import type { OrderItem, Register } from '../../constants/canteen/types';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { Dialog, DialogTrigger, DialogContent, DialogClose } from '../../components/commons/Dialog';
+import { Dialog, DialogContent, DialogClose } from '../../components/commons/Dialog';
+import { SwipeActionRow, type SwipeSide } from '../../components/commons/SwipeActionRow';
 
 type OrderItemWithDetails = {
   id: string;
@@ -59,6 +60,10 @@ const getOrders = async (): Promise<OrdersResponse> => {
 export const Orders: FC = () => {
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
+  const [openDrawer, setOpenDrawer] = useState<{
+    itemId: string;
+    side: SwipeSide;
+  } | null>(null);
 
   const { data: orders = [], isPending } = useQuery({
     queryKey: ['orders', workspaceId],
@@ -87,11 +92,19 @@ export const Orders: FC = () => {
         }),
       });
 
+      if (!res.ok) {
+        throw new Error('Erro ao atualizar status do item');
+      }
+
       return res.json();
     },
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+
+    onError: () => {
+      toast.error('Não foi possível marcar o item como pronto.');
     },
   });
 
@@ -154,8 +167,10 @@ export const Orders: FC = () => {
             const schoolClass = item.schoolClass;
             if (!student || !schoolClass) return;
 
+            const openSide = openDrawer?.itemId === item.id ? openDrawer.side : null;
+
             return (
-              <div className="app-row grid-cols-[minmax(0,1fr)_10ch_5ch] gap-5" key={item.id}>
+              <div className="app-row relative inline-flex justify-center gap-5" key={item.id}>
                 <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                   <span>{item.product.label}</span>
                 </div>
@@ -163,36 +178,67 @@ export const Orders: FC = () => {
                   <span className="text-center">{student.name}</span>
                   <span className="text-center">{schoolClass.label}</span>
                 </div>
-                <div className="flex flex-col items-center gap-1 justify-self-end">
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      updateOrderItemStatus.mutate({ orderId: item.orderId, itemId: item.id })
-                    }
-                  >
-                    <Check />
-                  </Button>
-                  <Dialog>
-                    <DialogTrigger render={<Button size="sm" variant="primary" />}>
-                      <X />
-                    </DialogTrigger>
-                    <DialogContent title="Atenção">
-                      <span>Tem certeza que deseja excluir o pedido?</span>
-                      <DialogClose
-                        render={
-                          <Button
-                            onClick={() => {
-                              deleteOrderItem.mutate({ orderId: item.orderId, itemId: item.id });
-                            }}
-                          />
-                        }
-                      >
-                        <Check />
-                        <span>Sim</span>
-                      </DialogClose>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+
+                <SwipeActionRow
+                  delta={8}
+                  openSide={openSide}
+                  onOpenSideChange={(nextSide) => {
+                    setOpenDrawer(nextSide ? { itemId: item.id, side: nextSide } : null);
+
+                    if (nextSide !== 'right') return;
+
+                    updateOrderItemStatus.mutate(
+                      { orderId: item.orderId, itemId: item.id },
+                      {
+                        onSettled: () => {
+                          setOpenDrawer((currentDrawer) =>
+                            currentDrawer?.itemId === item.id && currentDrawer.side === 'right'
+                              ? null
+                              : currentDrawer,
+                          );
+                        },
+                      },
+                    );
+                  }}
+                  left={{
+                    render: <X className="text-danger-soft size-10" />,
+                    handleWidth: 16,
+                    handleClassName: 'bg-danger',
+                    openWidth: 136,
+                    openThreshold: 0.8,
+                    progressStyle: (progress) => ({
+                      backgroundColor: `color-mix(in oklab, var(--color-danger-soft), var(--color-danger) ${Math.trunc(progress * 100)}%)`,
+                    }),
+                  }}
+                  right={{
+                    render: <Check className="text-success-soft size-10" />,
+                    handleWidth: 16,
+                    handleClassName: 'bg-success',
+                    openWidth: 136,
+                    openThreshold: 0.8,
+                    progressStyle: (progress) => ({
+                      backgroundColor: `color-mix(in oklab, var(--color-success-soft), var(--color-success) ${Math.trunc(progress * 100)}%)`,
+                    }),
+                  }}
+                />
+
+                <Dialog open={openSide === 'left'} onOpenChange={() => setOpenDrawer(null)}>
+                  <DialogContent title="Atenção">
+                    <span>Tem certeza que deseja excluir o pedido?</span>
+                    <DialogClose
+                      render={
+                        <Button
+                          onClick={() => {
+                            deleteOrderItem.mutate({ orderId: item.orderId, itemId: item.id });
+                          }}
+                        />
+                      }
+                    >
+                      <Check />
+                      <span>Sim</span>
+                    </DialogClose>
+                  </DialogContent>
+                </Dialog>
               </div>
             );
           })}
