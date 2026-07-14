@@ -25,7 +25,7 @@ interface UseSwipeReturn {
   onPointerUp: PointerEventHandler<HTMLElement>;
   onPointerCancel: PointerEventHandler<HTMLElement>;
   onPointerMove: PointerEventHandler<HTMLElement>;
-  onClick: MouseEventHandler<HTMLElement>
+  onClick: MouseEventHandler<HTMLElement>;
 }
 
 const IDLE_POINTER_ID = -1;

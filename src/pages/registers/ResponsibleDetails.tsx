@@ -20,6 +20,7 @@ type StudentTotal = {
   name: string;
   schoolClassId: string;
   schoolClassLabel: string;
+  schoolClassShiftLabel: string;
   total: number;
 };
 
@@ -158,7 +159,10 @@ export const ResponsibleDetails: FC = () => {
                         <User />
                         <span>{student.name}</span>
                       </div>
-                      <span className="text-center">{student.schoolClassLabel}</span>
+                      <div className="flex flex-col items-center">
+                        <span className="text-center">{student.schoolClassLabel}</span>
+                        <span className="text-center">{student.schoolClassShiftLabel}</span>
+                      </div>
                       <span className="text-center tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
                     </div>
                   )}
