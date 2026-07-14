@@ -1,29 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
 import { Navigate, Outlet, useLocation } from 'react-router';
-import { apiFetch } from '../../utils/api';
 import { Loader } from '../../components/commons/Loader';
 import ROUTES from '../../constants/routes';
+import { useAuth } from '../../hooks/useAuth';
 
 export const ProtectedRoute = () => {
   const location = useLocation();
 
-  const { isLoading, isError } = useQuery({
-    queryKey: ['auth'],
-    queryFn: async () => {
-      const res = await apiFetch('/check-auth');
+  const { data: isAuthenticated, isPending, isError } = useAuth();
 
-      if (!res.ok) {
-        throw new Error('Não autenticado');
-      }
+  if (isPending) return <Loader />;
 
-      return null;
-    },
-    retry: false,
-  });
-
-  if (isLoading) return <Loader />;
-
-  if (isError) {
+  if (isError || !isAuthenticated) {
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 

@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router';
+import { lazy, Suspense } from 'react';
 import ROUTES from './constants/routes';
 import { Layout } from './components/Layout';
 import { Menu } from './pages/menu/Menu';
@@ -9,12 +10,24 @@ import { StudentDetails } from './pages/registers/StudentDetails';
 import { Toast } from './components/commons/Toast';
 import { Orders } from './pages/orders/Orders';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LoginPage } from './pages/auth/LoginPage';
-import { SignupPage } from './pages/auth/SignupPage';
 import { ProtectedRoute } from './pages/auth/ProtectedRoute';
+import { UnprotectedRoute } from './pages/auth/UnprotectedRoute';
 import { Invites } from './pages/invites/Invites';
 import { ProtectedAdminRoute } from './pages/auth/ProtectedAdminRoute';
 import { getSavedTheme } from './utils/functions';
+import { Loader } from './components/commons/Loader';
+
+const LoginPage = lazy(() =>
+  import('./pages/auth/LoginPage').then((module) => ({
+    default: module.LoginPage,
+  })),
+);
+
+const SignupPage = lazy(() =>
+  import('./pages/auth/SignupPage').then((module) => ({
+    default: module.SignupPage,
+  })),
+);
 
 const queryClient = new QueryClient();
 
@@ -26,25 +39,29 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Toast />
-      <Routes>
-        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-        <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          <Route element={<UnprotectedRoute />}>
+            <Route path={ROUTES.SIGNUP} element={<SignupPage />} />
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+          </Route>
 
-        <Route element={<ProtectedRoute />}>
-          <Route element={<Layout />}>
-            <Route path={ROUTES.INVITE} element={<Invites />} />
-            <Route path={ROUTES.HOME} element={<NewOrders />} />
-            <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
-            <Route path={ROUTES.ORDERS} element={<Orders />} />
-            <Route element={<ProtectedAdminRoute />}>
-              <Route path={ROUTES.MENU} element={<Menu />} />
-              <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
-              <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
-              <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Layout />}>
+              <Route path={ROUTES.INVITE} element={<Invites />} />
+              <Route path={ROUTES.HOME} element={<NewOrders />} />
+              <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
+              <Route path={ROUTES.ORDERS} element={<Orders />} />
+              <Route element={<ProtectedAdminRoute />}>
+                <Route path={ROUTES.MENU} element={<Menu />} />
+                <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
+                <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
+                <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
+              </Route>
             </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </Suspense>
     </QueryClientProvider>
   );
 }

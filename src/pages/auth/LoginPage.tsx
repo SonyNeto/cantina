@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { FC } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -14,6 +14,7 @@ const loginSchema = z.object({
 
 export const LoginPage: FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
@@ -36,7 +37,8 @@ export const LoginPage: FC = () => {
     },
 
     onSuccess: () => {
-      navigate(ROUTES.HOME);
+      queryClient.setQueryData(['auth'], true);
+      navigate(ROUTES.HOME, { replace: true });
     },
 
     onError: (error) => {
