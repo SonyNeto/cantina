@@ -99,11 +99,48 @@ export const Orders: FC = () => {
       return res.json();
     },
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    onMutate: async ({ orderId, itemId }: OrderItemParams) => {
+      await queryClient.cancelQueries({
+        queryKey: ['orders', workspaceId],
+      });
+
+      const previousOrders = queryClient.getQueryData<OrdersResponse>(['orders', workspaceId]);
+
+      queryClient.setQueryData<OrdersResponse>(['orders', workspaceId], (currentData) => {
+        if (!currentData) return currentData;
+
+        return {
+          ...currentData,
+          orders: currentData.orders.map((order) => {
+            if (order.id !== orderId) return order;
+
+            return {
+              ...order,
+              items: order.items.map((item) =>
+                item.id === itemId
+                  ? {
+                      ...item,
+                      status: 'ready' as const,
+                    }
+                  : item,
+              ),
+            };
+          }),
+        };
+      });
+
+      return { previousOrders };
     },
 
-    onError: () => {
+    onSuccess: () => {
+      return queryClient.invalidateQueries({ queryKey: ['orders', workspaceId] });
+    },
+
+    onError: (_error, _variables, context) => {
+      if (context?.previousOrders) {
+        queryClient.setQueryData(['orders', workspaceId], context.previousOrders);
+      }
+
       toast.error('Não foi possível marcar o item como pronto.');
     },
   });
@@ -119,7 +156,7 @@ export const Orders: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders', workspaceId] });
       toast.success('Item removido com sucesso!');
     },
 
@@ -142,8 +179,8 @@ export const Orders: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-      queryClient.invalidateQueries({ queryKey: ['registers'] });
+      queryClient.invalidateQueries({ queryKey: ['orders', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['registers', workspaceId] });
       toast.success('Pedido movido para registro');
     },
   });
