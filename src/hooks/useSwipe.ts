@@ -1,4 +1,4 @@
-import { useRef, type PointerEvent, type PointerEventHandler } from 'react';
+import { useRef, type MouseEventHandler, type PointerEvent, type PointerEventHandler } from 'react';
 
 export type SwipeDirection = 'left' | 'right';
 
@@ -16,7 +16,7 @@ interface UseSwipeProps {
   onStart?: () => void;
   onMove?: (gesture: SwipeGesture) => void;
   onRelease?: (gesture: SwipeGesture) => void;
-  onTap?: (gesture: SwipeGesture) => void;
+  onTap?: () => void;
   onCancel?: () => void;
 }
 
@@ -25,6 +25,7 @@ interface UseSwipeReturn {
   onPointerUp: PointerEventHandler<HTMLElement>;
   onPointerCancel: PointerEventHandler<HTMLElement>;
   onPointerMove: PointerEventHandler<HTMLElement>;
+  onClick: MouseEventHandler<HTMLElement>
 }
 
 const IDLE_POINTER_ID = -1;
@@ -70,6 +71,8 @@ export function useSwipe({
     pointerId: IDLE_POINTER_ID,
   });
 
+  const didSwipeRef = useRef<boolean>(false);
+
   return {
     onPointerDown: (event) => {
       gestureRef.current = {
@@ -77,6 +80,8 @@ export function useSwipe({
         startY: event.clientY,
         pointerId: event.pointerId,
       };
+
+      didSwipeRef.current = false;
 
       event.currentTarget.setPointerCapture(event.pointerId);
       onStart?.();
@@ -93,13 +98,8 @@ export function useSwipe({
 
       const gesture = getSwipeGesture(event, startX, startY, delta);
 
+      didSwipeRef.current = gesture.isHorizontalSwipe;
       onRelease?.(gesture);
-
-      if (gesture.isHorizontalSwipe) {
-        return;
-      }
-
-      onTap?.(gesture);
     },
 
     onPointerCancel: (event) => {
@@ -119,6 +119,15 @@ export function useSwipe({
       if (event.pointerId !== pointerId) return;
 
       onMove?.(getSwipeGesture(event, startX, startY, delta));
+    },
+
+    onClick: () => {
+      if (didSwipeRef.current) {
+        didSwipeRef.current = false;
+        return;
+      }
+
+      onTap?.();
     },
   };
 }

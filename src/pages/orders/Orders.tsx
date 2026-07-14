@@ -222,7 +222,11 @@ export const Orders: FC = () => {
                   }}
                 />
 
-                <Dialog open={openSide === 'left'} onOpenChange={() => setOpenDrawer(null)}>
+                <Dialog open={openSide === 'left'} onOpenChange={(nextOpen) => {
+                    if (nextOpen) return;
+
+                    setOpenDrawer(null);
+                  }}>
                   <DialogContent title="Atenção">
                     <span>Tem certeza que deseja excluir o pedido?</span>
                     <DialogClose
