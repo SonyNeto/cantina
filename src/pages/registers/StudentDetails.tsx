@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { useState, type FC } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
 import { ArrowLeft } from 'pixelarticons/react';
@@ -10,18 +10,28 @@ import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import dayjs from 'dayjs';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { PageNavigator } from '../../components/commons/PageNavigator';
+
+type Pagination = {
+  page: number;
+  totalPages: number;
+  nextPage: number | null;
+};
 
 type RegistersResponse = {
   registersByDate: Record<string, Register[]>;
   studentName: string;
+  total: number;
+  pagination: Pagination;
 };
 
 const getStudentRegisters = async (
   studentId: string,
   period: Period,
+  page: number,
 ): Promise<RegistersResponse> => {
   const res = await workspaceApiFetch(
-    `/students/${studentId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
+    `/students/${studentId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}&page=${page}&limit=${8}`,
   );
 
   return res.json();
@@ -31,15 +41,18 @@ export const StudentDetails: FC = () => {
   const { responsibleId, studentId } = useParams();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: studentRegisterDetails, isPending } = useQuery({
-    queryKey: ['register', workspaceId, studentId, period],
-    queryFn: () => getStudentRegisters(studentId ?? '', period),
+  const { data: registersData, isPending } = useQuery({
+    queryKey: ['register', workspaceId, studentId, period, currentPage],
+    queryFn: () => getStudentRegisters(studentId ?? '', period, currentPage),
     enabled: Boolean(workspaceId && studentId),
     select: (data) => ({
       studentName: data.studentName,
       registersByDate: data.registersByDate,
+      total: data.total,
+      totalPages: data.pagination.totalPages,
     }),
   });
 
@@ -47,11 +60,9 @@ export const StudentDetails: FC = () => {
     return <div>Aluno não encontrado</div>;
   }
 
-  const registersByDate = studentRegisterDetails?.registersByDate ?? [];
-
-  const total = Object.values(registersByDate)
-    .flat()
-    .reduce((sum, register) => sum + register.product.price, 0);
+  const registersByDate = registersData?.registersByDate ?? [];
+  const totalPages = registersData?.totalPages ?? 1;
+  const total = registersData?.total ?? 0;
 
   return isPending ? (
     <Loader />
@@ -66,7 +77,7 @@ export const StudentDetails: FC = () => {
           >
             <ArrowLeft />
           </Link>
-          <span className="justify-self-center text-center">{`Pedidos de ${studentRegisterDetails?.studentName}`}</span>
+          <span className="justify-self-center text-center">{`Pedidos de ${registersData?.studentName}`}</span>
           <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
         </div>
 
@@ -95,6 +106,12 @@ export const StudentDetails: FC = () => {
             );
           })}
         </div>
+
+        <PageNavigator
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+        />
 
         <div className="app-total-bar justify-end [&_svg]:size-10">
           <div className="flex gap-5">

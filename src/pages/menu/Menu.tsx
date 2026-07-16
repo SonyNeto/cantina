@@ -11,9 +11,17 @@ import type { Product } from '../../constants/canteen/types';
 import { workspaceApiFetch } from '../../utils/api';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { MenuItemForm } from './components/MenuItemForm';
+import { PageNavigator } from '../../components/commons/PageNavigator';
+
+type Pagination = {
+  page: number;
+  totalPages: number;
+  nextPage: number | null;
+};
 
 type MenuItemsResponse = {
   menuItems: Product[];
+  pagination: Pagination;
 };
 
 type MenuItemResponse = {
@@ -22,25 +30,32 @@ type MenuItemResponse = {
 
 type FormPosition = 'top' | 'bottom' | null;
 
-const getMenuItems = async (): Promise<MenuItemsResponse> => {
-  const res = await workspaceApiFetch('/menu-items');
+const getMenuItems = async (page: number): Promise<MenuItemsResponse> => {
+  const res = await workspaceApiFetch(`/menu-items?page=${page}&limit=${8}`);
   return res.json();
 };
 
 export const Menu: FC = () => {
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
   const [formPosition, setFormPosition] = useState<FormPosition>(null);
   const isAdding = formPosition !== null;
 
-  const { data: menuItems = [], isPending } = useQuery({
-    queryKey: ['menuItems', workspaceId],
-    queryFn: getMenuItems,
+  const { data: menuItemsData, isPending } = useQuery({
+    queryKey: ['menuItems', workspaceId, currentPage],
+    queryFn: () => getMenuItems(currentPage),
     enabled: Boolean(workspaceId),
-    select: (data) => data.menuItems,
+    select: (data) => ({
+      menuItems: data.menuItems,
+      totalPages: data.pagination.totalPages,
+    }),
   });
+
+  const menuItems = menuItemsData?.menuItems ?? [];
+  const totalPages = menuItemsData?.totalPages ?? 1;
 
   const deleteMenuItem = useMutation({
     mutationFn: async (id: string): Promise<MenuItemResponse> => {
@@ -165,26 +180,13 @@ export const Menu: FC = () => {
               </div>
             );
           })}
-
-          {formPosition === 'bottom' ? (
-            <MenuItemForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
-          ) : (
-            <Button
-              size="lg"
-              className="app-row app-row-action !h-auto !w-full justify-center gap-2.5 rounded-none py-4"
-              variant="ghost"
-              disabled={isAdding}
-              onClick={() => {
-                setFormPosition('bottom');
-                setEditingIndex(null);
-                setDrawerOpenIndex(null);
-              }}
-            >
-              <Plus />
-              Adicionar item
-            </Button>
-          )}
         </div>
+
+        <PageNavigator
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+        />
       </div>
     </div>
   );

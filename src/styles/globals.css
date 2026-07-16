@@ -202,6 +202,7 @@ body {
   }
 
   .app-panel > .app-total-bar:last-child,
+  .app-panel > .app-panel-header:last-child,
   .app-panel > .app-form-row:last-child {
     @apply border-b-0;
   }

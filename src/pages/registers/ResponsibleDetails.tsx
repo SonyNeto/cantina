@@ -14,6 +14,7 @@ import { TrashCan } from '../../assets/icons/MenuIcons';
 import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 import { toast } from 'sonner';
+import { PageNavigator } from '../../components/commons/PageNavigator';
 
 type StudentTotal = {
   id: string;
@@ -31,8 +32,15 @@ type ResponsibleTotals = {
   studentsTotals: StudentTotal[];
 };
 
+type Pagination = {
+  page: number;
+  totalPages: number;
+  nextPage: number | null;
+};
+
 type ResponsibleRegistersResponse = {
   responsibleTotals: ResponsibleTotals;
+  pagination: Pagination;
 };
 
 type FormPosition = 'top' | 'bottom' | null;
@@ -40,9 +48,10 @@ type FormPosition = 'top' | 'bottom' | null;
 const getResponsibleRegisters = async (
   responsibleId: string,
   period: Period,
+  page: number,
 ): Promise<ResponsibleRegistersResponse> => {
   const res = await workspaceApiFetch(
-    `/responsibles/${responsibleId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}`,
+    `/responsibles/${responsibleId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}&page=${page}&limit=${6}`,
   );
   return res.json();
 };
@@ -52,6 +61,7 @@ export const ResponsibleDetails: FC = () => {
   const navigate = useNavigate();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [formPosition, setFormPosition] = useState<FormPosition>(null);
   const { responsibleId } = useParams();
@@ -59,14 +69,20 @@ export const ResponsibleDetails: FC = () => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
 
-  const { data: responsibleTotals, isPending } = useQuery({
-    queryKey: ['registers', workspaceId, responsibleId, period],
-    queryFn: () => getResponsibleRegisters(responsibleId ?? '', period),
+  const { data: registersData, isPending } = useQuery({
+    queryKey: ['registers', workspaceId, responsibleId, period, currentPage],
+    queryFn: () => getResponsibleRegisters(responsibleId ?? '', period, currentPage),
     enabled: Boolean(workspaceId && responsibleId),
-    select: (data) => data.responsibleTotals,
+    select: (data) => ({
+      responsibleTotals: data.responsibleTotals,
+      studentsTotals: data.responsibleTotals.studentsTotals,
+      totalPages: data.pagination.totalPages,
+    }),
   });
 
-  const responsibleStudents = responsibleTotals?.studentsTotals ?? [];
+  const responsibleTotals = registersData?.responsibleTotals;
+  const responsibleStudents = registersData?.studentsTotals ?? [];
+  const totalPages = registersData?.totalPages ?? 1;
 
   const deleteStudent = useMutation({
     mutationFn: async ({
@@ -131,125 +147,106 @@ export const ResponsibleDetails: FC = () => {
               onClose={() => setFormPosition(null)}
             />
           )}
-          {responsibleStudents
-            .sort((student1, student2) => student1.name.localeCompare(student2.name))
-            .map((student, idx) => {
-              const isEditing = editingIndex === idx;
-              const isDrawerOpen = drawerOpenIndex === idx;
+          {responsibleStudents.map((student, idx) => {
+            const isEditing = editingIndex === idx;
+            const isDrawerOpen = drawerOpenIndex === idx;
 
-              return (
-                <div key={student.id} className="app-row relative isolate overflow-hidden !p-0">
-                  {isEditing ? (
-                    <StudentForm
-                      className="relative z-10 !border-0"
-                      workspaceId={workspaceId}
-                      responsibleId={responsibleId}
-                      studentId={student.id}
-                      method="update"
-                      defaultName={student.name}
-                      defaultClass={student.schoolClassId}
-                      onClose={() => {
-                        setEditingIndex(null);
-                        setDrawerOpenIndex(idx);
-                      }}
-                    />
-                  ) : (
-                    <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 px-4 py-3">
-                      <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                        <User />
-                        <span>{student.name}</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-center">{student.schoolClassLabel}</span>
-                        <span className="text-center">{student.schoolClassShiftLabel}</span>
-                      </div>
-                      <span className="text-center tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
-                    </div>
-                  )}
-                  <SwipeActionRow
-                    right={{
-                      render: (
-                        <>
-                          <Button
-                            onClick={() => {
-                              setEditingIndex(isEditing ? null : idx);
-                              setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                              setFormPosition(null);
-                            }}
-                            disabled={isEditing}
-                          >
-                            <PenSquare />
-                          </Button>
-
-                          <Dialog>
-                            <DialogTrigger
-                              render={<Button size="md" variant="primary" disabled={isEditing} />}
-                            >
-                              <TrashCan />
-                            </DialogTrigger>
-                            <DialogContent title="Atenção">
-                              <span>Tem certeza que deseja excluir o aluno?</span>
-                              <DialogClose
-                                render={
-                                  <Button
-                                    onClick={() =>
-                                      deleteStudent.mutate({
-                                        responsibleId,
-                                        studentId: student.id,
-                                      })
-                                    }
-                                  />
-                                }
-                              >
-                                <Check />
-                                <span>Sim</span>
-                              </DialogClose>
-                            </DialogContent>
-                          </Dialog>
-                        </>
-                      ),
-                      handleWidth: 16,
-                      openWidth: 136,
+            return (
+              <div key={student.id} className="app-row relative isolate overflow-hidden !p-0">
+                {isEditing ? (
+                  <StudentForm
+                    className="relative z-10 !border-0"
+                    workspaceId={workspaceId}
+                    responsibleId={responsibleId}
+                    studentId={student.id}
+                    method="update"
+                    defaultName={student.name}
+                    defaultClass={student.schoolClassId}
+                    onClose={() => {
+                      setEditingIndex(null);
+                      setDrawerOpenIndex(idx);
                     }}
-                    openSide={isDrawerOpen ? 'right' : null}
-                    onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
-                    captureInteractions={!isEditing}
-                    onTap={() =>
-                      navigate({
-                        pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
-                          responsibleTotals?.responsibleId ?? responsibleId,
-                          student.id,
-                        ),
-                        search: location.search,
-                      })
-                    }
                   />
-                </div>
-              );
-            })}
+                ) : (
+                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 px-4 py-3">
+                    <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                      <User />
+                      <span>{student.name}</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <span className="text-center">{student.schoolClassLabel}</span>
+                      <span className="text-center">{student.schoolClassShiftLabel}</span>
+                    </div>
+                    <span className="text-center tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
+                  </div>
+                )}
+                <SwipeActionRow
+                  right={{
+                    render: (
+                      <>
+                        <Button
+                          onClick={() => {
+                            setEditingIndex(isEditing ? null : idx);
+                            setDrawerOpenIndex(isDrawerOpen ? null : idx);
+                            setFormPosition(null);
+                          }}
+                          disabled={isEditing}
+                        >
+                          <PenSquare />
+                        </Button>
 
-          {formPosition === 'bottom' ? (
-            <StudentForm
-              workspaceId={workspaceId}
-              responsibleId={responsibleId}
-              onClose={() => setFormPosition(null)}
-            />
-          ) : (
-            <Button
-              className="app-row app-row-action !h-auto !w-full justify-center gap-2.5 rounded-none py-4"
-              variant="ghost"
-              size="lg"
-              disabled={isAdding}
-              onClick={() => {
-                setFormPosition('bottom');
-                setEditingIndex(null);
-                setDrawerOpenIndex(null);
-              }}
-            >
-              <UserPlus />
-              Adicionar aluno
-            </Button>
-          )}
+                        <Dialog>
+                          <DialogTrigger
+                            render={<Button size="md" variant="primary" disabled={isEditing} />}
+                          >
+                            <TrashCan />
+                          </DialogTrigger>
+                          <DialogContent title="Atenção">
+                            <span>Tem certeza que deseja excluir o aluno?</span>
+                            <DialogClose
+                              render={
+                                <Button
+                                  onClick={() =>
+                                    deleteStudent.mutate({
+                                      responsibleId,
+                                      studentId: student.id,
+                                    })
+                                  }
+                                />
+                              }
+                            >
+                              <Check />
+                              <span>Sim</span>
+                            </DialogClose>
+                          </DialogContent>
+                        </Dialog>
+                      </>
+                    ),
+                    handleWidth: 16,
+                    openWidth: 136,
+                  }}
+                  openSide={isDrawerOpen ? 'right' : null}
+                  onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
+                  captureInteractions={!isEditing}
+                  onTap={() =>
+                    navigate({
+                      pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
+                        responsibleTotals?.responsibleId ?? responsibleId,
+                        student.id,
+                      ),
+                      search: location.search,
+                    })
+                  }
+                />
+              </div>
+            );
+          })}
+
+          <PageNavigator
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
         </div>
 
         <div className="app-total-bar grid-cols-[minmax(0,1fr)_8ch] [&_svg]:size-10 [&_svg]:shrink-0">

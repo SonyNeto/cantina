@@ -208,7 +208,7 @@ export const Orders: FC = () => {
 
             return (
               <div className="app-row relative inline-flex justify-center gap-5" key={item.id}>
-                <div className="inline-flex text-center items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                <div className="inline-flex items-center gap-2.5 text-center [&_svg]:size-10 [&_svg]:shrink-0">
                   <span>{item.product.label}</span>
                 </div>
                 <div className="flex flex-col items-center">
