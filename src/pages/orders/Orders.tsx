@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { Check, Download } from 'pixelarticons/react';
+import { ArrowBarRight, Check } from 'pixelarticons/react';
 import { Button } from '../../components/commons/Button';
 import { Cooking, X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -61,7 +61,7 @@ export const Orders: FC = () => {
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [openDrawer, setOpenDrawer] = useState<{
-    itemId: string;
+    drawerId: string;
     side: SwipeSide;
   } | null>(null);
 
@@ -204,7 +204,8 @@ export const Orders: FC = () => {
             const schoolClass = item.schoolClass;
             if (!student || !schoolClass) return;
 
-            const openSide = openDrawer?.itemId === item.id ? openDrawer.side : null;
+            const openSide =
+              openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
 
             return (
               <div className="app-row relative inline-flex justify-center gap-5" key={item.id}>
@@ -220,7 +221,9 @@ export const Orders: FC = () => {
                   delta={8}
                   openSide={openSide}
                   onOpenSideChange={(nextSide) => {
-                    setOpenDrawer(nextSide ? { itemId: item.id, side: nextSide } : null);
+                    setOpenDrawer(
+                      nextSide ? { drawerId: `${item.id}-${item.status}`, side: nextSide } : null,
+                    );
 
                     if (nextSide !== 'right') return;
 
@@ -229,7 +232,8 @@ export const Orders: FC = () => {
                       {
                         onSettled: () => {
                           setOpenDrawer((currentDrawer) =>
-                            currentDrawer?.itemId === item.id && currentDrawer.side === 'right'
+                            currentDrawer?.drawerId === `${item.id}-${item.status}` &&
+                            currentDrawer.side === 'right'
                               ? null
                               : currentDrawer,
                           );
@@ -299,8 +303,11 @@ export const Orders: FC = () => {
             const schoolClass = item.schoolClass;
             if (!student || !schoolClass) return;
 
+            const openSide =
+              openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
+
             return (
-              <div className="app-row grid-cols-[minmax(0,1fr)_5ch_7ch] gap-5" key={item.id}>
+              <div className="app-row relative inline-flex justify-center gap-5" key={item.id}>
                 <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                   <span>{item.product.label}</span>
                 </div>
@@ -308,19 +315,42 @@ export const Orders: FC = () => {
                   <span className="text-center">{student.name}</span>
                   <span className="text-center">{schoolClass.label}</span>
                 </div>
-                <div className="flex flex-col items-center gap-1 justify-self-end">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      postRegister.mutate({
-                        orderId: item.orderId,
-                        itemId: item.id,
-                      });
-                    }}
-                  >
-                    <Download />
-                  </Button>
-                </div>
+
+                <SwipeActionRow
+                  delta={8}
+                  openSide={openSide}
+                  onOpenSideChange={(nextSide) => {
+                    setOpenDrawer(
+                      nextSide ? { drawerId: `${item.id}-${item.status}`, side: nextSide } : null,
+                    );
+
+                    if (nextSide !== 'right') return;
+
+                    postRegister.mutate(
+                      { orderId: item.orderId, itemId: item.id },
+                      {
+                        onSettled: () => {
+                          setOpenDrawer((currentDrawer) =>
+                            currentDrawer?.drawerId === `${item.id}-${item.status}` &&
+                            currentDrawer.side === 'right'
+                              ? null
+                              : currentDrawer,
+                          );
+                        },
+                      },
+                    );
+                  }}
+                  right={{
+                    render: <ArrowBarRight className="text-text-soft size-10" />,
+                    handleWidth: 16,
+                    handleClassName: 'bg-border',
+                    openWidth: 136,
+                    openThreshold: 0.8,
+                    progressStyle: (progress) => ({
+                      backgroundColor: `color-mix(in oklab, var(--color-muted), var(--color-border) ${Math.trunc(progress * 100)}%)`,
+                    }),
+                  }}
+                />
               </div>
             );
           })}
