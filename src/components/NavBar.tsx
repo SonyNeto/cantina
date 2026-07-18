@@ -101,7 +101,7 @@ export const NavBar: FC = () => {
                   to={item.route}
                   className={({ isActive }) =>
                     [
-                      'border-border/35 relative inline-flex w-full items-center gap-2.5 border-b-4 px-4 py-4 text-xl whitespace-nowrap transition-colors outline-none [&_svg]:size-9 [&_svg]:shrink-0',
+                      'border-border/35 relative inline-flex w-full items-center gap-2.5 border-b-4 px-4 py-4 text-xl whitespace-nowrap outline-none [&_svg]:size-9 [&_svg]:shrink-0',
                       isActive
                         ? 'bg-info-soft text-info'
                         : 'text-text hover:bg-info-soft hover:text-info focus-visible:bg-info-soft focus-visible:text-info',

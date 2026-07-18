@@ -27,9 +27,9 @@ export const Toast: FC = () => {
           content: 'flex min-w-0 flex-col gap-2',
           icon: 'text-text flex shrink-0 items-center [&_svg]:size-10',
           actionButton:
-            'font-text border-border/60 bg-accent text-primary ml-auto inline-flex items-center justify-center rounded-none border-4 px-3 py-1.5 text-base font-medium whitespace-nowrap transition-colors hover:bg-accent-hover',
+            'font-text border-border/60 bg-accent text-primary ml-auto inline-flex items-center justify-center rounded-none border-4 px-3 py-1.5 text-base font-medium whitespace-nowrap  hover:bg-accent-hover',
           cancelButton:
-            'font-text border-border/60 bg-panel text-text inline-flex items-center justify-center rounded-none border-4 px-3 py-1.5 text-base font-medium whitespace-nowrap transition-colors hover:bg-info-soft hover:text-info',
+            'font-text border-border/60 bg-panel text-text inline-flex items-center justify-center rounded-none border-4 px-3 py-1.5 text-base font-medium whitespace-nowrap  hover:bg-info-soft hover:text-info',
           success: 'bg-success-soft text-success border-success',
           info: 'bg-info-soft text-info border-info',
           warning: 'bg-warning-soft text-text border-warning',

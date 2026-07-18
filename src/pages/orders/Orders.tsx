@@ -191,9 +191,9 @@ export const Orders: FC = () => {
   return isPending ? (
     <Loader />
   ) : (
-    <div className="app-page">
-      <div className="app-panel">
-        <div className="app-panel-header-accent flex flex-col items-center justify-center [&_svg]:size-10 [&_svg]:shrink-0">
+    <div className="app-page app-orders">
+      <div className="app-content">
+        <div className="app-header-accent bg-warning-soft text-warning flex items-center justify-center gap-3 [&_svg]:size-10 [&_svg]:shrink-0">
           <span className="text-center">Em preparação</span>
           <Cooking />
         </div>
@@ -208,7 +208,10 @@ export const Orders: FC = () => {
               openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
 
             return (
-              <div className="app-row relative inline-flex justify-center gap-5" key={item.id}>
+              <div
+                className="app-row app-row-tall relative inline-flex justify-center gap-5"
+                key={item.id}
+              >
                 <div className="inline-flex items-center gap-2.5 text-center [&_svg]:size-10 [&_svg]:shrink-0">
                   <span>{item.product.label}</span>
                 </div>
@@ -292,7 +295,7 @@ export const Orders: FC = () => {
           })}
         </div>
 
-        <div className="border-border/40 bg-success-soft text-success flex w-full flex-col items-center justify-center border-b-4 px-4 py-4 text-xl font-bold [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="app-header-accent border-border/40 bg-success-soft text-success flex w-full items-center justify-center gap-3 border-t-4 px-4 text-xl font-bold [&_svg]:size-10 [&_svg]:shrink-0">
           <span className="text-center">Pronto</span>
           <Check />
         </div>
@@ -307,7 +310,10 @@ export const Orders: FC = () => {
               openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
 
             return (
-              <div className="app-row relative inline-flex justify-center gap-5" key={item.id}>
+              <div
+                className="app-row app-row-tall relative inline-flex justify-center gap-5"
+                key={item.id}
+              >
                 <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                   <span>{item.product.label}</span>
                 </div>
@@ -341,7 +347,7 @@ export const Orders: FC = () => {
                     );
                   }}
                   right={{
-                    render: <ArrowBarRight className="text-text-soft size-10" />,
+                    render: <ArrowBarRight className="text-panel size-10" />,
                     handleWidth: 16,
                     handleClassName: 'bg-border',
                     openWidth: 136,

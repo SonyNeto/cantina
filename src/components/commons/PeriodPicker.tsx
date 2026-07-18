@@ -46,7 +46,7 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className={cn(
-          'border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 size-12 place-items-center self-center justify-self-end rounded-none border-4 transition-colors outline-none focus-visible:ring-[3px] [&_svg]:size-7',
+          'border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 size-12 place-items-center self-center justify-self-end rounded-none border-4 outline-none focus-visible:ring-[3px] [&_svg]:size-7',
           className,
         )}
       >

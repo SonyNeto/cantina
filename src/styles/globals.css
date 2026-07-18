@@ -15,6 +15,7 @@
     --color-text: #5a2d19;
     --color-muted: #8a674d;
     --color-border: #5a2d19;
+    --color-border-soft: #8c6954;
 
     --color-hover: #d7b27d;
     --color-text-hover: #2f1710;
@@ -52,6 +53,7 @@
     --color-text: #f7dfc6;
     --color-muted: #c5a384;
     --color-border: #a87554;
+    --color-border-soft: #7e573e;
 
     --color-hover: #573722;
     --color-text-hover: #fff2e3;
@@ -123,6 +125,7 @@
   --color-text: var(--color-text);
   --color-muted: var(--color-muted);
   --color-border: var(--color-border);
+  --color-border-soft: var(--color-border-soft);
   --color-hover: var(--color-hover);
   --color-text-hover: var(--color-text-hover);
   --color-accent: var(--color-accent);
@@ -149,40 +152,51 @@ body {
 
 @layer components {
   .app-page {
-    @apply mx-auto flex w-full max-w-5xl flex-col px-4 py-5 sm:px-6;
+    @apply mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col overflow-hidden;
   }
 
-  .app-panel {
-    box-shadow: 6px 6px 0 var(--color-shadow);
-    @apply border-border/70 bg-panel my-4 flex h-fit w-full flex-col overflow-hidden rounded-none border-4;
+  .app-page > form {
+    @apply flex min-h-0 w-full flex-1 flex-col overflow-hidden;
   }
 
-  .app-panel-header {
-    @apply border-border/40 bg-panel-header text-text grid w-full items-center gap-4 border-b-4 px-4 py-4 text-xl font-bold;
+  .app-content {
+    @apply flex min-h-0 w-full flex-1 flex-col overflow-hidden;
   }
 
-  .app-panel-header-accent {
-    @apply border-border/40 bg-panel-contrast text-text grid w-full items-center gap-2.5 border-b-4 px-4 py-4 text-xl font-bold;
+  .app-header {
+    @apply border-border-soft bg-panel-header text-text grid min-h-20 w-full shrink-0 items-center gap-4 border-b-4 px-4 py-3 text-xl font-bold;
+  }
+
+  .app-header-accent {
+    @apply border-border-soft bg-panel-contrast text-text grid min-h-20 w-full shrink-0 items-center gap-2.5 border-b-4 px-4 py-3 text-xl font-bold;
   }
 
   .app-list {
-    @apply grid w-full;
+    @apply bg-primary relative flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain;
   }
 
   .app-group {
-    @apply !border-b-0;
+    @apply shrink-0 [&>*]:border-b-4;
   }
 
-  .app-list > :last-child {
+  .app-list > * {
+    @apply border-border/35 shrink-0 border-b-4;
+  }
+
+  .app-list > .app-group {
     @apply border-b-0;
   }
 
-  .app-list:not(:last-child) > :last-child {
-    @apply border-b-4;
+  .app-row {
+    @apply border-border/35 bg-panel text-text grid min-h-16 w-full shrink-0 items-center gap-2.5 px-4 py-3 text-xl;
   }
 
-  .app-row {
-    @apply border-border/35 bg-panel text-text grid w-full items-center gap-2.5 border-b-4 px-4 py-3 text-xl transition-colors;
+  .app-row-tall {
+    @apply min-h-20;
+  }
+
+  .app-row-label {
+    @apply h-8 min-h-8 py-1;
   }
 
   .app-row-action {
@@ -190,7 +204,7 @@ body {
   }
 
   .app-form-row {
-    @apply border-border/35 bg-warning-soft grid w-full items-center gap-3 border-b-4 p-4 text-xl font-medium;
+    @apply border-border/35 bg-warning-soft grid w-full shrink-0 items-center gap-3 border-b-4 p-4 text-xl font-medium;
   }
 
   .app-input {
@@ -198,13 +212,40 @@ body {
   }
 
   .app-total-bar {
-    @apply border-border/35 bg-info-soft text-info grid w-full items-center gap-2.5 border-b-4 px-4 py-3 text-xl font-bold;
+    @apply bg-info-soft text-info grid min-h-14 w-full items-center gap-2.5 px-4 py-3 text-xl font-bold;
   }
 
-  .app-panel > .app-total-bar:last-child,
-  .app-panel > .app-panel-header:last-child,
-  .app-panel > .app-form-row:last-child {
-    @apply border-b-0;
+  .app-pagination {
+    @apply bg-panel-contrast text-text flex min-h-14 w-full items-center justify-between p-1 text-xl font-bold [&_svg]:shrink-0;
+  }
+
+  .app-footer {
+    @apply border-border-soft relative z-10 -mt-1 w-full shrink-0 border-t-4;
+  }
+
+  .app-footer > * + * {
+    @apply border-border-soft border-t-4;
+  }
+
+  .app-action-footer {
+    @apply bg-primary flex min-h-20 w-full items-center justify-center px-4 py-3;
+  }
+
+  .app-toolbar {
+    @apply border-border-soft shrink-0 border-b-4;
+  }
+
+  .app-orders .app-content {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .app-orders .app-list {
+    @apply overflow-y-auto;
+  }
+
+  .app-orders .app-header-accent {
+    @apply min-h-16 py-2;
   }
 
   .app-soft-band {

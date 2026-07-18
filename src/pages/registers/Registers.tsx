@@ -16,7 +16,6 @@ import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../compone
 import { toast } from 'sonner';
 import { PageNavigator } from '../../components/commons/PageNavigator';
 import { SearchBar } from '../../components/commons/SearchBar';
-import { cn } from '../../utils/functions';
 
 type ResponsibleRegister = {
   responsibleId: string;
@@ -47,7 +46,7 @@ const getResponsiblesRegisters = async (
   const params = new URLSearchParams({
     p: formattedPeriod,
     page: String(page),
-    limit: String(7),
+    limit: String(10),
     search,
   });
 
@@ -99,13 +98,13 @@ export const Registers: FC = () => {
 
   return (
     <div className="app-page">
-      <div className="app-panel">
-        <div className="app-panel-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
+      <div className="app-content">
+        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
           <span aria-hidden={true} className="col-start-1" />
           <span className="col-start-2 text-center">Responsáveis</span>
           <Button
             variant="ghost"
-            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0  outline-none focus-visible:ring-[3px] [&_svg]:size-7"
+            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
               setFormPosition('top');
@@ -135,105 +134,105 @@ export const Registers: FC = () => {
 
         {isFetching && <Loader />}
 
-          <div className={cn("app-list", isFetching? 'max-h-0' : 'max-h-[100vh]')}>
-            {responsiblesTotals.map((responsibleTotal, idx) => {
-              const isEditing = editingIndex === idx;
-              const isDrawerOpen = drawerOpenIndex === idx;
+        <div className="app-list">
+          {responsiblesTotals.map((responsibleTotal, idx) => {
+            const isEditing = editingIndex === idx;
+            const isDrawerOpen = drawerOpenIndex === idx;
 
-              if (isFetching) return null;
-
-              return (
-                <div
-                  key={responsibleTotal.responsibleId}
-                  className="app-row relative isolate overflow-hidden !p-0"
-                >
-                  {isEditing ? (
-                    <ResponsibleForm
-                      className="relative z-10 !border-0"
-                      workspaceId={workspaceId}
-                      responsibleId={responsibleTotal.responsibleId}
-                      method="update"
-                      defaultName={responsibleTotal.responsibleName}
-                      onClose={() => {
-                        setEditingIndex(null);
-                        setDrawerOpenIndex(idx);
-                      }}
-                    />
-                  ) : (
-                    <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 px-4 py-3">
-                      <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                        <User />
-                        <span>{responsibleTotal.responsibleName}</span>
-                      </div>
-                      <span className="text-center tabular-nums">{`R$${responsibleTotal.total.toFixed(2)}`}</span>
-                    </div>
-                  )}
-
-                  <SwipeActionRow
-                    right={{
-                      render: (
-                        <>
-                          <Button
-                            onClick={() => {
-                              setEditingIndex(isEditing ? null : idx);
-                              setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                              setFormPosition(null);
-                            }}
-                            disabled={isEditing}
-                          >
-                            <PenSquare />
-                          </Button>
-
-                          <Dialog>
-                            <DialogTrigger
-                              render={<Button size="md" variant="primary" disabled={isEditing} />}
-                            >
-                              <TrashCan />
-                            </DialogTrigger>
-                            <DialogContent title="Atenção">
-                              <span>Tem certeza que deseja excluir o responsável?</span>
-                              <DialogClose
-                                render={
-                                  <Button
-                                    onClick={() => {
-                                      deleteResponsible.mutate(responsibleTotal.responsibleId);
-                                      setEditingIndex(null);
-                                      setFormPosition(null);
-                                      setDrawerOpenIndex(null);
-                                    }}
-                                  />
-                                }
-                              >
-                                <Check />
-                                <span>Sim</span>
-                              </DialogClose>
-                            </DialogContent>
-                          </Dialog>
-                        </>
-                      ),
-                      handleWidth: 16,
-                      openWidth: 136,
+            return (
+              <div
+                key={responsibleTotal.responsibleId}
+                className="app-row relative isolate overflow-hidden !p-0"
+              >
+                {isEditing ? (
+                  <ResponsibleForm
+                    className="relative z-10 !border-0"
+                    workspaceId={workspaceId}
+                    responsibleId={responsibleTotal.responsibleId}
+                    method="update"
+                    defaultName={responsibleTotal.responsibleName}
+                    onClose={() => {
+                      setEditingIndex(null);
+                      setDrawerOpenIndex(idx);
                     }}
-                    openSide={isDrawerOpen ? 'right' : null}
-                    onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
-                    onTap={() =>
-                      navigate({
-                        pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
-                        search: location.search,
-                      })
-                    }
-                    captureInteractions={!isEditing}
                   />
-                </div>
-              );
-            })}
-          </div>
+                ) : (
+                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 px-4 py-3">
+                    <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                      <User />
+                      <span>{responsibleTotal.responsibleName}</span>
+                    </div>
+                    <span className="text-center tabular-nums">{`R$${responsibleTotal.total.toFixed(2)}`}</span>
+                  </div>
+                )}
 
-        <PageNavigator
-          currentPage={currentPage}
-          totalPages={totalPages}
-          setCurrentPage={setCurrentPage}
-        />
+                <SwipeActionRow
+                  right={{
+                    render: (
+                      <>
+                        <Button
+                          onClick={() => {
+                            setEditingIndex(isEditing ? null : idx);
+                            setDrawerOpenIndex(isDrawerOpen ? null : idx);
+                            setFormPosition(null);
+                          }}
+                          disabled={isEditing}
+                        >
+                          <PenSquare />
+                        </Button>
+
+                        <Dialog>
+                          <DialogTrigger
+                            render={<Button size="md" variant="primary" disabled={isEditing} />}
+                          >
+                            <TrashCan />
+                          </DialogTrigger>
+                          <DialogContent title="Atenção">
+                            <span>Tem certeza que deseja excluir o responsável?</span>
+                            <DialogClose
+                              render={
+                                <Button
+                                  onClick={() => {
+                                    deleteResponsible.mutate(responsibleTotal.responsibleId);
+                                    setEditingIndex(null);
+                                    setFormPosition(null);
+                                    setDrawerOpenIndex(null);
+                                  }}
+                                />
+                              }
+                            >
+                              <Check />
+                              <span>Sim</span>
+                            </DialogClose>
+                          </DialogContent>
+                        </Dialog>
+                      </>
+                    ),
+                    handleWidth: 16,
+                    openWidth: 136,
+                  }}
+                  openSide={isDrawerOpen ? 'right' : null}
+                  onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
+                  onTap={() =>
+                    navigate({
+                      pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
+                      search: location.search,
+                    })
+                  }
+                  captureInteractions={!isEditing}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <footer className="app-footer">
+          <PageNavigator
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
+        </footer>
       </div>
     </div>
   );

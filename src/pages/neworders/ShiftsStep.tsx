@@ -32,8 +32,8 @@ export const ShiftsStep: FC<Props> = ({ onNext }) => {
   return isPending ? (
     <Loader />
   ) : (
-    <div className="app-panel">
-      <div className="app-panel-header place-items-center [&_svg]:size-10 [&_svg]:shrink-0">
+    <div className="app-content">
+      <div className="app-header place-items-center [&_svg]:size-10 [&_svg]:shrink-0">
         <span className="text-center">Escolha um turno</span>
       </div>
       <div className="app-list">

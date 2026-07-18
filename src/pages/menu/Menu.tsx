@@ -77,13 +77,13 @@ export const Menu: FC = () => {
     <Loader />
   ) : (
     <div className="app-page">
-      <div className="app-panel">
-        <div className="app-panel-header-accent grid-cols-[2.5rem_minmax(0,1fr)_2.5rem]">
+      <div className="app-content">
+        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem]">
           <span aria-hidden={true} className="col-start-1" />
           <span className="col-start-2 text-center">Cardápio</span>
           <Button
             variant="ghost"
-            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 transition-colors outline-none focus-visible:ring-[3px] [&_svg]:size-7"
+            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
               setFormPosition('top');
@@ -182,11 +182,13 @@ export const Menu: FC = () => {
           })}
         </div>
 
-        <PageNavigator
-          currentPage={currentPage}
-          totalPages={totalPages}
-          setCurrentPage={setCurrentPage}
-        />
+        <footer className="app-footer">
+          <PageNavigator
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
+        </footer>
       </div>
     </div>
   );

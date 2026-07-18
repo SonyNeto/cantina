@@ -112,8 +112,8 @@ export const ResponsibleDetails: FC = () => {
     <Loader />
   ) : (
     <div className="app-page">
-      <div className="app-panel">
-        <div className="app-panel-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
+      <div className="app-content">
+        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
           <Link
             key="back-registers"
             to={{ pathname: ROUTES.REGISTERS.ROOT, search: location.search }}
@@ -124,7 +124,7 @@ export const ResponsibleDetails: FC = () => {
           <span className="justify-self-center text-center">{`Alunos de ${responsibleTotals?.responsibleName}`}</span>
           <Button
             variant="ghost"
-            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 transition-colors outline-none focus-visible:ring-[3px] [&_svg]:size-7"
+            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
               setFormPosition('top');
@@ -152,7 +152,10 @@ export const ResponsibleDetails: FC = () => {
             const isDrawerOpen = drawerOpenIndex === idx;
 
             return (
-              <div key={student.id} className="app-row relative isolate overflow-hidden !p-0">
+              <div
+                key={student.id}
+                className="app-row app-row-tall relative isolate overflow-hidden !p-0"
+              >
                 {isEditing ? (
                   <StudentForm
                     className="relative z-10 !border-0"
@@ -241,18 +244,19 @@ export const ResponsibleDetails: FC = () => {
               </div>
             );
           })}
+        </div>
+        <footer className="app-footer">
+          <div className="app-total-bar grid-cols-[minmax(0,1fr)_8ch] [&_svg]:size-10 [&_svg]:shrink-0">
+            <span className="text-right">Total: </span>
+            <span className="text-right tabular-nums">{`R$${(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
+          </div>
 
           <PageNavigator
             currentPage={currentPage}
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}
           />
-        </div>
-
-        <div className="app-total-bar grid-cols-[minmax(0,1fr)_8ch] [&_svg]:size-10 [&_svg]:shrink-0">
-          <span className="text-right">Total: </span>
-          <span className="text-right tabular-nums">{`R$${(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
-        </div>
+        </footer>
       </div>
     </div>
   );

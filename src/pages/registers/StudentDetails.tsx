@@ -68,8 +68,8 @@ export const StudentDetails: FC = () => {
     <Loader />
   ) : (
     <div className="app-page">
-      <div className="app-panel">
-        <div className="app-panel-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
+      <div className="app-content">
+        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
           <Link
             key="back-responsible-details"
             to={{ pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleId), search: location.search }}
@@ -81,44 +81,43 @@ export const StudentDetails: FC = () => {
           <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
         </div>
 
-        <div className="">
+        <div className="app-list">
           {Object.entries(registersByDate).map(([date, registers]) => {
             return (
-              <div key={date} className="app-list">
-                <div className="text-muted bg-secondary/35 border-border/15 border-b-4 px-4 py-1 text-xl">
+              <div key={date} className="app-group">
+                <div className="app-row app-row-label text-muted bg-secondary/35 px-4 text-xl">
                   {dayjs(date).format('DD/MM')}
                 </div>
-
-                <div className="app-group">
-                  {registers.map((register) => (
-                    <div
-                      className="app-row grid-cols-[minmax(0,1fr)_7ch] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
-                      key={register.id}
-                    >
-                      <div className="inline-flex items-center gap-2.5">
-                        <span>{register.product.label}</span>
-                      </div>
-                      <span className="text-right tabular-nums">{`R$${register.product.price.toFixed(2)}`}</span>
+                {registers.map((register) => (
+                  <div
+                    className="app-row grid-cols-[minmax(0,1fr)_7ch] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
+                    key={register.id}
+                  >
+                    <div className="inline-flex items-center gap-2.5">
+                      <span>{register.product.label}</span>
                     </div>
-                  ))}
-                </div>
+                    <span className="text-right tabular-nums">{`R$${register.product.price.toFixed(2)}`}</span>
+                  </div>
+                ))}
               </div>
             );
           })}
         </div>
 
-        <PageNavigator
-          currentPage={currentPage}
-          totalPages={totalPages}
-          setCurrentPage={setCurrentPage}
-        />
-
-        <div className="app-total-bar justify-end [&_svg]:size-10">
-          <div className="flex gap-5">
-            <span>Total: </span>
-            <span>{`R$${total.toFixed(2)}`}</span>
+        <footer className="app-footer">
+          <div className="app-total-bar justify-end [&_svg]:size-10">
+            <div className="flex gap-5">
+              <span>Total: </span>
+              <span>{`R$${total.toFixed(2)}`}</span>
+            </div>
           </div>
-        </div>
+
+          <PageNavigator
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
+        </footer>
       </div>
     </div>
   );

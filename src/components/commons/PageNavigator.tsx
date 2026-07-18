@@ -1,8 +1,9 @@
 import { ArrowLeft, ArrowRight } from 'pixelarticons/react';
 import { cn } from '../../utils/functions';
 import { Button } from './Button';
+import type { ComponentProps } from 'react';
 
-type PageNavigatorProps = {
+type PageNavigatorProps = ComponentProps<'div'> & {
   currentPage: number;
   totalPages: number;
   setCurrentPage: (page: number) => void;
@@ -41,14 +42,16 @@ const getPaginationItems = (currentPage: number, totalPages: number): Pagination
   ];
 };
 
-export const PageNavigator = ({ currentPage, totalPages, setCurrentPage }: PageNavigatorProps) => {
+export const PageNavigator = ({
+  currentPage,
+  totalPages,
+  setCurrentPage,
+  className,
+}: PageNavigatorProps) => {
   const paginationItems = getPaginationItems(currentPage, totalPages);
 
   return (
-    <nav
-      aria-label="pagination"
-      className="app-panel-header inline-flex items-center justify-between !gap-0 p-1 [&_svg]:shrink-0"
-    >
+    <nav aria-label="pagination" className={cn('app-pagination', className)}>
       <Button
         variant="ghost"
         size="md"
@@ -58,7 +61,7 @@ export const PageNavigator = ({ currentPage, totalPages, setCurrentPage }: PageN
       >
         <ArrowLeft />
       </Button>
-      <div className="grid inline-flex grid-cols-1">
+      <div className="inline-flex min-w-0 items-center justify-center gap-1 overflow-hidden">
         {paginationItems.map((item) => {
           if (typeof item !== 'number') {
             return (

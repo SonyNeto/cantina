@@ -50,8 +50,8 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) =>
   return isPending ? (
     <Loader />
   ) : (
-    <div className="app-panel">
-      <div className="app-panel-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
+    <div className="app-content">
+      <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
         <Button variant={'ghost'} className="justify-self-start" disableHover onClick={onBack}>
           <ArrowLeft />
         </Button>

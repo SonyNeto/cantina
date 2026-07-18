@@ -74,20 +74,15 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
     <Loader />
   ) : (
     <>
-      <div className="app-panel">
-        <div className="app-panel-header-accent grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10">
+      <div className="app-content">
+        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10">
           <Button variant={'ghost'} className="justify-self-start" disableHover onClick={onBack}>
             <ArrowLeft />
           </Button>
           <span className="justify-self-center text-center">Cardápio</span>
           <span aria-hidden="true" />
         </div>
-        <div className="app-total-bar justify-end [&_svg]:size-10 [&_svg]:shrink-0">
-          <div className="flex gap-5">
-            <span>Total: </span>
-            <span>{`R$ ${total.toFixed(2)}`}</span>
-          </div>
-        </div>
+
         <div className="app-list">
           {menuItems.map((item, idx) => {
             const quantity = getSelectedProductQuantity(item.id);
@@ -120,16 +115,26 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
             );
           })}
         </div>
-      </div>
-      <div className="sticky bottom-4 flex items-center justify-center">
-        <Button
-          type="submit"
-          variant="primary"
-          size="xl"
-          className="border-border/70 shadow-[5px_5px_0_var(--color-shadow)]"
-        >
-          Concluir
-        </Button>
+
+        <footer className="app-footer">
+          <div className="app-total-bar justify-end [&_svg]:size-10 [&_svg]:shrink-0">
+            <div className="flex gap-5">
+              <span>Total: </span>
+              <span>{`R$ ${total.toFixed(2)}`}</span>
+            </div>
+          </div>
+
+          <div className="app-action-footer">
+            <Button
+              type="submit"
+              variant="primary"
+              size="xl"
+              className="border-border/70 w-full max-w-sm shadow-[5px_5px_0_var(--color-shadow)]"
+            >
+              Concluir
+            </Button>
+          </div>
+        </footer>
       </div>
     </>
   );

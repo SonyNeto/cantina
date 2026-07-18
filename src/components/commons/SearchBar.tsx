@@ -10,7 +10,7 @@ type SearchBarProps = ComponentProps<'input'> & {
 
 export const SearchBar: FC<SearchBarProps> = ({ placeholder, query, setQuery }) => {
   return (
-    <div className="border-border-soft inline-flex w-full items-stretch justify-between">
+    <div className="app-toolbar inline-flex w-full items-stretch justify-between">
       <input
         type="text"
         placeholder={placeholder}
@@ -18,7 +18,7 @@ export const SearchBar: FC<SearchBarProps> = ({ placeholder, query, setQuery }) 
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
-      <Button variant="primary" size="md" className="border-l-4 border-y-0 border-r-0">
+      <Button variant="primary" size="md" className="border-y-0 border-r-0 border-l-4">
         <Search />
       </Button>
     </div>
