@@ -5,12 +5,13 @@ import { useAuth } from '../../hooks/useAuth';
 
 export const ProtectedRoute = () => {
   const location = useLocation();
-
+  
   const { data: isAuthenticated, isPending, isError } = useAuth();
 
   if (isPending) return <Loader />;
 
   if (isError || !isAuthenticated) {
+
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import type { FC } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { Button } from '../../components/commons/Button';
 import ROUTES from '../../constants/routes';
@@ -25,6 +25,7 @@ const signupSchema = z
 
 export const SignupPage: FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const signupMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
@@ -46,7 +47,10 @@ export const SignupPage: FC = () => {
 
     onSuccess: () => {
       toast.success('Cadastro realizado com sucesso');
-      navigate(ROUTES.LOGIN);
+      navigate(ROUTES.LOGIN, {
+        state: location.state,
+        replace: true,
+      });
     },
 
     onError: () => {
@@ -107,7 +111,7 @@ export const SignupPage: FC = () => {
           <Button type="submit" variant="primary" size="md" className="w-full">
             Cadastrar-se
           </Button>
-          <Link to={ROUTES.LOGIN} className="app-link text-center text-xl">
+          <Link to={ROUTES.LOGIN} state={location.state} className="app-link text-center text-xl">
             Voltar para o login
           </Link>
         </form>
