@@ -25,7 +25,7 @@ const DialogContent: FC<ComponentProps<typeof DialogPrimitive.Popup>> = ({
         )}
         {...props}
       >
-        <div className="border-border/40 bg-panel-header flex h-14 items-center justify-between gap-3 border-b-4 pr-1 pl-4">
+        <div className="bg-panel-header flex h-14 items-center justify-between gap-3 pr-1 pl-4 raised">
           {title && (
             <DialogPrimitive.Title className="min-w-0 truncate text-xl font-bold">
               {title}

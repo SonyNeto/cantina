@@ -353,7 +353,7 @@ export const Orders: FC = () => {
                     openWidth: 136,
                     openThreshold: 0.8,
                     progressStyle: (progress) => ({
-                      backgroundColor: `color-mix(in oklab, var(--color-muted), var(--color-border) ${Math.trunc(progress * 100)}%)`,
+                      backgroundColor: `color-mix(in oklab, var(--color-primary), var(--color-border) ${Math.trunc(progress * 100)}%)`,
                     }),
                   }}
                 />

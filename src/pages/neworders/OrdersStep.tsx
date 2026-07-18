@@ -129,7 +129,7 @@ export const OrdersStep: FC<Props> = ({ onBack }) => {
               type="submit"
               variant="primary"
               size="xl"
-              className="border-border/70 w-full max-w-sm shadow-[5px_5px_0_var(--color-shadow)]"
+              className="border-border/70 w-full max-w-sm"
             >
               Concluir
             </Button>

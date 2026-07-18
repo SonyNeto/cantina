@@ -275,7 +275,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
       {left && (
         <div
           className={cn(
-            'bg-panel-contrast pointer-events-auto absolute inset-y-0 left-0 z-10 flex h-full w-full flex-row-reverse',
+            'bg-panel-contrast pointer-events-auto absolute inset-y-0 left-0 z-10 flex h-full w-full flex-row-reverse sunken',
             !isDragging && 'transition-transform duration-200',
             left.className,
           )}
@@ -288,7 +288,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
             {...leftSwipeHandlers}
             type="button"
             className={cn(
-              'bg-border h-full shrink-0 cursor-pointer touch-pan-y',
+              'bg-border h-full shrink-0 cursor-pointer touch-pan-y sunken border-info/50 border-4',
               left.handleClassName,
             )}
             style={{ width: `${getHandleWidth('left')}px` }}
@@ -307,7 +307,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
       {right && (
         <div
           className={cn(
-            'bg-panel-contrast pointer-events-auto absolute inset-y-0 right-0 z-10 flex h-full w-full',
+            'bg-panel-contrast pointer-events-auto absolute inset-y-0 right-0 z-10 flex h-full w-full sunken',
             !isDragging && 'transition-transform duration-200',
             right.className,
           )}
@@ -320,7 +320,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
             {...rightSwipeHandlers}
             type="button"
             className={cn(
-              'bg-border h-full shrink-0 cursor-pointer touch-pan-y',
+              'bg-border h-full shrink-0 cursor-pointer touch-pan-y raised border-info/50 border-4',
               right.handleClassName,
             )}
             style={{ width: `${getHandleWidth('right')}px` }}

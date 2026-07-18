@@ -14,11 +14,11 @@ export const SearchBar: FC<SearchBarProps> = ({ placeholder, query, setQuery }) 
       <input
         type="text"
         placeholder={placeholder}
-        className="w-full px-2 text-xl"
+        className="app-input w-full px-2 text-xl"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
-      <Button variant="primary" size="md" className="border-y-0 border-r-0 border-l-4">
+      <Button variant="primary" size="lg" className="border-y-0 border-r-0 border-l-4 size-full">
         <Search />
       </Button>
     </div>

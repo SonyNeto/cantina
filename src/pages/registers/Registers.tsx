@@ -99,12 +99,12 @@ export const Registers: FC = () => {
   return (
     <div className="app-page">
       <div className="app-content">
-        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="app-header raised !border-0 grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
           <span aria-hidden={true} className="col-start-1" />
           <span className="col-start-2 text-center">Responsáveis</span>
           <Button
-            variant="ghost"
-            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
+            variant="primary"
+            className="bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
               setFormPosition('top');
@@ -157,7 +157,7 @@ export const Registers: FC = () => {
                     }}
                   />
                 ) : (
-                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 px-4 py-3">
+                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 pl-4 pr-8 py-3">
                     <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                       <User />
                       <span>{responsibleTotal.responsibleName}</span>

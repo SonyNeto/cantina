@@ -123,8 +123,8 @@ export const ResponsibleDetails: FC = () => {
           </Link>
           <span className="justify-self-center text-center">{`Alunos de ${responsibleTotals?.responsibleName}`}</span>
           <Button
-            variant="ghost"
-            className="border-border/45 bg-panel hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end rounded-none border-4 !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
+            variant="primary"
+            className="bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
               setFormPosition('top');

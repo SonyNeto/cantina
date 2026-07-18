@@ -79,17 +79,16 @@ export const NavBar: FC = () => {
           swipeDirection="right"
           className="fixed top-0 left-0 z-10 h-screen w-5 sm:w-8"
         />
-        <div className="border-border/35 bg-panel-header sticky top-0 left-0 z-50 flex h-[4.5rem] w-full items-center justify-between border-b-4 px-4 shadow-[0_4px_0_var(--color-shadow)]">
+        <div className="bg-panel-header sticky top-0 left-0 z-50 flex h-[4.5rem] w-full items-center justify-between px-4 raised">
           <DrawerTrigger
             render={
-              <Button size="lg" className="z-50 rounded-none" variant="ghost">
-                <Menu />
-              </Button>
+              <Button size="lg" className="z-50 rounded-none" variant="ghost" />
             }
-          ></DrawerTrigger>
+          ><Menu /></DrawerTrigger>
 
           <DrawerContent className="flex h-full flex-col">
             <WorkspaceSelect />
+            
             {NAVMENU.ITEMS.filter((item) =>
               canAccessWorkspaceRole(workspaceRole, item.accessLevel),
             ).map((item, idx) => {
@@ -101,10 +100,10 @@ export const NavBar: FC = () => {
                   to={item.route}
                   className={({ isActive }) =>
                     [
-                      'border-border/35 relative inline-flex w-full items-center gap-2.5 border-b-4 px-4 py-4 text-xl whitespace-nowrap outline-none [&_svg]:size-9 [&_svg]:shrink-0',
+                      'relative inline-flex w-full items-center gap-2.5 px-4 py-4 text-xl whitespace-nowrap outline-none [&_svg]:size-9 [&_svg]:shrink-0',
                       isActive
-                        ? 'bg-info-soft text-info'
-                        : 'text-text hover:bg-info-soft hover:text-info focus-visible:bg-info-soft focus-visible:text-info',
+                        ? 'bg-info-soft text-info sunken'
+                        : 'text-text hover:bg-info-soft hover:text-info focus-visible:bg-info-soft focus-visible:text-info raised',
                     ].join(' ')
                   }
                   onClick={() => setIsOpen(false)}

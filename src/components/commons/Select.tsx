@@ -17,7 +17,7 @@ const Select = SelectPrimitive.Root;
 const SelectTrigger = ({ placeholder, className, ...props }: SelectTriggerProps) => (
   <SelectPrimitive.Trigger
     className={cn(
-      'border-border/45 bg-panel text-text hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 inline-flex min-w-0 items-center rounded-none border-4 px-2 whitespace-nowrap  outline-none focus-visible:ring-[3px]',
+      'sunken bg-panel text-text hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 inline-flex min-w-0 items-center rounded-none px-2 whitespace-nowrap  outline-none focus-visible:ring-[3px]',
       className,
     )}
     {...props}
@@ -83,7 +83,7 @@ const SelectGroup = ({ label, children, className, ...props }: SelectGroupProps)
     className={cn('border-border/35 border-b-4 last:border-b-0', className)}
     {...props}
   >
-    <SelectPrimitive.GroupLabel className="bg-panel-header border-border/35 w-full truncate border-b-4 px-2 py-1 text-center text-xl font-bold">
+    <SelectPrimitive.GroupLabel className="bg-panel-header raised w-full truncate px-2 py-1 text-center text-xl font-bold">
       {label}
     </SelectPrimitive.GroupLabel>
     {children}

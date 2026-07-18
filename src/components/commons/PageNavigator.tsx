@@ -51,7 +51,7 @@ export const PageNavigator = ({
   const paginationItems = getPaginationItems(currentPage, totalPages);
 
   return (
-    <nav aria-label="pagination" className={cn('app-pagination', className)}>
+    <nav aria-label="pagination" className={cn('app-pagination raised', className)}>
       <Button
         variant="ghost"
         size="md"

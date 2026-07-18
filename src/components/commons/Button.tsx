@@ -4,7 +4,7 @@ import { cn } from '../../utils/functions';
 
 const variants = {
   primary: {
-    base: 'bg-accent text-primary border-4 border-border/70',
+    base: 'bg-accent text-primary border-4 border-border/70 raised',
     hover: 'hover:bg-accent-hover hover:text-primary',
   },
   ghost: {
@@ -49,7 +49,7 @@ export const Button: FC<Props> = ({
       variants[variant].base,
       !disableHover && variants[variant].hover,
       sizes[size],
-      'z-30 inline-flex cursor-pointer items-center justify-center rounded-none font-medium whitespace-nowrap outline-none focus-visible:ring-[3px] focus-visible:ring-accent/35 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_*]:pointer-events-none [&_svg]:shrink-0',
+      'app-button',
       className,
     ),
     ...(nativeButton ? { type: 'button' } : {}),
