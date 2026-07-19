@@ -66,6 +66,16 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
     if (!row) return;
 
     setPanelWidth(row.offsetWidth);
+
+    const resizeObserver = new ResizeObserver(() => {
+      setPanelWidth(row.offsetWidth);
+    });
+    resizeObserver.observe(row);
+
+    return () => {
+      resizeObserver.disconnect();
+      rowRef.current = null;
+    };
   }, []);
 
   const getSideConfig = (side: SwipeSide) => (side === 'left' ? left : right);
@@ -275,7 +285,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
       {left && (
         <div
           className={cn(
-            'bg-panel-contrast pointer-events-auto absolute inset-y-0 left-0 z-10 flex h-full w-full flex-row-reverse sunken',
+            'bg-panel-contrast sunken pointer-events-auto absolute inset-y-0 left-0 z-10 flex h-full w-full flex-row-reverse',
             !isDragging && 'transition-transform duration-200',
             left.className,
           )}
@@ -288,7 +298,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
             {...leftSwipeHandlers}
             type="button"
             className={cn(
-              'bg-border h-full shrink-0 cursor-pointer touch-pan-y sunken border-info/50 border-4',
+              'bg-border sunken border-info/50 h-full shrink-0 cursor-pointer touch-pan-y border-4',
               left.handleClassName,
             )}
             style={{ width: `${getHandleWidth('left')}px` }}
@@ -307,7 +317,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
       {right && (
         <div
           className={cn(
-            'bg-panel-contrast pointer-events-auto absolute inset-y-0 right-0 z-10 flex h-full w-full sunken',
+            'bg-panel-contrast sunken pointer-events-auto absolute inset-y-0 right-0 z-10 flex h-full w-full',
             !isDragging && 'transition-transform duration-200',
             right.className,
           )}
@@ -320,7 +330,7 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
             {...rightSwipeHandlers}
             type="button"
             className={cn(
-              'bg-border h-full shrink-0 cursor-pointer touch-pan-y raised border-info/50 border-4',
+              'bg-border raised border-info/50 h-full shrink-0 cursor-pointer touch-pan-y border-4',
               right.handleClassName,
             )}
             style={{ width: `${getHandleWidth('right')}px` }}
