@@ -32,7 +32,7 @@ export const Layout: FC = () => {
   return (
     <div className="bg-primary flex min-h-screen w-full flex-col overflow-x-hidden">
       <NavBar />
-      <main className="w-full h-[calc(100dvh-4.5rem)]">
+      <main className="h-[calc(100dvh-4.5rem)] w-full">
         <Outlet />
       </main>
     </div>

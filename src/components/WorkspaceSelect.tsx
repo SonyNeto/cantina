@@ -128,7 +128,7 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
           <SelectTrigger
             placeholder="Selecione uma instituição"
             className={cn(
-              'raised border-0 bg-panel-header text-text hover:bg-warning-soft hover:text-text h-14 w-full shrink-0 justify-between rounded-none px-4',
+              'raised bg-panel-header text-text hover:bg-warning-soft hover:text-text h-14 w-full shrink-0 justify-between rounded-none border-0 px-4',
               className,
             )}
             {...props}
@@ -205,7 +205,7 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
               <Button
                 size="md"
                 variant="ghost"
-                className="raised border-0 text-muted hover:bg-accent-soft hover:text-accent grid h-12 w-full grid-cols-[2.5rem_minmax(0,1fr)] rounded-none px-3"
+                className="raised text-muted hover:bg-accent-soft hover:text-accent grid h-12 w-full grid-cols-[2.5rem_minmax(0,1fr)] rounded-none border-0 px-3"
                 onClick={() => getInviteToken.mutate()}
               />
             }

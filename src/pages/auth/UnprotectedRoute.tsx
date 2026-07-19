@@ -19,8 +19,8 @@ export const UnprotectedRoute = () => {
     const from = location.state?.from;
 
     const destination = from
-    ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}`
-    : ROUTES.HOME;
+      ? `${from.pathname}${from.search ?? ''}${from.hash ?? ''}`
+      : ROUTES.HOME;
 
     return <Navigate to={destination} replace />;
   }

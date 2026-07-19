@@ -17,7 +17,7 @@ const Select = SelectPrimitive.Root;
 const SelectTrigger = ({ placeholder, className, ...props }: SelectTriggerProps) => (
   <SelectPrimitive.Trigger
     className={cn(
-      'sunken bg-panel text-text hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 inline-flex min-w-0 items-center rounded-none px-2 whitespace-nowrap  outline-none focus-visible:ring-[3px]',
+      'sunken bg-panel text-text hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 inline-flex min-w-0 items-center rounded-none px-2 whitespace-nowrap outline-none focus-visible:ring-[3px]',
       className,
     )}
     {...props}

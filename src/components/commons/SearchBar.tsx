@@ -18,7 +18,7 @@ export const SearchBar: FC<SearchBarProps> = ({ placeholder, query, setQuery }) 
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />
-      <Button variant="primary" size="lg" className="border-y-0 border-r-0 border-l-4 size-full">
+      <Button variant="primary" size="lg" className="size-full border-y-0 border-r-0 border-l-4">
         <Search />
       </Button>
     </div>

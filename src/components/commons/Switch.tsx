@@ -21,7 +21,7 @@ const SwitchThumb = ({ className }: SwitchThumbProps) => {
   return (
     <SwitchPrimitive.Thumb
       className={cn(
-        'bg-primary border-text/70 h-6 w-6 border-4 transition-transform duration-200 ease-out raised [&[data-checked]]:translate-x-[1.5rem] [&[data-checked]]:sunken',
+        'bg-primary border-text/70 raised [&[data-checked]]:sunken h-6 w-6 border-4 transition-transform duration-200 ease-out [&[data-checked]]:translate-x-[1.5rem]',
         className,
       )}
     />

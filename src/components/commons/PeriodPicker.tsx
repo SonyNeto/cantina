@@ -46,14 +46,14 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className={cn(
-          'raised border-border/45 text-primary cursor-pointer bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 size-12 place-items-center self-center justify-self-end rounded-none border-4 outline-none focus-visible:ring-[3px] [&_svg]:size-7',
+          'raised border-border/45 text-primary bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 size-12 cursor-pointer place-items-center self-center justify-self-end rounded-none border-4 outline-none focus-visible:ring-[3px] [&_svg]:size-7',
           className,
         )}
       >
         <Calendar2 />
       </PopoverTrigger>
       <PopoverContent className="w-52 text-xl">
-        <div className="bg-panel-header grid grid-cols-[1fr_2fr_1fr] items-center gap-2 p-2 raised">
+        <div className="bg-panel-header raised grid grid-cols-[1fr_2fr_1fr] items-center gap-2 p-2">
           <Button
             className="justify-self-start"
             variant="ghost"
@@ -85,7 +85,7 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
                 size="md"
                 className={cn(
                   'p-2',
-                  isSelected && 'border-border/40 bg-accent text-primary border-4 raised',
+                  isSelected && 'border-border/40 bg-accent text-primary raised border-4',
                   !isSelected && isCurrentMonth && 'text-accent',
                 )}
                 onClick={() => handleMonthSelect(index)}

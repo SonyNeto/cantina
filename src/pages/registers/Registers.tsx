@@ -99,7 +99,7 @@ export const Registers: FC = () => {
   return (
     <div className="app-page">
       <div className="app-content">
-        <div className="app-header raised !border-0 grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="app-header raised grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] !border-0 [&_svg]:size-10 [&_svg]:shrink-0">
           <span aria-hidden={true} className="col-start-1" />
           <span className="col-start-2 text-center">Responsáveis</span>
           <Button
@@ -157,7 +157,7 @@ export const Registers: FC = () => {
                     }}
                   />
                 ) : (
-                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 pl-4 pr-8 py-3">
+                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 py-3 pr-8 pl-4">
                     <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                       <User />
                       <span>{responsibleTotal.responsibleName}</span>

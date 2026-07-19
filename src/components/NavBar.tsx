@@ -79,16 +79,16 @@ export const NavBar: FC = () => {
           swipeDirection="right"
           className="fixed top-0 left-0 z-10 h-screen w-5 sm:w-8"
         />
-        <div className="bg-panel-header sticky top-0 left-0 z-50 flex h-[4.5rem] w-full items-center justify-between px-4 raised">
+        <div className="bg-panel-header raised sticky top-0 left-0 z-50 flex h-[4.5rem] w-full items-center justify-between px-4">
           <DrawerTrigger
-            render={
-              <Button size="lg" className="z-50 rounded-none" variant="ghost" />
-            }
-          ><Menu /></DrawerTrigger>
+            render={<Button size="lg" className="z-50 rounded-none" variant="ghost" />}
+          >
+            <Menu />
+          </DrawerTrigger>
 
           <DrawerContent className="flex h-full flex-col">
             <WorkspaceSelect />
-            
+
             {NAVMENU.ITEMS.filter((item) =>
               canAccessWorkspaceRole(workspaceRole, item.accessLevel),
             ).map((item, idx) => {
