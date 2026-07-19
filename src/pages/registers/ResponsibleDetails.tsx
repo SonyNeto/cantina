@@ -43,8 +43,6 @@ type ResponsibleRegistersResponse = {
   pagination: Pagination;
 };
 
-type FormPosition = 'top' | 'bottom' | null;
-
 const getResponsibleRegisters = async (
   responsibleId: string,
   period: Period,
@@ -63,9 +61,8 @@ export const ResponsibleDetails: FC = () => {
   const location = useLocation();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
-  const [formPosition, setFormPosition] = useState<FormPosition>(null);
+  const [isAdding, setIsAdding] = useState(false);
   const { responsibleId } = useParams();
-  const isAdding = formPosition !== null;
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
 
@@ -127,7 +124,7 @@ export const ResponsibleDetails: FC = () => {
             className="bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
-              setFormPosition('top');
+              setIsAdding(true);
               setEditingIndex(null);
               setDrawerOpenIndex(null);
             }}
@@ -140,11 +137,11 @@ export const ResponsibleDetails: FC = () => {
         </div>
 
         <div className="app-list">
-          {formPosition === 'top' && (
+          {isAdding && (
             <StudentForm
               workspaceId={workspaceId}
               responsibleId={responsibleId}
-              onClose={() => setFormPosition(null)}
+              onClose={() => setIsAdding(false)}
             />
           )}
           {responsibleStudents.map((student, idx) => {
@@ -191,7 +188,7 @@ export const ResponsibleDetails: FC = () => {
                           onClick={() => {
                             setEditingIndex(isEditing ? null : idx);
                             setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                            setFormPosition(null);
+                            setIsAdding(false);
                           }}
                           disabled={isEditing}
                         >

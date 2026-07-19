@@ -34,8 +34,6 @@ type ResponsiblesRegistersResponse = {
   pagination: Pagination;
 };
 
-type FormPosition = 'top' | 'bottom' | null;
-
 const getResponsiblesRegisters = async (
   period: Period,
   page: number,
@@ -62,11 +60,9 @@ export const Registers: FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [search, setSearch] = useState<string>('');
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
-  const [formPosition, setFormPosition] = useState<FormPosition>(null);
+  const [isAdding, setIsAdding] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
-
-  const isAdding = formPosition !== null;
 
   const { data: registersData, isFetching } = useQuery({
     queryKey: ['registers', 'responsibles', workspaceId, period, currentPage, search],
@@ -107,7 +103,7 @@ export const Registers: FC = () => {
             className="bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
-              setFormPosition('top');
+              setIsAdding(true);
               setEditingIndex(null);
               setDrawerOpenIndex(null);
             }}
@@ -119,8 +115,8 @@ export const Registers: FC = () => {
           <PeriodPicker value={period} onChange={setPeriod} className="col-start-4" />
         </div>
 
-        {formPosition === 'top' && (
-          <ResponsibleForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
+        {isAdding && (
+          <ResponsibleForm workspaceId={workspaceId} onClose={() => setIsAdding(false)} />
         )}
 
         <SearchBar
@@ -174,7 +170,7 @@ export const Registers: FC = () => {
                           onClick={() => {
                             setEditingIndex(isEditing ? null : idx);
                             setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                            setFormPosition(null);
+                            setIsAdding(false);
                           }}
                           disabled={isEditing}
                         >
@@ -195,7 +191,7 @@ export const Registers: FC = () => {
                                   onClick={() => {
                                     deleteResponsible.mutate(responsibleTotal.responsibleId);
                                     setEditingIndex(null);
-                                    setFormPosition(null);
+                                    setIsAdding(false);
                                     setDrawerOpenIndex(null);
                                   }}
                                 />

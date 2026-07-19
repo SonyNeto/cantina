@@ -28,8 +28,6 @@ type MenuItemResponse = {
   menuItem: Product;
 };
 
-type FormPosition = 'top' | 'bottom' | null;
-
 const getMenuItems = async (page: number): Promise<MenuItemsResponse> => {
   const res = await workspaceApiFetch(`/menu-items?page=${page}&limit=${8}`);
   return res.json();
@@ -41,8 +39,7 @@ export const Menu: FC = () => {
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
-  const [formPosition, setFormPosition] = useState<FormPosition>(null);
-  const isAdding = formPosition !== null;
+  const [isAdding, setIsAdding] = useState(false);
 
   const { data: menuItemsData, isPending } = useQuery({
     queryKey: ['menuItems', workspaceId, currentPage],
@@ -86,7 +83,7 @@ export const Menu: FC = () => {
             className="bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
             disabled={isAdding}
             onClick={() => {
-              setFormPosition('top');
+              setIsAdding(true);
               setEditingIndex(null);
               setDrawerOpenIndex(null);
             }}
@@ -98,8 +95,8 @@ export const Menu: FC = () => {
         </div>
 
         <div className="app-list">
-          {formPosition === 'top' && (
-            <MenuItemForm workspaceId={workspaceId} onClose={() => setFormPosition(null)} />
+          {isAdding && (
+            <MenuItemForm workspaceId={workspaceId} onClose={() => setIsAdding(false)} />
           )}
 
           {menuItems.map((item, idx) => {
@@ -136,7 +133,7 @@ export const Menu: FC = () => {
                           onClick={() => {
                             setEditingIndex(isEditing ? null : idx);
                             setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                            setFormPosition(null);
+                            setIsAdding(false);
                           }}
                           disabled={isEditing}
                         >
@@ -157,7 +154,7 @@ export const Menu: FC = () => {
                                   onClick={() => {
                                     deleteMenuItem.mutate(item.id);
                                     setEditingIndex(null);
-                                    setFormPosition(null);
+                                    setIsAdding(false);
                                     setDrawerOpenIndex(null);
                                   }}
                                 />
