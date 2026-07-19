@@ -14,14 +14,8 @@ import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
 import { canAccessWorkspaceRole } from '../utils/workspaceAccess.ts';
 import { ThemeSwitch } from './ThemeSwitch.tsx';
 
-type OrderWithItems = {
-  items: {
-    status: 'cooking' | 'ready';
-  }[];
-};
-
 type OrdersResponse = {
-  orders: OrderWithItems[];
+  totalActiveItems: number;
 };
 
 const getOrders = async (): Promise<OrdersResponse> => {
@@ -32,15 +26,16 @@ const getOrders = async (): Promise<OrdersResponse> => {
 export const NavBar: FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const workspaceRole = useWorkspaceStore((state) => state.workspace?.role);
   const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
 
-  const { data: orders = [], isPending } = useQuery({
+  const { data: totalActiveItems, isPending } = useQuery({
     queryKey: ['orders', workspaceId],
     queryFn: getOrders,
     enabled: Boolean(workspaceId),
-    select: (data) => data.orders,
+    select: (data) => data.totalActiveItems,
   });
 
   const logoutMutation = useMutation({
@@ -67,11 +62,6 @@ export const NavBar: FC = () => {
     },
   });
 
-  const totalActiveItems = orders.reduce((total, order) => {
-    return total + order.items.filter((item) => item.status === 'cooking').length;
-  }, 0);
-
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     (!workspaceId || !isPending) && (
       <Drawer swipeDirection="right" open={isOpen} onOpenChange={setIsOpen}>
@@ -110,7 +100,7 @@ export const NavBar: FC = () => {
                 >
                   <item.icon width={12} height={12} />
                   {item.label}
-                  {orders && <NotificationBadge count={totalActiveItems} />}
+                  {orders && totalActiveItems && <NotificationBadge count={totalActiveItems} />}
                 </NavLink>
               );
             })}

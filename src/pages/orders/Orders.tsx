@@ -36,7 +36,8 @@ type OrderWithDetails = {
 };
 
 type OrdersResponse = {
-  orders: OrderWithDetails[];
+  orders: Record<string, OrderWithDetails[]>;
+  totalActiveItems: number;
 };
 
 type OrderItemParams = {
@@ -65,21 +66,28 @@ export const Orders: FC = () => {
     side: SwipeSide;
   } | null>(null);
 
-  const { data: orders = [], isPending } = useQuery({
+  const { data: ordersData, isPending } = useQuery({
     queryKey: ['orders', workspaceId],
     queryFn: getOrders,
     enabled: Boolean(workspaceId),
     select: (data) => data.orders,
   });
 
-  const items = orders.flatMap((order) =>
-    order.items.map((item) => ({
-      ...item,
-      orderId: order.id,
-      created_at: order.created_at,
-      student: order.student,
-      schoolClass: order.schoolClass,
-    })),
+  const ordersBySchoolClass = ordersData ?? {};
+
+  const itemsBySchoolClass = Object.fromEntries(
+    Object.entries(ordersBySchoolClass).map(([schoolClassLabel, orders]) => [
+      schoolClassLabel,
+      orders.flatMap((order) =>
+        order.items.map((item) => ({
+          ...item,
+          orderId: order.id,
+          created_at: order.created_at,
+          student: order.student,
+          schoolClass: order.schoolClass,
+        })),
+      ),
+    ]),
   );
 
   const updateOrderItemStatus = useMutation({
@@ -111,21 +119,26 @@ export const Orders: FC = () => {
 
         return {
           ...currentData,
-          orders: currentData.orders.map((order) => {
-            if (order.id !== orderId) return order;
+          orders: Object.fromEntries(
+            Object.entries(currentData.orders).map(([schoolClassLabel, orders]) => [
+              schoolClassLabel,
+              orders.map((order) => {
+                if (order.id !== orderId) return order;
 
-            return {
-              ...order,
-              items: order.items.map((item) =>
-                item.id === itemId
-                  ? {
-                      ...item,
-                      status: 'ready' as const,
-                    }
-                  : item,
-              ),
-            };
-          }),
+                return {
+                  ...order,
+                  items: order.items.map((item) =>
+                    item.id === itemId
+                      ? {
+                          ...item,
+                          status: 'ready' as const,
+                        }
+                      : item,
+                  ),
+                };
+              }),
+            ]),
+          ),
         };
       });
 
@@ -185,9 +198,6 @@ export const Orders: FC = () => {
     },
   });
 
-  const cookingItems = items.filter((item) => item.status === 'cooking');
-  const readyItems = items.filter((item) => item.status === 'ready');
-
   return isPending ? (
     <Loader />
   ) : (
@@ -199,97 +209,111 @@ export const Orders: FC = () => {
         </div>
 
         <div className="app-list">
-          {cookingItems.map((item) => {
-            const student = item.student;
-            const schoolClass = item.schoolClass;
-            if (!student || !schoolClass) return;
+          {Object.entries(itemsBySchoolClass).map(([schoolClassLabel, items]) => {
+            const cookingItems = items.filter((item) => item.status === 'cooking');
 
-            const openSide =
-              openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
+            if (cookingItems.length === 0) return null;
 
             return (
-              <div
-                className="app-row app-row-tall relative inline-flex justify-center gap-5"
-                key={item.id}
-              >
-                <div className="inline-flex items-center gap-2.5 text-center [&_svg]:size-10 [&_svg]:shrink-0">
-                  <span>{item.product.label}</span>
+              <div key={schoolClassLabel} className="app-group">
+                <div className="app-row app-row-label text-muted bg-secondary/35 px-4 text-xl">
+                  {schoolClassLabel}
                 </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-center">{student.name}</span>
-                  <span className="text-center">{schoolClass.label}</span>
-                </div>
+                {cookingItems.map((item) => {
+                  const student = item.student;
+                  if (!student) return null;
 
-                <SwipeActionRow
-                  delta={8}
-                  openSide={openSide}
-                  onOpenSideChange={(nextSide) => {
-                    setOpenDrawer(
-                      nextSide ? { drawerId: `${item.id}-${item.status}`, side: nextSide } : null,
-                    );
+                  const openSide =
+                    openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
 
-                    if (nextSide !== 'right') return;
-
-                    updateOrderItemStatus.mutate(
-                      { orderId: item.orderId, itemId: item.id },
-                      {
-                        onSettled: () => {
-                          setOpenDrawer((currentDrawer) =>
-                            currentDrawer?.drawerId === `${item.id}-${item.status}` &&
-                            currentDrawer.side === 'right'
-                              ? null
-                              : currentDrawer,
-                          );
-                        },
-                      },
-                    );
-                  }}
-                  left={{
-                    render: <X className="text-danger-soft size-10" />,
-                    handleWidth: 16,
-                    handleClassName: 'bg-danger',
-                    openWidth: 136,
-                    openThreshold: 0.8,
-                    progressStyle: (progress) => ({
-                      backgroundColor: `color-mix(in oklab, var(--color-danger-soft), var(--color-danger) ${Math.trunc(progress * 100)}%)`,
-                    }),
-                  }}
-                  right={{
-                    render: <Check className="text-success-soft size-10" />,
-                    handleWidth: 16,
-                    handleClassName: 'bg-success',
-                    openWidth: 136,
-                    openThreshold: 0.8,
-                    progressStyle: (progress) => ({
-                      backgroundColor: `color-mix(in oklab, var(--color-success-soft), var(--color-success) ${Math.trunc(progress * 100)}%)`,
-                    }),
-                  }}
-                />
-
-                <Dialog
-                  open={openSide === 'left'}
-                  onOpenChange={(nextOpen) => {
-                    if (nextOpen) return;
-
-                    setOpenDrawer(null);
-                  }}
-                >
-                  <DialogContent title="Atenção">
-                    <span>Tem certeza que deseja excluir o pedido?</span>
-                    <DialogClose
-                      render={
-                        <Button
-                          onClick={() => {
-                            deleteOrderItem.mutate({ orderId: item.orderId, itemId: item.id });
-                          }}
-                        />
-                      }
+                  return (
+                    <div
+                      className="app-row app-row-tall relative grid-cols-[1fr_1fr] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
+                      key={item.id}
                     >
-                      <Check />
-                      <span>Sim</span>
-                    </DialogClose>
-                  </DialogContent>
-                </Dialog>
+                      <div className="inline-flex items-center justify-center gap-2.5 text-center">
+                        <span>{item.product.label}</span>
+                      </div>
+                      <span className="text-center">{student.name}</span>
+
+                      <SwipeActionRow
+                        delta={8}
+                        openSide={openSide}
+                        onOpenSideChange={(nextSide) => {
+                          setOpenDrawer(
+                            nextSide
+                              ? { drawerId: `${item.id}-${item.status}`, side: nextSide }
+                              : null,
+                          );
+
+                          if (nextSide !== 'right') return;
+
+                          updateOrderItemStatus.mutate(
+                            { orderId: item.orderId, itemId: item.id },
+                            {
+                              onSettled: () => {
+                                setOpenDrawer((currentDrawer) =>
+                                  currentDrawer?.drawerId === `${item.id}-${item.status}` &&
+                                  currentDrawer.side === 'right'
+                                    ? null
+                                    : currentDrawer,
+                                );
+                              },
+                            },
+                          );
+                        }}
+                        left={{
+                          render: <X className="text-danger-soft size-10" />,
+                          handleWidth: 16,
+                          handleClassName: 'bg-danger',
+                          openWidth: 136,
+                          openThreshold: 0.8,
+                          progressStyle: (progress) => ({
+                            backgroundColor: `color-mix(in oklab, var(--color-danger-soft), var(--color-danger) ${Math.trunc(progress * 100)}%)`,
+                          }),
+                        }}
+                        right={{
+                          render: <Check className="text-success-soft size-10" />,
+                          handleWidth: 16,
+                          handleClassName: 'bg-success',
+                          openWidth: 136,
+                          openThreshold: 0.8,
+                          progressStyle: (progress) => ({
+                            backgroundColor: `color-mix(in oklab, var(--color-success-soft), var(--color-success) ${Math.trunc(progress * 100)}%)`,
+                          }),
+                        }}
+                      />
+
+                      <Dialog
+                        open={openSide === 'left'}
+                        onOpenChange={(nextOpen) => {
+                          if (nextOpen) return;
+
+                          setOpenDrawer(null);
+                        }}
+                      >
+                        <DialogContent title="Atenção">
+                          <span>Tem certeza que deseja excluir o pedido?</span>
+                          <DialogClose
+                            render={
+                              <Button
+                                onClick={() => {
+                                  deleteOrderItem.mutate({
+                                    orderId: item.orderId,
+                                    itemId: item.id,
+                                  });
+                                }}
+                              />
+                            }
+                          >
+                            <Check />
+                            <span>Sim</span>
+                          </DialogClose>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  );
+                })}
               </div>
             );
           })}
@@ -301,62 +325,73 @@ export const Orders: FC = () => {
         </div>
 
         <div className="app-list">
-          {readyItems.map((item) => {
-            const student = item.student;
-            const schoolClass = item.schoolClass;
-            if (!student || !schoolClass) return;
+          {Object.entries(itemsBySchoolClass).map(([schoolClassLabel, items]) => {
+            const readyItems = items.filter((item) => item.status === 'ready');
 
-            const openSide =
-              openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
+            if (readyItems.length === 0) return null;
 
             return (
-              <div
-                className="app-row app-row-tall relative inline-flex justify-center gap-5"
-                key={item.id}
-              >
-                <div className="inline-flex items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                  <span>{item.product.label}</span>
+              <div key={schoolClassLabel} className="app-group">
+                <div className="app-row app-row-label text-muted px-4 text-xl">
+                  {schoolClassLabel}
                 </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-center">{student.name}</span>
-                  <span className="text-center">{schoolClass.label}</span>
-                </div>
+                {readyItems.map((item) => {
+                  const student = item.student;
+                  if (!student) return null;
 
-                <SwipeActionRow
-                  delta={8}
-                  openSide={openSide}
-                  onOpenSideChange={(nextSide) => {
-                    setOpenDrawer(
-                      nextSide ? { drawerId: `${item.id}-${item.status}`, side: nextSide } : null,
-                    );
+                  const openSide =
+                    openDrawer?.drawerId === `${item.id}-${item.status}` ? openDrawer.side : null;
 
-                    if (nextSide !== 'right') return;
+                  return (
+                    <div
+                      className="app-row app-row-tall relative grid-cols-[1fr_1fr] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
+                      key={item.id}
+                    >
+                      <div className="inline-flex items-center justify-center gap-2.5 text-center">
+                        <span>{item.product.label}</span>
+                      </div>
+                      <span className="text-center">{student.name}</span>
 
-                    postRegister.mutate(
-                      { orderId: item.orderId, itemId: item.id },
-                      {
-                        onSettled: () => {
-                          setOpenDrawer((currentDrawer) =>
-                            currentDrawer?.drawerId === `${item.id}-${item.status}` &&
-                            currentDrawer.side === 'right'
-                              ? null
-                              : currentDrawer,
+                      <SwipeActionRow
+                        delta={8}
+                        openSide={openSide}
+                        onOpenSideChange={(nextSide) => {
+                          setOpenDrawer(
+                            nextSide
+                              ? { drawerId: `${item.id}-${item.status}`, side: nextSide }
+                              : null,
                           );
-                        },
-                      },
-                    );
-                  }}
-                  right={{
-                    render: <ArrowBarRight className="text-panel size-10" />,
-                    handleWidth: 16,
-                    handleClassName: 'bg-border',
-                    openWidth: 136,
-                    openThreshold: 0.8,
-                    progressStyle: (progress) => ({
-                      backgroundColor: `color-mix(in oklab, var(--color-primary), var(--color-border) ${Math.trunc(progress * 100)}%)`,
-                    }),
-                  }}
-                />
+
+                          if (nextSide !== 'right') return;
+
+                          postRegister.mutate(
+                            { orderId: item.orderId, itemId: item.id },
+                            {
+                              onSettled: () => {
+                                setOpenDrawer((currentDrawer) =>
+                                  currentDrawer?.drawerId === `${item.id}-${item.status}` &&
+                                  currentDrawer.side === 'right'
+                                    ? null
+                                    : currentDrawer,
+                                );
+                              },
+                            },
+                          );
+                        }}
+                        right={{
+                          render: <ArrowBarRight className="text-panel size-10" />,
+                          handleWidth: 16,
+                          handleClassName: 'bg-border',
+                          openWidth: 136,
+                          openThreshold: 0.8,
+                          progressStyle: (progress) => ({
+                            backgroundColor: `color-mix(in oklab, var(--color-primary), var(--color-border) ${Math.trunc(progress * 100)}%)`,
+                          }),
+                        }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             );
           })}

@@ -60,7 +60,7 @@ export const StudentDetails: FC = () => {
     return <div>Aluno não encontrado</div>;
   }
 
-  const registersByDate = registersData?.registersByDate ?? [];
+  const registersByDate = registersData?.registersByDate ?? {};
   const totalPages = registersData?.totalPages ?? 1;
   const total = registersData?.total ?? 0;
 
@@ -85,7 +85,7 @@ export const StudentDetails: FC = () => {
           {Object.entries(registersByDate).map(([date, registers]) => {
             return (
               <div key={date} className="app-group">
-                <div className="app-row app-row-label text-muted bg-secondary/35 px-4 text-xl">
+                <div className="app-row app-row-label text-muted px-4 text-xl">
                   {dayjs(date).format('DD/MM')}
                 </div>
                 {registers.map((register) => (
