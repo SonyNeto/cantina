@@ -31,7 +31,7 @@ export const NavBar: FC = () => {
   const workspaceRole = useWorkspaceStore((state) => state.workspace?.role);
   const clearWorkspace = useWorkspaceStore((state) => state.clearWorkspace);
 
-  const { data: totalActiveItems, isPending } = useQuery({
+  const { data: totalActiveItems = 0, isPending } = useQuery({
     queryKey: ['orders', workspaceId],
     queryFn: getOrders,
     enabled: Boolean(workspaceId),
@@ -100,7 +100,7 @@ export const NavBar: FC = () => {
                 >
                   <item.icon width={12} height={12} />
                   {item.label}
-                  {orders && totalActiveItems && <NotificationBadge count={totalActiveItems} />}
+                  {orders && totalActiveItems > 0 && <NotificationBadge count={totalActiveItems} />}
                 </NavLink>
               );
             })}
