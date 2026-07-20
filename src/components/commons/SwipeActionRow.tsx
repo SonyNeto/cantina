@@ -9,6 +9,8 @@ import {
 } from 'react';
 import { cn } from '../../utils/functions';
 import { useSwipe, type SwipeGesture } from '../../hooks/useSwipe';
+import { ChevronLeft, ChevronRight } from 'pixelarticons/react';
+import { Button } from './Button';
 
 export type SwipeSide = 'left' | 'right';
 
@@ -24,36 +26,61 @@ type SwipeSideConfig = {
   onCloseThreshold?: () => void;
 };
 
-interface SwipeActionRowProps extends ComponentPropsWithoutRef<'div'> {
-  left?: SwipeSideConfig;
-  right?: SwipeSideConfig;
+type AlternatedSwipeSideConfig = Omit<SwipeSideConfig, 'openWidth'> & {
+  openWidth?: never;
+};
+
+interface SwipeActionRowBaseProps extends Omit<ComponentPropsWithoutRef<'div'>, 'type'> {
   openSide?: SwipeSide | null;
+  defaultOpenSide?: SwipeSide | null;
   onOpenSideChange?: (side: SwipeSide | null) => void;
   onTap?: () => void;
   captureInteractions?: boolean;
   delta?: number;
+  swipeButtonClassName?: string;
 }
 
-function clampTranslate(translate: number, maxTranslate: number) {
-  return Math.max(Math.min(translate, maxTranslate), 0);
+type SwipeActionRowProps = SwipeActionRowBaseProps &
+  (
+    | {
+        type?: 'drawer';
+        left?: SwipeSideConfig;
+        right?: SwipeSideConfig;
+      }
+    | {
+        type: 'alternated';
+        left?: AlternatedSwipeSideConfig;
+        right?: AlternatedSwipeSideConfig;
+      }
+  );
+
+function clampTranslate(translate: number, maxTranslate: number, minTranslate: number) {
+  return Math.max(Math.min(translate, maxTranslate), minTranslate);
 }
 
 export const SwipeActionRow: FC<SwipeActionRowProps> = ({
   left,
   right,
-  openSide = null,
+  openSide: controlledOpenSide,
+  defaultOpenSide,
   onOpenSideChange,
   onTap,
   captureInteractions = true,
   delta,
   className,
   style,
+  swipeButtonClassName,
+  type = 'drawer',
   ...props
 }) => {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const gestureSideRef = useRef<SwipeSide | null>(null);
   const gestureStartTranslateRef = useRef<number>(0);
   const thresholdReachedRef = useRef<boolean>(false);
+  const [uncontrolledOpenSide, setUncontrolledOpenSide] = useState<SwipeSide | null>(
+    defaultOpenSide ?? (type === 'alternated' ? 'left' : null),
+  );
+  const openSide = controlledOpenSide !== undefined ? controlledOpenSide : uncontrolledOpenSide;
   const [panelWidth, setPanelWidth] = useState<number>(0);
   const [activeSide, setActiveSide] = useState<SwipeSide | null>(openSide);
   const [translate, setTranslate] = useState<number | null>(null);
@@ -82,7 +109,8 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
 
   const getHandleWidth = (side: SwipeSide) => getSideConfig(side)?.handleWidth ?? 16;
 
-  const getOpenWidth = (side: SwipeSide) => getSideConfig(side)?.openWidth ?? 0;
+  const getOpenWidth = (side: SwipeSide) =>
+    type === 'alternated' ? panelWidth : (getSideConfig(side)?.openWidth ?? 0);
 
   const getClosedTranslate = (side: SwipeSide) => Math.max(panelWidth - getHandleWidth(side), 0);
 
@@ -91,10 +119,13 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
 
   const getGestureTranslate = (side: SwipeSide, deltaX: number) => {
     const directionalDelta = side === 'left' ? -deltaX : deltaX;
+    const oppositeConfig = getSideConfig(side === 'left' ? 'right' : 'left');
+    const oppositeHandleWidth = oppositeConfig ? (oppositeConfig.handleWidth ?? 16) : 0;
 
     return clampTranslate(
       gestureStartTranslateRef.current + directionalDelta,
       getClosedTranslate(side),
+      oppositeHandleWidth,
     );
   };
 
@@ -128,7 +159,13 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
   };
 
   const setPanelOpen = (side: SwipeSide, nextOpen: boolean) => {
-    const nextSide = nextOpen ? side : null;
+    const nextSide = nextOpen
+      ? side
+      : type === 'alternated'
+        ? side === 'left'
+          ? 'right'
+          : 'left'
+        : null;
 
     setActiveSide(side);
     setTranslate(nextOpen ? getOpenTranslate(side) : getClosedTranslate(side));
@@ -136,6 +173,10 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
     setThresholdReached(side, nextOpen);
 
     if (nextSide === openSide) return;
+
+    if (controlledOpenSide === undefined) {
+      setUncontrolledOpenSide(nextSide);
+    }
 
     onOpenSideChange?.(nextSide);
   };
@@ -257,17 +298,42 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
     return `translateX(${side === 'left' ? -currentTranslate : currentTranslate}px)`;
   };
 
+  const getContentPanelTransform = (side: SwipeSide) => {
+    const visibleWidth = openSide === side ? getOpenWidth(side) : 0;
+
+    if (panelWidth === 0) {
+      return side === 'left'
+        ? `translateX(calc(-100% + ${visibleWidth}px))`
+        : `translateX(calc(100% - ${visibleWidth}px))`;
+    }
+
+    const currentTranslate = Math.min(getPanelTranslate(side) + getHandleWidth(side), panelWidth);
+
+    return `translateX(${side === 'left' ? -currentTranslate : currentTranslate}px)`;
+  };
+
   const getPanelProgress = (side: SwipeSide) => {
     if (openSide !== side && !isDragging) return 0;
 
     return activeSide === side ? progress : openSide === side ? 1 : 0;
   };
 
+  const getAlternatedTransform = () => {
+    if (isDragging && activeSide && translate !== null) {
+      const panelTranslate = activeSide === 'left' ? -translate : -panelWidth + translate;
+
+      return `translateX(${panelTranslate}px)`;
+    }
+
+    return `translateX(${openSide === 'right' ? -panelWidth : 0}px)`;
+  };
+
   return (
     <div
       ref={setRowRef}
       className={cn(
-        'pointer-events-none absolute inset-0 z-40 h-full w-full overflow-hidden',
+        'pointer-events-none inset-0 z-40 h-full w-full overflow-hidden',
+        type === 'drawer' ? 'absolute' : 'relative flex',
         className,
       )}
       style={style}
@@ -278,73 +344,101 @@ export const SwipeActionRow: FC<SwipeActionRowProps> = ({
           {...rowSwipeHandlers}
           type="button"
           tabIndex={-1}
-          className="pointer-events-auto absolute inset-0 z-0 h-full w-full cursor-pointer touch-pan-y bg-transparent"
+          className={cn(
+            'pointer-events-auto absolute inset-0 h-full w-full cursor-pointer touch-pan-y bg-transparent',
+            type === 'drawer' ? 'z-0' : 'z-15',
+            swipeButtonClassName,
+          )}
         />
       )}
 
-      {left && (
-        <div
-          className={cn(
-            'bg-panel-contrast sunken pointer-events-auto absolute inset-y-0 left-0 z-10 flex h-full w-full flex-row-reverse',
-            !isDragging && 'transition-transform duration-200',
-            left.className,
-          )}
-          style={{
-            ...left.progressStyle?.(getPanelProgress('left')),
-            transform: getPanelTransform('left'),
-          }}
-        >
-          <button
-            {...leftSwipeHandlers}
-            type="button"
-            className={cn(
-              'bg-border sunken border-info/50 h-full shrink-0 cursor-pointer touch-pan-y border-4',
-              left.handleClassName,
-            )}
-            style={{ width: `${getHandleWidth('left')}px` }}
-          />
-          <div
-            className="flex h-full items-center justify-center gap-2"
-            style={{ width: `${getOpenWidth('left')}px` }}
-            inert={openSide !== 'left'}
-            aria-hidden={openSide !== 'left'}
-          >
-            {left.render}
-          </div>
-        </div>
-      )}
+      {(['left', 'right'] as const).map((side) => {
+        const sideConfig = getSideConfig(side);
 
-      {right && (
-        <div
-          className={cn(
-            'bg-panel-contrast sunken pointer-events-auto absolute inset-y-0 right-0 z-10 flex h-full w-full',
-            !isDragging && 'transition-transform duration-200',
-            right.className,
-          )}
-          style={{
-            ...right.progressStyle?.(getPanelProgress('right')),
-            transform: getPanelTransform('right'),
-          }}
-        >
-          <button
-            {...rightSwipeHandlers}
-            type="button"
-            className={cn(
-              'bg-border raised border-info/50 h-full shrink-0 cursor-pointer touch-pan-y border-4',
-              right.handleClassName,
-            )}
-            style={{ width: `${getHandleWidth('right')}px` }}
-          />
+        if (!sideConfig) return null;
+
+        return (
           <div
-            className="flex h-full items-center justify-center gap-2"
-            style={{ width: `${getOpenWidth('right')}px` }}
-            inert={openSide !== 'right'}
-            aria-hidden={openSide !== 'right'}
+            key={side}
+            className={cn(
+              'bg-panel-contrast sunken pointer-events-auto z-10 flex h-full w-full',
+              type === 'drawer'
+                ? ['absolute inset-y-0', side === 'left' ? 'left-0' : 'right-0']
+                : 'relative shrink-0',
+              side === 'left' && 'flex-row-reverse',
+              !isDragging && 'transition-transform duration-200',
+              sideConfig.className,
+            )}
+            style={{
+              ...sideConfig.progressStyle?.(getPanelProgress(side)),
+              transform:
+                type === 'alternated' ? getAlternatedTransform() : getContentPanelTransform(side),
+            }}
           >
-            {right.render}
+            <div
+              className={cn(
+                'flex h-full items-center justify-center gap-2',
+                type === 'alternated' && 'w-full shrink-0',
+              )}
+              style={
+                type === 'drawer' ? { width: `${getOpenWidth(side)}px` } : undefined
+              }
+              inert={openSide !== side}
+              aria-hidden={openSide !== side}
+            >
+              {sideConfig.render}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })}
+
+      {(['left', 'right'] as const).map((side) => {
+        const sideConfig = getSideConfig(side);
+
+        if (!sideConfig) return null;
+
+        const swipeHandlers = side === 'left' ? leftSwipeHandlers : rightSwipeHandlers;
+
+        return (
+          <div
+            key={`${side}-handle`}
+            className={cn(
+              'pointer-events-none absolute inset-y-0 z-20 h-full w-full',
+              type === 'alternated' && (side === 'left' ? 'left-0' : 'left-full'),
+              !isDragging && 'transition-transform duration-200',
+            )}
+            style={{
+              transform: type === 'alternated' ? getAlternatedTransform() : getPanelTransform(side),
+            }}
+          >
+            <div
+              className={cn(
+                'absolute shrink-0',
+                type === 'drawer'
+                  ? ['inset-y-0 h-full', side === 'left' ? 'right-0' : 'left-0']
+                  : ['top-2 size-12', side === 'left' ? 'right-6' : 'left-6'],
+              )}
+              style={type === 'drawer' ? { width: `${getHandleWidth(side)}px` } : undefined}
+            >
+              {type === 'alternated' ? (
+                <Button {...swipeHandlers} variant="ghost" size="lg" className="pointer-events-auto touch-pan-y !size-full !hover:text-info">
+                  {side === 'left' ? <ChevronRight /> : <ChevronLeft />}
+                </Button>
+              ) : (
+                <button
+                  {...swipeHandlers}
+                  type="button"
+                  className={cn(
+                    'bg-border border-info/50 pointer-events-auto h-full w-full cursor-pointer touch-pan-y border-4',
+                    side === 'left' ? 'sunken' : 'raised',
+                    sideConfig.handleClassName,
+                  )}
+                />
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
