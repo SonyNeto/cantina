@@ -239,7 +239,7 @@ body {
 
   .app-orders .app-content {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .app-orders .app-list {

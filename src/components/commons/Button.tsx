@@ -9,7 +9,7 @@ const variants = {
   },
   ghost: {
     base: 'text-text',
-    hover: 'hover:bg-info-soft hover:text-info',
+    hover: 'hover:text-info',
   },
   outlined: {
     base: 'border-4 border-border/45 bg-panel text-text',
