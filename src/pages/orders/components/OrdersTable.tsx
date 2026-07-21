@@ -59,7 +59,7 @@ export const OrdersTable: FC<OrdersTableProps> = ({
   } | null>(null);
 
   return (
-    <div className="app-list">
+    <div className="app-list scroll-pb-20 pb-20">
       {Object.entries(itemsBySchoolClass).map(([schoolClassLabel, items]) => {
         const statusItems = items.filter((item) => item.status === status);
 

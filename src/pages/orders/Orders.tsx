@@ -9,6 +9,12 @@ import type { OrderItem, Register } from '../../constants/canteen/types';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
 import { OrdersTable } from './components/OrdersTable';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../../components/commons/Collapsible';
+import { Button } from '../../components/commons/Button';
 
 type OrderItemWithDetails = {
   id: string;
@@ -84,6 +90,24 @@ export const Orders: FC = () => {
       ),
     ]),
   );
+
+  const totalByItem = Object.values(itemsBySchoolClass).reduce<Record<string, number>>(
+    (acc, items) => {
+      const productsLabels = items.flatMap((item) =>
+        item.status === 'cooking' ? [item.product.label] : [],
+      );
+
+      productsLabels.map((productLabel) => {
+        acc[productLabel] ??= 0;
+        acc[productLabel]++;
+      });
+
+      return acc;
+    },
+    {},
+  );
+
+  console.log(Object.entries(totalByItem));
 
   const updateOrderItemStatus = useMutation({
     mutationFn: async ({ orderId, itemId }: OrderItemParams): Promise<ItemResponse> => {
@@ -297,6 +321,31 @@ export const Orders: FC = () => {
           threshold: 0.8,
         }}
       />
+
+      <Collapsible className="absolute inset-x-0 bottom-4 z-60 flex w-full flex-col bg-transparent px-4">
+        <CollapsibleTrigger
+          className="h-13 w-full shrink-0"
+          render={<Button className="!w-full" />}
+        >
+          <Cooking />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <h2 className="bg-panel-header raised flex min-h-14 w-full items-center px-4 text-xl font-bold">
+            Total por produto
+          </h2>
+          <ul className="border-border/35 max-h-[min(60vh,28rem)] w-full overflow-y-auto font-medium [&>li+li]:border-t-4">
+            {Object.entries(totalByItem).map(([label, quantity]) => (
+              <li
+                key={label}
+                className="border-border/35 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3"
+              >
+                <span className="min-w-0 truncate">{label}</span>
+                <span className="text-right tabular-nums">{quantity}</span>
+              </li>
+            ))}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 };
