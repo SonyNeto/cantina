@@ -1,8 +1,12 @@
-import { useState, type CSSProperties, type FC, type ReactElement } from 'react';
+import { useState, type FC } from 'react';
 import { Check } from 'pixelarticons/react';
 import { Button } from '../../../components/commons/Button';
 import { Dialog, DialogClose, DialogContent } from '../../../components/commons/Dialog';
-import { SwipeActionRow, type SwipeSide } from '../../../components/commons/SwipeActionRow';
+import {
+  SwipeActionRow,
+  type SwipeDrawerAction,
+  type SwipeSide,
+} from '../../../components/commons/SwipeActionRow';
 import type { OrderStatus, Product } from '../../../constants/canteen/types';
 import { cn } from '../../../utils/functions';
 
@@ -29,14 +33,7 @@ type ActionConfirmation = {
   onConfirm: (item: OrderTableItem) => void;
 };
 
-type OrdersTableAction = {
-  render: ReactElement;
-  handleWidth?: number;
-  openWidth?: number;
-  openThreshold?: number;
-  className?: string;
-  handleClassName?: string;
-  progressStyle?: (progress: number) => CSSProperties;
+type OrdersTableAction = SwipeDrawerAction & {
   onOpen?: (item: OrderTableItem, closeDrawer: () => void) => void;
   confirmation?: ActionConfirmation;
 };
@@ -88,22 +85,6 @@ export const OrdersTable: FC<OrdersTableProps> = ({
                 );
               };
 
-              const getSwipeAction = (side: SwipeSide) => {
-                const action = actions[side];
-
-                if (!action) return undefined;
-
-                return {
-                  render: action.render,
-                  handleWidth: action.handleWidth,
-                  openWidth: action.openWidth,
-                  openThreshold: action.openThreshold,
-                  className: action.className,
-                  handleClassName: action.handleClassName,
-                  progressStyle: action.progressStyle,
-                };
-              };
-
               return (
                 <div
                   className="app-row app-row-tall relative grid-cols-[1fr_1fr] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
@@ -115,7 +96,7 @@ export const OrdersTable: FC<OrdersTableProps> = ({
                   <span className="text-center">{student.name}</span>
 
                   <SwipeActionRow
-                    delta={8}
+                    swipeDelta={8}
                     openSide={openSide}
                     onOpenSideChange={(nextSide) => {
                       setOpenDrawer(nextSide ? { drawerId, side: nextSide } : null);
@@ -127,8 +108,8 @@ export const OrdersTable: FC<OrdersTableProps> = ({
 
                       action?.onOpen?.(item, () => closeDrawer(nextSide));
                     }}
-                    left={getSwipeAction('left')}
-                    right={getSwipeAction('right')}
+                    left={actions.left}
+                    right={actions.right}
                   />
 
                   {swipeSides.map((side) => {

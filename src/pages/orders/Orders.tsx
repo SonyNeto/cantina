@@ -200,11 +200,11 @@ export const Orders: FC = () => {
       <SwipeActionRow
         className="flex"
         type="alternated"
-        delta={8}
+        swipeDelta={8}
         defaultOpenSide="left"
-        swipeButtonClassName="h-16"
+        interactionClassName="h-16"
         left={{
-          render: (
+          content: (
             <div className="app-page app-orders">
               <div className="app-content">
                 <div className="app-header-accent bg-warning-soft text-warning flex items-center justify-center gap-3 [&_svg]:size-10 [&_svg]:shrink-0">
@@ -218,11 +218,11 @@ export const Orders: FC = () => {
                   labelClassName="bg-secondary/35"
                   actions={{
                     left: {
-                      render: <X className="text-danger-soft size-10" />,
+                      content: <X className="text-danger-soft size-10" />,
                       handleWidth: 16,
                       handleClassName: 'bg-danger',
-                      openWidth: 136,
-                      openThreshold: 0.8,
+                      width: 136,
+                      threshold: 0.8,
                       progressStyle: (progress) => ({
                         backgroundColor: `color-mix(in oklab, var(--color-danger-soft), var(--color-danger) ${Math.trunc(progress * 100)}%)`,
                       }),
@@ -238,11 +238,11 @@ export const Orders: FC = () => {
                       },
                     },
                     right: {
-                      render: <Check className="text-success-soft size-10" />,
+                      content: <Check className="text-success-soft size-10" />,
                       handleWidth: 16,
                       handleClassName: 'bg-success',
-                      openWidth: 136,
-                      openThreshold: 0.8,
+                      width: 136,
+                      threshold: 0.8,
                       progressStyle: (progress) => ({
                         backgroundColor: `color-mix(in oklab, var(--color-success-soft), var(--color-success) ${Math.trunc(progress * 100)}%)`,
                       }),
@@ -258,10 +258,10 @@ export const Orders: FC = () => {
               </div>
             </div>
           ),
-          openThreshold: 0.8,
+          threshold: 0.8,
         }}
         right={{
-          render: (
+          content: (
             <div className="app-page app-orders">
               <div className="app-content">
                 <div className="app-header-accent border-border/40 bg-success-soft text-success flex items-center justify-center gap-3 [&_svg]:size-10 [&_svg]:shrink-0">
@@ -274,11 +274,11 @@ export const Orders: FC = () => {
                   status="ready"
                   actions={{
                     right: {
-                      render: <ArrowBarRight className="text-panel size-10" />,
+                      content: <ArrowBarRight className="text-panel size-10" />,
                       handleWidth: 16,
                       handleClassName: 'bg-border',
-                      openWidth: 136,
-                      openThreshold: 0.8,
+                      width: 136,
+                      threshold: 0.8,
                       progressStyle: (progress) => ({
                         backgroundColor: `color-mix(in oklab, var(--color-primary), var(--color-border) ${Math.trunc(progress * 100)}%)`,
                       }),
@@ -294,7 +294,7 @@ export const Orders: FC = () => {
               </div>
             </div>
           ),
-          openThreshold: 0.8,
+          threshold: 0.8,
         }}
       />
     </div>

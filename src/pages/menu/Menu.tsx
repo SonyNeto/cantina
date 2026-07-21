@@ -127,7 +127,7 @@ export const Menu: FC = () => {
 
                 <SwipeActionRow
                   right={{
-                    render: (
+                    content: (
                       <>
                         <Button
                           onClick={() => {
@@ -168,7 +168,7 @@ export const Menu: FC = () => {
                       </>
                     ),
                     handleWidth: 16,
-                    openWidth: 136,
+                    width: 136,
                   }}
                   openSide={isDrawerOpen ? 'right' : null}
                   onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
