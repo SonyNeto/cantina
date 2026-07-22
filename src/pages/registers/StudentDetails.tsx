@@ -11,6 +11,7 @@ import { usePeriod, type Period } from '../../hooks/usePeriod';
 import dayjs from 'dayjs';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { PageNavigator } from '../../components/commons/PageNavigator';
+import { cn } from '../../utils/functions';
 
 type Pagination = {
   page: number;
@@ -96,7 +97,19 @@ export const StudentDetails: FC = () => {
                     <div className="inline-flex items-center gap-2.5">
                       <span>{register.product.label}</span>
                     </div>
-                    <span className="text-right tabular-nums">{`R$${register.product.price.toFixed(2)}`}</span>
+                    <span
+                      className={cn(
+                        'text-right tabular-nums',
+                        register.payment === register.product.price && 'line-through',
+                      )}
+                    >
+                      R${register.product.price.toFixed(2)}
+                      {register.payment > 0 && register.payment < register.product.price && (
+                        <>
+                          <br />- R${register.payment.toFixed(2)}
+                        </>
+                      )}
+                    </span>
                   </div>
                 ))}
               </div>

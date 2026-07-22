@@ -14,6 +14,7 @@ export interface Register {
   id: string;
   product: Product;
   created_at: Date;
+  payment: number;
   studentId: string;
 }
 
@@ -33,11 +34,13 @@ export interface Order {
   id: string;
   studentId: string;
   created_at: string;
+  payment: number;
   items: OrderItem[];
 }
 
 export interface OrderForm {
   studentId: string;
   created_at: string;
+  payment: number;
   items: OrderItemDraft[];
 }

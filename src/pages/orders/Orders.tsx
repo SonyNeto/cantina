@@ -107,8 +107,6 @@ export const Orders: FC = () => {
     {},
   );
 
-  console.log(Object.entries(totalByItem));
-
   const updateOrderItemStatus = useMutation({
     mutationFn: async ({ orderId, itemId }: OrderItemParams): Promise<ItemResponse> => {
       const res = await workspaceApiFetch(`/orders/${orderId}/items/${itemId}/status`, {
