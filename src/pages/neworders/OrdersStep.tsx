@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { workspaceApiFetch } from '../../utils/api';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
+import { fromCents, toCents } from '../../utils/functions';
 
 interface Props {
   onBack: () => void;
@@ -53,7 +54,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
     return sum + (product?.price ?? 0);
   }, 0);
 
-  const change = payment - total < 0.005 ? 0 : payment - total;
+  const change = Math.max(payment - total, 0);
 
   function getSelectedProductQuantity(productId: string) {
     return items.filter((item) => item.productId === productId).length;
@@ -112,7 +113,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                 <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                   <span>{item.label}</span>
                 </div>
-                <span className="text-right tabular-nums">{`R$${item.price.toFixed(2)}`}</span>
+                <span className="text-right tabular-nums">{`R$${fromCents(item.price).toFixed(2)}`}</span>
                 <Button
                   variant="primary"
                   size="sm"
@@ -158,43 +159,40 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                     <span>R$</span>
                     <input
                       type="text"
-                      step="0.01"
-                      min="0"
                       inputMode="decimal"
-                      defaultValue={total.toFixed(2)}
+                      defaultValue={fromCents(total).toFixed(2)}
                       aria-label="Valor do pagamento"
                       className="app-input w-full max-w-[7ch] text-end tabular-nums"
                       onChange={(event) => {
                         const value = Number(event.currentTarget.value.replace(',', '.'));
 
                         if (Number.isFinite(value)) {
-                          setPayment(value);
+                          setPayment(Math.max(toCents(value), 0));
                         }
                       }}
                       onBlur={(event) => {
                         const input = event.currentTarget;
                         const parsedValue = Number(input.value.replace(',', '.'));
-                        const normalizedValue = Number.isFinite(parsedValue)
-                          ? Math.max(parsedValue, 0)
+                        const valueInCents = Number.isFinite(parsedValue)
+                          ? Math.max(toCents(parsedValue), 0)
                           : 0;
-                        const roundedValue = Math.round(normalizedValue * 100) / 100;
 
-                        input.value = roundedValue.toFixed(2);
-                        setPayment(roundedValue);
+                        input.value = fromCents(valueInCents).toFixed(2);
+                        setPayment(valueInCents);
                       }}
                     />
                   </div>
 
                   <span className="text-right">- Total:</span>
-                  <span className="text-right tabular-nums">{`R$ ${total.toFixed(2)}`}</span>
+                  <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
 
                   <div className="border-border/45 col-span-2 border-b-4" />
                   <span className="text-right">Troco:</span>
                   <span
                     className="text-right tabular-nums"
-                    aria-label={`Troco: R$ ${change.toFixed(2)}`}
+                    aria-label={`Troco: R$ ${fromCents(change).toFixed(2)}`}
                   >
-                    {`R$ ${change.toFixed(2)}`}
+                    {`R$ ${fromCents(change).toFixed(2)}`}
                   </span>
                 </>
               ) : (
@@ -207,13 +205,13 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                     aria-pressed="false"
                     onClick={() => {
                       setIsImmediatePayment(true);
-                      setPayment(Number(total.toFixed(2)));
+                      setPayment(total);
                     }}
                   >
                     <Banknote />
                   </Button>
                   <span className="text-right">Total:</span>
-                  <span className="text-right tabular-nums">{`R$ ${total.toFixed(2)}`}</span>
+                  <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
                 </div>
               )}
             </div>

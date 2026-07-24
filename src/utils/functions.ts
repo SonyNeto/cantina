@@ -6,6 +6,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function toCents(value: number) {
+  return Math.round(value * 100);
+}
+
+export function fromCents(value: number) {
+  return value / 100;
+}
+
 export function getSavedTheme() {
   const savedTheme = localStorage.getItem('theme');
 

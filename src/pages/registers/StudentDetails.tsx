@@ -11,7 +11,7 @@ import { usePeriod, type Period } from '../../hooks/usePeriod';
 import dayjs from 'dayjs';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { PageNavigator } from '../../components/commons/PageNavigator';
-import { cn } from '../../utils/functions';
+import { cn, fromCents } from '../../utils/functions';
 
 type Pagination = {
   page: number;
@@ -103,10 +103,10 @@ export const StudentDetails: FC = () => {
                         register.payment === register.product.price && 'line-through',
                       )}
                     >
-                      R${register.product.price.toFixed(2)}
+                      R${fromCents(register.product.price).toFixed(2)}
                       {register.payment > 0 && register.payment < register.product.price && (
                         <>
-                          <br />- R${register.payment.toFixed(2)}
+                          <br />- R${fromCents(register.payment).toFixed(2)}
                         </>
                       )}
                     </span>
@@ -121,7 +121,7 @@ export const StudentDetails: FC = () => {
           <div className="app-total-bar justify-end [&_svg]:size-10">
             <div className="flex gap-5">
               <span>Total: </span>
-              <span>{`R$${total.toFixed(2)}`}</span>
+              <span>{`R$${fromCents(total).toFixed(2)}`}</span>
             </div>
           </div>
 

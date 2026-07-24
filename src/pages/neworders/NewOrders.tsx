@@ -30,8 +30,8 @@ const orderFormSchema = z.object({
   created_at: z.string().trim().min(1, 'Informe a data do pedido'),
   payment: z
     .number()
-    .nonnegative('O pagamento deve ser maior ou igual a zero')
-    .multipleOf(0.01, 'O pagamento não pode ter mais que duas casas decimais'),
+    .int('O pagamento deve ser informado em centavos')
+    .nonnegative('O pagamento deve ser maior ou igual a zero'),
   items: z
     .array(
       z.object({
