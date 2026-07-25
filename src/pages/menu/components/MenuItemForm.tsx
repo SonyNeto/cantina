@@ -6,7 +6,7 @@ import type { Product } from '../../../constants/canteen/types';
 import { workspaceApiFetch } from '../../../utils/api';
 import { Button } from '../../../components/commons/Button';
 import { X } from '../../../assets/icons/MenuIcons';
-import { cn } from '../../../utils/functions';
+import { cn, fromCents, toCents } from '../../../utils/functions';
 import { menuItemSchema } from './menuItemSchema';
 
 type MenuItemInput = {
@@ -100,12 +100,17 @@ export const MenuItemForm = ({
           return;
         }
 
+        const menuItem = {
+          ...result.data,
+          price: toCents(result.data.price),
+        };
+
         if (method === 'post') {
-          createMenuItem.mutate(result.data);
+          createMenuItem.mutate(menuItem);
         }
 
         if (method === 'update') {
-          updateMenuItem.mutate({ id: itemId, ...result.data });
+          updateMenuItem.mutate({ id: itemId, ...menuItem });
         }
       }}
     >
@@ -127,7 +132,7 @@ export const MenuItemForm = ({
           type="number"
           step="0.01"
           placeholder="Preço"
-          defaultValue={defaultPrice?.toFixed(2)}
+          defaultValue={defaultPrice === undefined ? undefined : fromCents(defaultPrice).toFixed(2)}
           className="app-input w-full max-w-[6ch] text-end"
         />
       </div>

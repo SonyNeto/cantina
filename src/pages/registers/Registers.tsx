@@ -16,6 +16,7 @@ import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../compone
 import { toast } from 'sonner';
 import { PageNavigator } from '../../components/commons/PageNavigator';
 import { SearchBar } from '../../components/commons/SearchBar';
+import { fromCents } from '../../utils/functions';
 
 type ResponsibleRegister = {
   responsibleId: string;
@@ -158,7 +159,7 @@ export const Registers: FC = () => {
                       <User />
                       <span>{responsibleTotal.responsibleName}</span>
                     </div>
-                    <span className="text-center tabular-nums">{`R$${responsibleTotal.total.toFixed(2)}`}</span>
+                    <span className="text-center tabular-nums">{`R$${fromCents(responsibleTotal.total).toFixed(2)}`}</span>
                   </div>
                 )}
 

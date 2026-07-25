@@ -28,6 +28,10 @@ type CreateOrdersResponse = {
 const orderFormSchema = z.object({
   studentId: z.string().trim().min(1, 'Selecione um aluno'),
   created_at: z.string().trim().min(1, 'Informe a data do pedido'),
+  payment: z
+    .number()
+    .int('O pagamento deve ser informado em centavos')
+    .nonnegative('O pagamento deve ser maior ou igual a zero'),
   items: z
     .array(
       z.object({
@@ -47,6 +51,7 @@ export const NewOrders: FC = () => {
     defaultValues: {
       studentId: '',
       created_at: dayjs().format('DD-MM-YYYY'),
+      payment: 0,
       items: [],
     },
   });
@@ -126,7 +131,12 @@ export const NewOrders: FC = () => {
             />
           )}
 
-          {step === STEPS.ORDER && <OrdersStep onBack={() => setStep(STEPS.STUDENTS)} />}
+          {step === STEPS.ORDER && (
+            <OrdersStep
+              onBack={() => setStep(STEPS.STUDENTS)}
+              isSubmitting={createOrders.isPending}
+            />
+          )}
         </form>
       </FormProvider>
     </div>

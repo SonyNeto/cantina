@@ -12,6 +12,7 @@ import { workspaceApiFetch } from '../../utils/api';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { MenuItemForm } from './components/MenuItemForm';
 import { PageNavigator } from '../../components/commons/PageNavigator';
+import { fromCents } from '../../utils/functions';
 
 type Pagination = {
   page: number;
@@ -121,7 +122,7 @@ export const Menu: FC = () => {
                 ) : (
                   <div className="relative z-10 grid w-full grid-cols-[minmax(0,1fr)_8ch] items-center gap-2.5 px-4 py-3">
                     <span className="min-w-0 truncate">{item.label}</span>
-                    <span className="text-center tabular-nums">{`R$${item.price.toFixed(2)}`}</span>
+                    <span className="text-center tabular-nums">{`R$${fromCents(item.price).toFixed(2)}`}</span>
                   </div>
                 )}
 

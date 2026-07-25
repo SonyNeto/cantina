@@ -43,6 +43,7 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) =>
     });
 
     setValue('items', []);
+    setValue('payment', 0);
 
     onNext();
   }

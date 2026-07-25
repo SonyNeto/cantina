@@ -15,6 +15,7 @@ import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 import { toast } from 'sonner';
 import { PageNavigator } from '../../components/commons/PageNavigator';
+import { fromCents } from '../../utils/functions';
 
 type StudentTotal = {
   id: string;
@@ -177,7 +178,7 @@ export const ResponsibleDetails: FC = () => {
                       <span className="text-center">{student.schoolClassLabel}</span>
                       <span className="text-center">{student.schoolClassShiftLabel}</span>
                     </div>
-                    <span className="text-center tabular-nums">{`R$${student.total.toFixed(2)}`}</span>
+                    <span className="text-center tabular-nums">{`R$${fromCents(student.total).toFixed(2)}`}</span>
                   </div>
                 )}
                 <SwipeActionRow
@@ -245,7 +246,7 @@ export const ResponsibleDetails: FC = () => {
         <footer className="app-footer">
           <div className="app-total-bar grid-cols-[minmax(0,1fr)_8ch] [&_svg]:size-10 [&_svg]:shrink-0">
             <span className="text-right">Total: </span>
-            <span className="text-right tabular-nums">{`R$${(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
+            <span className="text-right tabular-nums">{`R$${fromCents(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
           </div>
 
           <PageNavigator
