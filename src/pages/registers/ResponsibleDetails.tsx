@@ -30,6 +30,7 @@ type ResponsibleTotals = {
   responsibleId: string;
   responsibleName: string;
   total: number;
+  balance: number;
   studentsTotals: StudentTotal[];
 };
 
@@ -247,6 +248,8 @@ export const ResponsibleDetails: FC = () => {
           <div className="app-total-bar grid-cols-[minmax(0,1fr)_8ch] [&_svg]:size-10 [&_svg]:shrink-0">
             <span className="text-right">Total: </span>
             <span className="text-right tabular-nums">{`R$${fromCents(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
+            <span className="text-right">Saldo: </span>
+            <span className="text-right tabular-nums">{`R$${fromCents(responsibleTotals?.balance ?? 0).toFixed(2)}`}</span>
           </div>
 
           <PageNavigator

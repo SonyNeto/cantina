@@ -32,6 +32,7 @@ const orderFormSchema = z.object({
     .number()
     .int('O pagamento deve ser informado em centavos')
     .nonnegative('O pagamento deve ser maior ou igual a zero'),
+  keepChange: z.boolean(),
   items: z
     .array(
       z.object({
@@ -52,6 +53,7 @@ export const NewOrders: FC = () => {
       studentId: '',
       created_at: dayjs().format('DD-MM-YYYY'),
       payment: 0,
+      keepChange: false,
       items: [],
     },
   });

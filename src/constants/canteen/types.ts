@@ -42,5 +42,6 @@ export interface OrderForm {
   studentId: string;
   created_at: string;
   payment: number;
+  keepChange: boolean;
   items: OrderItemDraft[];
 }

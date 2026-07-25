@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react';
 import { Button } from '../../components/commons/Button';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { ArrowLeft, Banknote, Minus, Plus } from 'pixelarticons/react';
+import { ArrowLeft, Banknote, Check, Minus, Plus } from 'pixelarticons/react';
 import type { OrderForm, Product } from '../../constants/canteen/types';
 import { useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
@@ -34,7 +34,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
     select: (data) => data.menuItems,
   });
 
-  const { control, setValue } = useFormContext<OrderForm>();
+  const { control, register, setValue } = useFormContext<OrderForm>();
 
   const items =
     useWatch({
@@ -194,6 +194,25 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                   >
                     {`R$ ${fromCents(change).toFixed(2)}`}
                   </span>
+                  {change > 0 && (
+                    <div className="col-span-2 grid grid-cols-[1fr_2rem] items-center gap-x-2.5">
+                      <span className="text-right text-xl">Deixar troco como saldo</span>
+                      <span className="relative block size-8 justify-self-end">
+                        <input
+                          type="checkbox"
+                          {...register('keepChange')}
+                          aria-label="Deixar troco como saldo"
+                          className="peer absolute inset-0 z-10 size-full cursor-pointer appearance-none outline-none"
+                        />
+                        <span
+                          aria-hidden="true"
+                          className="bg-panel-contrast sunken peer-checked:bg-success peer-checked:text-primary peer-focus-visible:ring-accent/35 flex size-8 items-center justify-center peer-focus-visible:ring-[3px] [&_svg]:size-6 [&_svg]:opacity-0 peer-checked:[&_svg]:opacity-100"
+                        >
+                          <Check />
+                        </span>
+                      </span>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="col-span-2 flex items-center justify-end gap-2.5">
