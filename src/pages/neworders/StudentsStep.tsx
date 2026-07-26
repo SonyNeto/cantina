@@ -26,7 +26,7 @@ const getStudents = async (shiftId: ShiftId | '', classId: string): Promise<Stud
 };
 
 export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) => {
-  const { setValue } = useFormContext<OrderForm>();
+  const { setValue, unregister } = useFormContext<OrderForm>();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
   const { data: students = [], isPending } = useQuery({
@@ -45,6 +45,7 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) =>
     setValue('items', []);
     setValue('payment', 0);
     setValue('keepChange', false);
+    unregister('details');
 
     onNext();
   }

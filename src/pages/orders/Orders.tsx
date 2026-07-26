@@ -20,6 +20,7 @@ type OrderItemWithDetails = {
   id: string;
   orderId: string;
   created_at: string;
+  details?: string;
   status: 'cooking' | 'ready';
   student: {
     id: string;
@@ -35,6 +36,7 @@ type OrderItemWithDetails = {
 type OrderWithDetails = {
   id: string;
   created_at: string;
+  details?: string;
   student: OrderItemWithDetails['student'];
   schoolClass: OrderItemWithDetails['schoolClass'];
   items: OrderItem[];
@@ -84,6 +86,7 @@ export const Orders: FC = () => {
           ...item,
           orderId: order.id,
           created_at: order.created_at,
+          details: order.details,
           student: order.student,
           schoolClass: order.schoolClass,
         })),

@@ -43,5 +43,6 @@ export interface OrderForm {
   created_at: string;
   payment: number;
   keepChange: boolean;
+  details?: string;
   items: OrderItemDraft[];
 }

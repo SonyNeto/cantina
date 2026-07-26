@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react';
 import { Button } from '../../components/commons/Button';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { ArrowLeft, Banknote, Check, Minus, Plus } from 'pixelarticons/react';
+import { ArrowLeft, Banknote, Check, Minus, PenSquare, Plus } from 'pixelarticons/react';
 import type { OrderForm, Product } from '../../constants/canteen/types';
 import { useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
@@ -26,6 +26,7 @@ const getMenuItems = async (): Promise<MenuItemsResponse> => {
 export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [isImmediatePayment, setIsImmediatePayment] = useState<boolean>(false);
+  const [haveDetails, setHaveDetails] = useState<boolean>(false);
 
   const { data: menuItems = [], isPending } = useQuery({
     queryKey: ['menuItems', workspaceId],
@@ -34,7 +35,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
     select: (data) => data.menuItems,
   });
 
-  const { control, register, setValue } = useFormContext<OrderForm>();
+  const { control, register, setValue, unregister } = useFormContext<OrderForm>();
 
   const items =
     useWatch({
@@ -88,6 +89,13 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
     });
   }
 
+  function setDetails(details: string) {
+    setValue('details', details, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
   return isPending ? (
     <Loader />
   ) : (
@@ -136,25 +144,23 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
 
         <footer className="app-footer">
           <div className="app-total-bar [&_svg]:size-10 [&_svg]:shrink-0">
-            <div className="ml-auto grid w-full max-w-sm grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2">
+            <div className="ml-auto grid w-full max-w-sm grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2">
               {isImmediatePayment ? (
                 <>
-                  <div className="inline-flex min-w-0 items-center justify-end gap-2.5">
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      className="border-success/60 bg-success text-primary hover:bg-success/85"
-                      aria-label="Remover pagamento"
-                      aria-pressed="true"
-                      onClick={() => {
-                        setIsImmediatePayment(false);
-                        setPayment(0);
-                      }}
-                    >
-                      <Banknote />
-                    </Button>
-                    <span>Pagamento:</span>
-                  </div>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="border-success/60 bg-success text-primary hover:bg-success/85"
+                    aria-label="Remover pagamento"
+                    aria-pressed="true"
+                    onClick={() => {
+                      setIsImmediatePayment(false);
+                      setPayment(0);
+                    }}
+                  >
+                    <Banknote />
+                  </Button>
+                  <span className="text-right">Pagamento:</span>
                   <div className="inline-flex min-w-0 items-center justify-end gap-1">
                     <span>R$</span>
                     <input
@@ -183,10 +189,12 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                     />
                   </div>
 
+                  <span aria-hidden="true" />
                   <span className="text-right">- Total:</span>
                   <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
 
-                  <div className="border-border/45 col-span-2 border-b-4" />
+                  <div className="border-border/45 col-span-2 col-start-2 border-b-4" />
+                  <span aria-hidden="true" />
                   <span className="text-right">Troco:</span>
                   <span
                     className="text-right tabular-nums"
@@ -195,7 +203,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                     {`R$ ${fromCents(change).toFixed(2)}`}
                   </span>
                   {change > 0 && (
-                    <div className="col-span-2 grid grid-cols-[1fr_2rem] items-center gap-x-2.5">
+                    <div className="col-span-2 col-start-2 grid grid-cols-[1fr_2rem] items-center gap-x-2.5">
                       <span className="text-right text-xl">Deixar troco como saldo</span>
                       <span className="relative block size-8 justify-self-end">
                         <input
@@ -215,7 +223,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                   )}
                 </>
               ) : (
-                <div className="col-span-2 flex items-center justify-end gap-2.5">
+                <>
                   <Button
                     variant="primary"
                     size="lg"
@@ -231,7 +239,30 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                   </Button>
                   <span className="text-right">Total:</span>
                   <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
-                </div>
+                </>
+              )}
+
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => {
+                  setHaveDetails(!haveDetails);
+                  unregister('details');
+                }}
+              >
+                <PenSquare />
+              </Button>
+              <span className="col-span-2 text-right">Observação</span>
+
+              {haveDetails && (
+                <textarea
+                  maxLength={100}
+                  placeholder="Escreva uma observação sobre o pedido"
+                  className="app-input col-span-3 !h-auto !p-2"
+                  onChange={(event) => {
+                    setDetails(event.currentTarget.value);
+                  }}
+                />
               )}
             </div>
           </div>

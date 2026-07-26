@@ -33,6 +33,7 @@ const orderFormSchema = z.object({
     .int('O pagamento deve ser informado em centavos')
     .nonnegative('O pagamento deve ser maior ou igual a zero'),
   keepChange: z.boolean(),
+  details: z.string().trim().max(100, 'A observação deve ter no máximo 100 caracteres').optional(),
   items: z
     .array(
       z.object({
