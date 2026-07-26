@@ -16,8 +16,6 @@ export const LoginPage: FC = () => {
   const queryClient = useQueryClient();
   const location = useLocation();
 
-  console.log(`/invite/${location.search.replace('?invite=', '')}`);
-
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
       const res = await apiFetch('/login', {
