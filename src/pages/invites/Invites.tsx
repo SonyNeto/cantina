@@ -14,8 +14,13 @@ type InviteResponse = {
   role: 'admin' | 'member';
 };
 
-const getOrdersWithDetails = async (token: string): Promise<InviteResponse> => {
+const getInvite = async (token: string): Promise<InviteResponse | null> => {
   const res = await apiFetch(`/invites/${token}`);
+
+  if (res.status === 404) {
+    return null;
+  }
+
   return res.json();
 };
 
@@ -23,9 +28,9 @@ export const Invites: FC = () => {
   const { token } = useParams();
   const navigate = useNavigate();
 
-  const { data, isPending } = useQuery({
+  const { data: inviteData, isPending } = useQuery({
     queryKey: ['invites', token],
-    queryFn: () => getOrdersWithDetails(token ?? ''),
+    queryFn: () => getInvite(token ?? ''),
     enabled: Boolean(token),
   });
 
@@ -51,7 +56,7 @@ export const Invites: FC = () => {
     },
 
     onError: () => {
-      toast.error('Falha criar convite');
+      toast.error('Falha aceitar convite');
     },
   });
 
@@ -63,7 +68,9 @@ export const Invites: FC = () => {
         <DialogContent title="Convite para instituição">
           <div className="flex min-w-0 flex-col gap-2">
             <p className="text-text/70 text-base font-medium">
-              {`Você foi convidado para fazer parte de ${data?.workspaceName}`}
+              {inviteData === null
+                ? 'Convite inválido ou expirado'
+                : `Você foi convidado para fazer parte de ${inviteData?.workspaceName}`}
             </p>
           </div>
 
@@ -73,10 +80,14 @@ export const Invites: FC = () => {
             className="w-full rounded-none"
             disabled={postInviteResponse.isPending}
             onClick={() => {
-              postInviteResponse.mutate();
+              if (!inviteData) {
+                navigate(ROUTES.HOME);
+              } else {
+                postInviteResponse.mutate();
+              }
             }}
           >
-            Aceitar convite
+            {!inviteData ? 'Voltar para o início' : 'Aceitar convite'}
           </Button>
         </DialogContent>
       </Dialog>
