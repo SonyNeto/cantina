@@ -174,7 +174,7 @@ export const Orders: FC = () => {
         queryClient.setQueryData(['orders', workspaceId], context.previousOrders);
       }
 
-      toast.error('Não foi possível marcar o item como pronto.');
+      toast.error('Não foi possível marcar o item como pronto');
     },
   });
 
@@ -211,10 +211,53 @@ export const Orders: FC = () => {
       return res.json();
     },
 
+    onMutate: async ({ orderId, itemId }) => {
+      await queryClient.cancelQueries({
+        queryKey: ['orders', workspaceId],
+      });
+
+      const previousOrders = queryClient.getQueryData<OrdersResponse>(['orders', workspaceId]);
+
+      queryClient.setQueryData<OrdersResponse>(['orders', workspaceId], (currentData) => {
+        if (!currentData) return currentData;
+
+        return {
+          ...currentData,
+          orders: Object.fromEntries(
+            Object.entries(currentData.orders).map(([schoolClassLabel, orders]) => [
+              schoolClassLabel,
+              orders.map((order) => {
+                if (order.id !== orderId) return order;
+
+                return {
+                  ...order,
+                  items: order.items.flatMap((item) => {
+                    if (item.id === itemId) return [];
+
+                    return item;
+                }),
+                };
+              }),
+            ]),
+          ),
+        };
+      });
+
+      return { previousOrders };
+    },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['registers', workspaceId] });
       toast.success('Pedido movido para registro');
+    },
+
+    onError: (_error, _variables, context) => {
+      if (context?.previousOrders) {
+        queryClient.setQueryData(['orders', workspaceId], context.previousOrders);
+      }
+
+      toast.error('Não foi possível mover o item para registro');
     },
   });
 

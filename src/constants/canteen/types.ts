@@ -12,6 +12,7 @@ export interface MenuItem extends Product {
 
 export interface Register {
   id: string;
+  sourceOrderItemId?: string;
   product: Product;
   created_at: Date;
   payment: number;

@@ -96,6 +96,19 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
     });
   }
 
+  const selectedProductsSummary = items.reduce<Record<string, Product & { quantity: number }>>(
+    (summary, item) => {
+      const product = menuItems.find((menuItem) => menuItem.id === item.productId);
+      if (!product) return summary;
+
+      summary[product.id] ??= { ...product, quantity: 0 };
+      summary[product.id].quantity++;
+
+      return summary;
+    },
+    {},
+  );
+
   return isPending ? (
     <Loader />
   ) : (
@@ -145,114 +158,137 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
         <footer className="app-footer">
           <div className="app-total-bar [&_svg]:size-10 [&_svg]:shrink-0">
             <div className="ml-auto grid w-full max-w-sm grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2">
-              {isImmediatePayment ? (
+              {Object.keys(selectedProductsSummary).length > 0 && (
                 <>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="border-success/60 bg-success text-primary hover:bg-success/85"
-                    aria-label="Remover pagamento"
-                    aria-pressed="true"
-                    onClick={() => {
-                      setIsImmediatePayment(false);
-                      setPayment(0);
-                    }}
-                  >
-                    <Banknote />
-                  </Button>
-                  <span className="text-right">Pagamento:</span>
-                  <div className="inline-flex min-w-0 items-center justify-end gap-1">
-                    <span>R$</span>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      defaultValue={fromCents(total).toFixed(2)}
-                      aria-label="Valor do pagamento"
-                      className="app-input w-full max-w-[7ch] text-end tabular-nums"
-                      onChange={(event) => {
-                        const value = Number(event.currentTarget.value.replace(',', '.'));
-
-                        if (Number.isFinite(value)) {
-                          setPayment(Math.max(toCents(value), 0));
-                        }
-                      }}
-                      onBlur={(event) => {
-                        const input = event.currentTarget;
-                        const parsedValue = Number(input.value.replace(',', '.'));
-                        const valueInCents = Number.isFinite(parsedValue)
-                          ? Math.max(toCents(parsedValue), 0)
-                          : 0;
-
-                        input.value = fromCents(valueInCents).toFixed(2);
-                        setPayment(valueInCents);
-                      }}
-                    />
-                  </div>
-
-                  <span aria-hidden="true" />
-                  <span className="text-right">- Total:</span>
-                  <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
-
-                  <div className="border-border/45 col-span-2 col-start-2 border-b-4" />
-                  <span aria-hidden="true" />
-                  <span className="text-right">Troco:</span>
-                  <span
-                    className="text-right tabular-nums"
-                    aria-label={`Troco: R$ ${fromCents(change).toFixed(2)}`}
-                  >
-                    {`R$ ${fromCents(change).toFixed(2)}`}
-                  </span>
-                  {change > 0 && (
-                    <div className="col-span-2 col-start-2 grid grid-cols-[1fr_2rem] items-center gap-x-2.5">
-                      <span className="text-right text-xl">Deixar troco como saldo</span>
-                      <span className="relative block size-8 justify-self-end">
-                        <input
-                          type="checkbox"
-                          {...register('keepChange')}
-                          aria-label="Deixar troco como saldo"
-                          className="peer absolute inset-0 z-10 size-full cursor-pointer appearance-none outline-none"
-                        />
-                        <span
-                          aria-hidden="true"
-                          className="bg-panel-contrast sunken peer-checked:bg-success peer-checked:text-primary peer-focus-visible:ring-accent/35 flex size-8 items-center justify-center peer-focus-visible:ring-[3px] [&_svg]:size-6 [&_svg]:opacity-0 peer-checked:[&_svg]:opacity-100"
-                        >
-                          <Check />
+                  <ul className="col-span-3 grid max-h-32 gap-y-1.5 overflow-y-auto pr-1 pb-2 text-xl">
+                    {Object.values(selectedProductsSummary).map((product) => (
+                      <li
+                        key={product.id}
+                        className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-baseline gap-x-2.5"
+                      >
+                        <span aria-hidden="true" />
+                        <span className="min-w-0 truncate text-right" title={product.label}>
+                          <span className="tabular-nums">{product.quantity}x </span>
+                          {`${product.label}:`}
                         </span>
-                      </span>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="border-success/60 bg-success text-primary hover:bg-success/85"
-                    aria-label="Adicionar pagamento"
-                    aria-pressed="false"
-                    onClick={() => {
-                      setIsImmediatePayment(true);
-                      setPayment(total);
-                    }}
-                  >
-                    <Banknote />
-                  </Button>
-                  <span className="text-right">Total:</span>
-                  <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
+                        <span className="text-right whitespace-nowrap tabular-nums">
+                          {`R$ ${fromCents(product.price * product.quantity).toFixed(2)}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="border-border/45 col-span-2 col-start-2 border-b-4" />
                 </>
               )}
 
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => {
-                  setHaveDetails(!haveDetails);
-                  unregister('details');
-                }}
-              >
-                <PenSquare />
-              </Button>
-              <span className="col-span-2 text-right">Observação</span>
+              <div className="col-span-3 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2.5">
+                <div
+                  className={
+                    isImmediatePayment
+                      ? 'flex flex-col items-center gap-2.5'
+                      : 'flex items-center gap-2.5'
+                  }
+                >
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="border-success/60 bg-success text-primary hover:bg-success/85"
+                    aria-label={isImmediatePayment ? 'Remover pagamento' : 'Adicionar pagamento'}
+                    aria-pressed={isImmediatePayment}
+                    onClick={() => {
+                      const nextIsImmediatePayment = !isImmediatePayment;
+
+                      setIsImmediatePayment(nextIsImmediatePayment);
+                      setPayment(nextIsImmediatePayment ? total : 0);
+                    }}
+                  >
+                    <Banknote />
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    aria-label={haveDetails ? 'Remover observação' : 'Adicionar observação'}
+                    aria-pressed={haveDetails}
+                    onClick={() => {
+                      setHaveDetails(!haveDetails);
+                      unregister('details');
+                    }}
+                  >
+                    <PenSquare />
+                  </Button>
+                </div>
+
+                <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2">
+                  {isImmediatePayment ? (
+                    <>
+                      <span className="text-right">Pagamento:</span>
+                      <div className="inline-flex min-w-0 items-center justify-end gap-1">
+                        <span>R$</span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          defaultValue={fromCents(total).toFixed(2)}
+                          aria-label="Valor do pagamento"
+                          className="app-input w-full max-w-[7ch] text-end tabular-nums"
+                          onChange={(event) => {
+                            const value = Number(event.currentTarget.value.replace(',', '.'));
+
+                            if (Number.isFinite(value)) {
+                              setPayment(Math.max(toCents(value), 0));
+                            }
+                          }}
+                          onBlur={(event) => {
+                            const input = event.currentTarget;
+                            const parsedValue = Number(input.value.replace(',', '.'));
+                            const valueInCents = Number.isFinite(parsedValue)
+                              ? Math.max(toCents(parsedValue), 0)
+                              : 0;
+
+                            input.value = fromCents(valueInCents).toFixed(2);
+                            setPayment(valueInCents);
+                          }}
+                        />
+                      </div>
+
+                      <span className="text-right">- Total:</span>
+                      <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
+
+                      <div className="border-border/45 col-span-2 border-b-4" />
+                      <span className="text-right">Troco:</span>
+                      <span
+                        className="text-right tabular-nums"
+                        aria-label={`Troco: R$ ${fromCents(change).toFixed(2)}`}
+                      >
+                        {`R$ ${fromCents(change).toFixed(2)}`}
+                      </span>
+                      {change > 0 && (
+                        <div className="col-span-2 grid grid-cols-[1fr_2rem] items-center gap-x-2.5">
+                          <span className="text-right text-xl">Deixar troco como saldo</span>
+                          <span className="relative block size-8 justify-self-end">
+                            <input
+                              type="checkbox"
+                              {...register('keepChange')}
+                              aria-label="Deixar troco como saldo"
+                              className="peer absolute inset-0 z-10 size-full cursor-pointer appearance-none outline-none"
+                            />
+                            <span
+                              aria-hidden="true"
+                              className="bg-panel-contrast sunken peer-checked:bg-success peer-checked:text-primary peer-focus-visible:ring-accent/35 flex size-8 items-center justify-center peer-focus-visible:ring-[3px] [&_svg]:size-6 [&_svg]:opacity-0 peer-checked:[&_svg]:opacity-100"
+                            >
+                              <Check />
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-right">Total:</span>
+                      <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
+                    </>
+                  )}
+                </div>
+              </div>
 
               {haveDetails && (
                 <textarea
