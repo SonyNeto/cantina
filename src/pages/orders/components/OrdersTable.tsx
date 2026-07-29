@@ -61,15 +61,15 @@ export const OrdersTable: FC<OrdersTableProps> = ({
 
   return (
     <div className="app-list scroll-pb-20 pb-20">
-      {Object.entries(itemsBySchoolClass).map(([schoolClassLabel, items]) => {
+      {Object.entries(itemsBySchoolClass).map(([schoolClassId, items]) => {
         const statusItems = items.filter((item) => item.status === status);
 
         if (statusItems.length === 0) return null;
 
         return (
-          <div key={schoolClassLabel} className="app-group">
+          <div key={schoolClassId} className="app-group">
             <div className={cn('app-row app-row-label text-muted px-4 text-xl', labelClassName)}>
-              {schoolClassLabel}
+              {statusItems[0].schoolClass?.label ?? 'Turma não encontrada'}
             </div>
             {statusItems.map((item, itemIndex) => {
               const student = item.student;
