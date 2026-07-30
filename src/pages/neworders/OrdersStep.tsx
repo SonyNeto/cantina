@@ -294,7 +294,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                 <textarea
                   maxLength={100}
                   placeholder="Escreva uma observação sobre o pedido"
-                  className="app-input col-span-3 !h-auto !p-2 w-full"
+                  className="app-input col-span-3 !h-auto w-full !p-2"
                   onChange={(event) => {
                     setDetails(event.currentTarget.value);
                   }}

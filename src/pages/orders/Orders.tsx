@@ -211,6 +211,8 @@ export const Orders: FC = () => {
       return res.json();
     },
 
+    mutationKey: ['postRegister', workspaceId],
+
     onMutate: async ({ orderId, itemId }) => {
       await queryClient.cancelQueries({
         queryKey: ['orders', workspaceId],
@@ -235,7 +237,7 @@ export const Orders: FC = () => {
                     if (item.id === itemId) return [];
 
                     return item;
-                }),
+                  }),
                 };
               }),
             ]),
@@ -247,7 +249,6 @@ export const Orders: FC = () => {
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['registers', workspaceId] });
       toast.success('Pedido movido para registro');
     },
@@ -258,6 +259,18 @@ export const Orders: FC = () => {
       }
 
       toast.error('Não foi possível mover o item para registro');
+    },
+
+    onSettled: () => {
+      const activeRegisterMutations = queryClient.isMutating({
+        mutationKey: ['postRegister', workspaceId],
+      });
+
+      if (activeRegisterMutations === 1) {
+        return queryClient.invalidateQueries({
+          queryKey: ['orders', workspaceId],
+        });
+      }
     },
   });
 
