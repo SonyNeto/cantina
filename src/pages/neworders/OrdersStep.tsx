@@ -177,7 +177,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                       </li>
                     ))}
                   </ul>
-                  <div className="border-border/45 col-span-2 col-start-2 border-b-4" />
+                  <div className="border-border/45 col-span-3 col-start-1 border-b-4" />
                 </>
               )}
 
@@ -294,7 +294,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                 <textarea
                   maxLength={100}
                   placeholder="Escreva uma observação sobre o pedido"
-                  className="app-input col-span-3 !h-auto !p-2"
+                  className="app-input col-span-3 !h-auto !p-2 w-full"
                   onChange={(event) => {
                     setDetails(event.currentTarget.value);
                   }}
