@@ -79,8 +79,8 @@ export const Orders: FC = () => {
   const ordersBySchoolClass = ordersData ?? {};
 
   const itemsBySchoolClass = Object.fromEntries(
-    Object.entries(ordersBySchoolClass).map(([schoolClassLabel, orders]) => [
-      schoolClassLabel,
+    Object.entries(ordersBySchoolClass).map(([schoolClassId, orders]) => [
+      schoolClassId,
       orders.flatMap((order) =>
         order.items.map((item) => ({
           ...item,
@@ -140,8 +140,8 @@ export const Orders: FC = () => {
         return {
           ...currentData,
           orders: Object.fromEntries(
-            Object.entries(currentData.orders).map(([schoolClassLabel, orders]) => [
-              schoolClassLabel,
+            Object.entries(currentData.orders).map(([schoolClassId, orders]) => [
+              schoolClassId,
               orders.map((order) => {
                 if (order.id !== orderId) return order;
 
@@ -226,8 +226,8 @@ export const Orders: FC = () => {
         return {
           ...currentData,
           orders: Object.fromEntries(
-            Object.entries(currentData.orders).map(([schoolClassLabel, orders]) => [
-              schoolClassLabel,
+            Object.entries(currentData.orders).map(([schoolClassId, orders]) => [
+              schoolClassId,
               orders.map((order) => {
                 if (order.id !== orderId) return order;
 
