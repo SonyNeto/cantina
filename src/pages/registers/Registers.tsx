@@ -35,6 +35,10 @@ type ResponsiblesRegistersResponse = {
   pagination: Pagination;
 };
 
+type RegistersSummary = {
+  revenue: number;
+};
+
 const getResponsiblesRegisters = async (
   period: Period,
   page: number,
@@ -50,6 +54,13 @@ const getResponsiblesRegisters = async (
   });
 
   const res = await workspaceApiFetch(`/registers/responsibles?${params}`);
+  return res.json();
+};
+
+const getRegistersSummary = async (period: Period): Promise<RegistersSummary> => {
+  const formattedPeriod = `${period.year}${(period.month + 1).toString().padStart(2, '0')}`;
+
+  const res = await workspaceApiFetch(`/registers/summary?p=${formattedPeriod}`);
   return res.json();
 };
 
@@ -73,6 +84,15 @@ export const Registers: FC = () => {
     select: (data) => ({
       responsiblesTotals: data.responsiblesTotals,
       totalPages: data.pagination.totalPages,
+    }),
+  });
+
+  const { data: revenueData } = useQuery({
+    queryKey: ['registers', 'summary', workspaceId, period],
+    queryFn: () => getRegistersSummary(period),
+    enabled: Boolean(workspaceId),
+    select: (data) => ({
+      revenue: data.revenue,
     }),
   });
 
@@ -224,6 +244,10 @@ export const Registers: FC = () => {
         </div>
 
         <footer className="app-footer">
+          <div className="app-total-bar inline-flex justify-end text-right">
+            <span>Faturamento: </span>
+            {`R$ ${fromCents(revenueData?.revenue ?? 0).toFixed(2)}`}
+          </div>
           <PageNavigator
             currentPage={currentPage}
             totalPages={totalPages}
