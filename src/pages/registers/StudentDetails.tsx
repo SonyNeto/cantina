@@ -1,8 +1,8 @@
 import { useState, type FC } from 'react';
 import { Link, useLocation, useParams } from 'react-router';
 import ROUTES from '../../constants/routes';
-import { ArrowLeft } from 'pixelarticons/react';
-import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, Check } from 'pixelarticons/react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Register } from '../../constants/canteen/types';
 import { Loader } from '../../components/commons/Loader';
 import { workspaceApiFetch } from '../../utils/api';
@@ -39,6 +39,7 @@ const getStudentRegisters = async (
 };
 
 export const StudentDetails: FC = () => {
+  const queryClient = useQueryClient();
   const { responsibleId, studentId } = useParams();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
@@ -55,6 +56,83 @@ export const StudentDetails: FC = () => {
       total: data.total,
       totalPages: data.pagination.totalPages,
     }),
+  });
+
+  const updateRegisterPayment = useMutation({
+    mutationFn: async ({ registerId, paid }: { registerId: string; paid: boolean }) => {
+      const res = await workspaceApiFetch(`/registers/${registerId}/payment`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paid,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Erro ao atualizar o pagamento do registro');
+      }
+
+      return;
+    },
+
+    onMutate: async ({ registerId, paid }) => {
+      await queryClient.cancelQueries({
+        queryKey: ['register', workspaceId, studentId, period, currentPage],
+      });
+
+      const previousRegisters = queryClient.getQueryData<RegistersResponse>([
+        'register',
+        workspaceId,
+        studentId,
+        period,
+        currentPage,
+      ]);
+
+      queryClient.setQueryData<RegistersResponse>(
+        ['register', workspaceId, studentId, period, currentPage],
+        (currentData) => {
+          if (!currentData) return currentData;
+
+          const updatedRegistersByDate = Object.fromEntries(
+            Object.entries(currentData.registersByDate).map(([date, registers]) => [
+              date,
+              registers.map((register) =>
+                register.id === registerId
+                  ? { ...register, payment: paid ? register.product.price : 0 }
+                  : register,
+              ),
+            ]),
+          );
+
+          const total = Object.values(updatedRegistersByDate)
+            .flat()
+            .reduce((acc, register) => acc + register.product.price - register.payment, 0);
+
+          return {
+            ...currentData,
+            registersByDate: updatedRegistersByDate,
+            total,
+          };
+        },
+      );
+
+      return { previousRegisters };
+    },
+
+    onSuccess: () => {
+      return queryClient.invalidateQueries({
+        queryKey: ['register', workspaceId, studentId, period, currentPage],
+      });
+    },
+
+    onError: (_error, _variables, context) => {
+      if (context?.previousRegisters) {
+        queryClient.setQueryData(
+          ['register', workspaceId, studentId, period, currentPage],
+          context.previousRegisters,
+        );
+      }
+    },
   });
 
   if (!studentId || !responsibleId) {
@@ -91,11 +169,13 @@ export const StudentDetails: FC = () => {
                 </div>
                 {registers.map((register) => (
                   <div
-                    className="app-row grid-cols-[minmax(0,1fr)_7ch] gap-5 [&_svg]:size-10 [&_svg]:shrink-0"
+                    className="app-row grid-cols-[minmax(0,1fr)_7ch_auto] gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0"
                     key={register.id}
                   >
-                    <div className="inline-flex items-center gap-2.5">
-                      <span>{register.product.label}</span>
+                    <div className="inline-flex min-w-0 items-center gap-2.5">
+                      <span className="truncate" title={register.product.label}>
+                        {register.product.label}
+                      </span>
                     </div>
                     <span
                       className={cn(
@@ -110,6 +190,29 @@ export const StudentDetails: FC = () => {
                         </>
                       )}
                     </span>
+                    <div className="flex items-center justify-end gap-2.5 whitespace-nowrap">
+                      <span className="relative block size-8">
+                        <input
+                          type="checkbox"
+                          checked={register.payment === register.product.price}
+                          aria-label={`Marcar ${register.product.label} como pago`}
+                          className="peer absolute inset-0 z-10 size-full cursor-pointer appearance-none outline-none"
+                          onChange={(event) => {
+                            updateRegisterPayment.mutate({
+                              registerId: register.id,
+                              paid: event.currentTarget.checked,
+                            });
+                          }}
+                        />
+                        <span
+                          aria-hidden="true"
+                          className="bg-panel-contrast sunken peer-checked:bg-success peer-checked:text-primary peer-focus-visible:ring-accent/35 flex size-8 items-center justify-center peer-focus-visible:ring-[3px] [&_svg]:size-6 [&_svg]:opacity-0 peer-checked:[&_svg]:opacity-100"
+                        >
+                          <Check />
+                        </span>
+                      </span>
+                      <span className="">Pago</span>
+                    </div>
                   </div>
                 ))}
               </div>
