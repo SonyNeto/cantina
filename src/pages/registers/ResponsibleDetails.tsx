@@ -163,7 +163,7 @@ export const ResponsibleDetails: FC = () => {
                     studentId={student.id}
                     method="update"
                     defaultName={student.name}
-                    defaultClass={student.schoolClassId}
+                    defaultSchoolClass={student.schoolClassId}
                     onClose={() => {
                       setEditingIndex(null);
                       setDrawerOpenIndex(idx);

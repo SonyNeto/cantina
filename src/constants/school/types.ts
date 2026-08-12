@@ -15,7 +15,7 @@ export interface SchoolClass {
 export interface Student {
   id: string;
   name: string;
-  classId: string;
+  schoolClassId: string;
   responsibleId: string;
 }
 

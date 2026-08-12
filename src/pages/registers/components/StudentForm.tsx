@@ -22,7 +22,7 @@ type SchoolClassesResponse = {
 
 type StudentInput = {
   name: string;
-  classId: string;
+  schoolClassId: string;
   studentId?: string;
 };
 
@@ -37,17 +37,17 @@ type StudentFormProps = ComponentPropsWithRef<'form'> & {
   onClose: () => void;
   method?: 'post' | 'update';
   defaultName?: string;
-  defaultClass?: string;
+  defaultSchoolClass?: string;
 };
 
 const studentSchema = z.object({
   name: z.string().trim().min(1, 'Informe o nome do aluno'),
-  classId: z.string().trim().min(1, 'Selecione uma turma'),
+  schoolClassId: z.string().trim().min(1, 'Selecione uma turma'),
   studentId: z.string().optional(),
 });
 
 const getSchoolClasses = async (): Promise<SchoolClassesResponse> => {
-  const res = await workspaceApiFetch('/classes');
+  const res = await workspaceApiFetch('/schoolClasses');
   return res.json();
 };
 
@@ -59,7 +59,7 @@ export const StudentForm = ({
   onClose,
   method = 'post',
   defaultName,
-  defaultClass,
+  defaultSchoolClass,
 }: StudentFormProps) => {
   const queryClient = useQueryClient();
 
@@ -71,13 +71,17 @@ export const StudentForm = ({
   });
 
   const updateStudent = useMutation({
-    mutationFn: async ({ name, classId, studentId }: StudentInput): Promise<StudentResponse> => {
+    mutationFn: async ({
+      name,
+      schoolClassId,
+      studentId,
+    }: StudentInput): Promise<StudentResponse> => {
       const res = await workspaceApiFetch(`/responsibles/${responsibleId}/students/${studentId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
-          classId,
+          schoolClassId,
         }),
       });
 
@@ -92,13 +96,13 @@ export const StudentForm = ({
   });
 
   const createStudent = useMutation({
-    mutationFn: async ({ name, classId }: StudentInput): Promise<StudentResponse> => {
+    mutationFn: async ({ name, schoolClassId }: StudentInput): Promise<StudentResponse> => {
       const res = await workspaceApiFetch(`/responsibles/${responsibleId}/students`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
-          classId,
+          schoolClassId,
         }),
       });
 
@@ -111,12 +115,17 @@ export const StudentForm = ({
     },
   });
 
-  const classesByShift = schoolClasses.reduce<Record<string, SchoolClass[]>>((acc, schoolClass) => {
-    const shiftLabel = schoolClass.shiftLabel ?? schoolClass.shiftId;
-    acc[shiftLabel] = [...(acc[shiftLabel] ?? []), schoolClass];
-    return acc;
-  }, {});
-  const defaultClassId = schoolClasses.find((schoolClass) => schoolClass.id === defaultClass)?.id;
+  const schoolClassesByShift = schoolClasses.reduce<Record<string, SchoolClass[]>>(
+    (acc, schoolClass) => {
+      const shiftLabel = schoolClass.shiftLabel ?? schoolClass.shiftId;
+      acc[shiftLabel] = [...(acc[shiftLabel] ?? []), schoolClass];
+      return acc;
+    },
+    {},
+  );
+  const defaultSchoolClassId = schoolClasses.find(
+    (schoolClass) => schoolClass.id === defaultSchoolClass,
+  )?.id;
 
   return (
     <form
@@ -127,7 +136,7 @@ export const StudentForm = ({
         const formData = new FormData(e.currentTarget);
         const result = studentSchema.safeParse({
           name: String(formData.get('name') ?? ''),
-          classId: String(formData.get('classId') ?? ''),
+          schoolClassId: String(formData.get('schoolClassId') ?? ''),
           studentId,
         });
 
@@ -163,10 +172,10 @@ export const StudentForm = ({
           </Select>
         ) : (
           <Select
-            key={defaultClassId ?? 'empty-school-class'}
-            name="classId"
-            id="add-student-class"
-            defaultValue={defaultClassId}
+            key={defaultSchoolClassId ?? 'empty-school-class'}
+            name="schoolClassId"
+            id="add-student-school-class"
+            defaultValue={defaultSchoolClassId}
             items={schoolClasses.map((schoolClass) => ({
               label: schoolClass.label,
               value: schoolClass.id,
@@ -177,9 +186,9 @@ export const StudentForm = ({
               className="w-full max-w-[21ch] min-w-0"
             />
             <SelectContent className="">
-              {Object.entries(classesByShift).map(([shiftLabel, classes]) => (
+              {Object.entries(schoolClassesByShift).map(([shiftLabel, schoolClasses]) => (
                 <SelectGroup label={shiftLabel} key={shiftLabel}>
-                  {classes.map((schoolClass) => (
+                  {schoolClasses.map((schoolClass) => (
                     <SelectItem value={schoolClass.id} key={schoolClass.id}>
                       {schoolClass.label}
                     </SelectItem>

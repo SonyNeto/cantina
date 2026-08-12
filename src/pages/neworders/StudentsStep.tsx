@@ -12,7 +12,7 @@ import { Cooking } from '../../assets/icons/MenuIcons';
 
 interface Props {
   shiftId: ShiftId | '';
-  classId: string;
+  schoolClassId: string;
   onNext: () => void;
   onBack: () => void;
 }
@@ -37,8 +37,11 @@ type ActiveOrdersResponse = {
 
 const ACTIVE_ORDER_STATUS: OrderStatus = 'cooking';
 
-const getStudents = async (shiftId: ShiftId | '', classId: string): Promise<StudentsResponse> => {
-  const res = await workspaceApiFetch(`/shifts/${shiftId}/classes/${classId}/students`);
+const getStudents = async (
+  shiftId: ShiftId | '',
+  schoolClassId: string,
+): Promise<StudentsResponse> => {
+  const res = await workspaceApiFetch(`/shifts/${shiftId}/schoolClasses/${schoolClassId}/students`);
   return res.json();
 };
 
@@ -47,14 +50,14 @@ const getActiveOrders = async (): Promise<ActiveOrdersResponse> => {
   return res.json();
 };
 
-export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) => {
+export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, schoolClassId }) => {
   const { setValue, unregister } = useFormContext<OrderForm>();
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
   const { data: students = [], isPending } = useQuery({
-    queryKey: ['students', workspaceId, classId],
-    queryFn: () => getStudents(shiftId, classId),
-    enabled: Boolean(workspaceId && shiftId && classId),
+    queryKey: ['students', workspaceId, schoolClassId],
+    queryFn: () => getStudents(shiftId, schoolClassId),
+    enabled: Boolean(workspaceId && shiftId && schoolClassId),
     select: (data) => data.students,
   });
 
@@ -79,7 +82,7 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) =>
     onNext();
   }
 
-  const activeClassOrders = ordersData?.[classId] ?? [];
+  const activeSchoolClassOrders = ordersData?.[schoolClassId] ?? [];
 
   return isPending ? (
     <Loader />
@@ -107,7 +110,7 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) =>
         ))}
       </div>
 
-      {activeClassOrders.length > 0 && (
+      {activeSchoolClassOrders.length > 0 && (
         <footer className="app-footer z-40" aria-label="Pedidos ativos da turma">
           <h2 className="bg-panel-header raised flex min-h-14 w-full items-center justify-center gap-3 px-4 text-xl font-bold [&_svg]:size-10 [&_svg]:shrink-0">
             <span>Pedidos ativos</span>
@@ -116,7 +119,7 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, classId }) =>
 
           <div className="app-total-bar min-w-0 !p-0">
             <ul className="border-border/35 grid max-w-full min-w-0 overflow-hidden [&>li+li]:border-t-4">
-              {activeClassOrders.map((order) => {
+              {activeSchoolClassOrders.map((order) => {
                 const itemsSummary = order.items.reduce<
                   Record<string, OrderItem & { quantity: number }>
                 >((summary, item) => {
