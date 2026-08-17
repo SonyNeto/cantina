@@ -3,51 +3,51 @@ import type { ComponentPropsWithRef } from 'react';
 import { toast } from 'sonner';
 import z from 'zod';
 import { Check } from 'pixelarticons/react';
-import type { Responsible } from '../../../constants/school/types';
+import type { Shift } from '../../../constants/school/types';
 import { workspaceApiFetch } from '../../../utils/api';
 import { Button } from '../../../components/commons/Button';
 import { X } from '../../../assets/icons/MenuIcons';
 import { cn } from '../../../utils/functions';
 
-type ResponsibleInput = {
-  name: string;
-  responsibleId?: string;
+type ShiftInput = {
+  label: string;
+  shiftId?: string;
 };
 
-type ResponsibleResponse = {
-  responsible: Responsible;
+type ShiftResponse = {
+  shift: Shift;
 };
 
-type ResponsibleFormProps = ComponentPropsWithRef<'form'> & {
+type ShiftFormProps = ComponentPropsWithRef<'form'> & {
   workspaceId: string | undefined;
-  responsibleId?: string;
+  shiftId?: string;
   onClose: () => void;
   method?: 'post' | 'update';
-  defaultName?: string;
+  defaultLabel?: string;
 };
 
-const responsibleSchema = z.object({
-  name: z.string().trim().min(1, 'Informe o nome do responsável'),
-  responsibleId: z.string().optional(),
+const shiftSchema = z.object({
+  label: z.string().trim().min(1, 'Informe o nome do turno'),
+  shiftId: z.string().optional(),
 });
 
-export const ResponsibleForm = ({
+export const ShiftForm = ({
   className,
   workspaceId,
-  responsibleId,
+  shiftId,
   onClose,
   method = 'post',
-  defaultName,
-}: ResponsibleFormProps) => {
+  defaultLabel,
+}: ShiftFormProps) => {
   const queryClient = useQueryClient();
 
-  const createResponsible = useMutation({
-    mutationFn: async ({ name }: ResponsibleInput): Promise<ResponsibleResponse> => {
-      const res = await workspaceApiFetch('/responsibles', {
+  const createShift = useMutation({
+    mutationFn: async ({ label }: ShiftInput): Promise<ShiftResponse> => {
+      const res = await workspaceApiFetch('/shifts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
+          label,
         }),
       });
 
@@ -55,19 +55,18 @@ export const ResponsibleForm = ({
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspaces', 'responsibles', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces', 'shifts', workspaceId] });
       onClose();
     },
   });
 
-  const updateResponsible = useMutation({
-    mutationFn: async ({ name, responsibleId }: ResponsibleInput): Promise<ResponsibleResponse> => {
-      const res = await workspaceApiFetch(`/responsibles/${responsibleId}`, {
+  const updateShift = useMutation({
+    mutationFn: async ({ label, shiftId }: ShiftInput): Promise<ShiftResponse> => {
+      const res = await workspaceApiFetch(`/shifts/${shiftId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
+          label,
         }),
       });
 
@@ -75,9 +74,8 @@ export const ResponsibleForm = ({
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspaces', 'responsibles', workspaceId] });
-      toast.success('Responsável atualizado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['workspaces', 'shifts', workspaceId] });
+      toast.success('Turno atualizado com sucesso!');
       onClose();
     },
   });
@@ -89,9 +87,9 @@ export const ResponsibleForm = ({
         e.preventDefault();
 
         const formData = new FormData(e.currentTarget);
-        const result = responsibleSchema.safeParse({
-          name: String(formData.get('name') ?? ''),
-          responsibleId,
+        const result = shiftSchema.safeParse({
+          label: String(formData.get('label') ?? ''),
+          shiftId,
         });
 
         if (!result.success) {
@@ -100,21 +98,21 @@ export const ResponsibleForm = ({
         }
 
         if (method === 'post') {
-          createResponsible.mutate(result.data);
+          createShift.mutate(result.data);
         }
 
         if (method === 'update') {
-          updateResponsible.mutate(result.data);
+          updateShift.mutate(result.data);
         }
       }}
     >
       <div className="inline-flex min-w-0 items-center gap-2.5">
         <input
-          name="name"
-          id={responsibleId ? `responsible-name-${responsibleId}` : 'add-responsible-name'}
+          name="label"
+          id={shiftId ? `shift-label-${shiftId}` : 'add-shift-label'}
           type="text"
-          placeholder="Nome do responsável"
-          defaultValue={defaultName}
+          placeholder="Nome do turno"
+          defaultValue={defaultLabel}
           className="app-input w-full max-w-[20ch] truncate"
         />
       </div>

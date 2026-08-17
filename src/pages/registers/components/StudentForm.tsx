@@ -90,6 +90,7 @@ export const StudentForm = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces', 'students', workspaceId] });
       toast.success('Aluno atualizado com sucesso!');
       onClose();
     },
@@ -111,6 +112,7 @@ export const StudentForm = ({
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces', 'students', workspaceId] });
       onClose();
     },
   });

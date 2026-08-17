@@ -1,14 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, type ComponentPropsWithoutRef } from 'react';
+import { useEffect, type ComponentPropsWithoutRef } from 'react';
 import { toast } from 'sonner';
-import { Plus, UserPlus } from 'pixelarticons/react';
-import { apiFetch, workspaceApiFetch } from '../utils/api';
+import { Plus } from 'pixelarticons/react';
+import { apiFetch } from '../utils/api';
 import { cn } from '../utils/functions';
 import { Button } from './commons/Button';
 import { Dialog, DialogContent, DialogTrigger } from './commons/Dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger } from './commons/Select';
 import { useWorkspaceStore, type Workspace } from '../stores/useWorkspaceStore';
-import { canManageWorkspace } from '../utils/workspaceAccess';
 import { z } from 'zod';
 
 type WorkspacesResponse = {
@@ -34,8 +33,6 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
   const selectedWorkspace = useWorkspaceStore((state) => state.workspace);
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace);
   const setDefaultWorkspace = useWorkspaceStore.getState().setDefaultWorkspace;
-  const [inviteLink, setInviteLink] = useState<string>('');
-  const canInviteMembers = canManageWorkspace(selectedWorkspace?.role);
 
   const { data: userWorkspaces, isPending } = useQuery({
     queryKey: ['workspaces'],
@@ -65,34 +62,6 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
 
     onError: () => {
       toast.error('Falha ao criar instituição');
-    },
-  });
-
-  const getInviteToken = useMutation({
-    mutationFn: async () => {
-      const res = await workspaceApiFetch('/invites', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Falha criar convite');
-      }
-
-      return res.json();
-    },
-
-    onSuccess: (data) => {
-      const token = data.token;
-      const link = `${window.location.origin}/invite/${token}`;
-
-      setInviteLink(link);
-    },
-
-    onError: () => {
-      toast.error('Falha criar convite');
     },
   });
 
@@ -197,39 +166,6 @@ export const WorkspaceSelect = ({ className, ...props }: WorkspaceSelectProps) =
           </form>
         </DialogContent>
       </Dialog>
-
-      {canInviteMembers && (
-        <Dialog>
-          <DialogTrigger
-            render={
-              <Button
-                size="md"
-                variant="ghost"
-                className="raised text-muted hover:bg-accent-soft hover:text-accent grid h-12 w-full grid-cols-[2.5rem_minmax(0,1fr)] rounded-none border-0 px-3"
-                onClick={() => getInviteToken.mutate()}
-              />
-            }
-          >
-            <UserPlus className="col-start-1 justify-self-end" />
-            <span className="col-start-2 min-w-0 truncate text-center text-lg font-medium">
-              Convidar membro
-            </span>
-          </DialogTrigger>
-          <DialogContent title="Convidar membro">
-            <input type="text" value={inviteLink} readOnly className="app-input w-full" />
-            <Button
-              size="md"
-              variant="primary"
-              onClick={async () => {
-                await navigator.clipboard.writeText(inviteLink);
-                toast.success('Link copiado');
-              }}
-            >
-              Copiar link
-            </Button>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };
