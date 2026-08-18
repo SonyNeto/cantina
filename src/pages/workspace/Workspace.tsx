@@ -127,10 +127,24 @@ const useDeleteListItem = <K extends ListKey>(
 ) => {
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
-      await workspaceApiFetch(`/${key}/${id}`, {
+      let route: string;
+      if (key === 'schoolClasses') {
+        route = `/shifts/${filter?.shiftId}/${key}/${id}`;
+      } else if (key === 'students') {
+        route = `/responsibles/${filter?.responsibleId}/${key}/${id}`;
+      } else {
+        route = `/${key}/${id}`;
+      }
+
+      const res = await workspaceApiFetch(route, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
+
+      if (res.status === 409) {
+        throw new Error('Existem alunos cadastrados');
+      }
+
     },
 
     onSuccess: () => {
@@ -146,6 +160,12 @@ const useDeleteListItem = <K extends ListKey>(
         ],
       });
       toast.success('Removido com sucesso!');
+    },
+
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Não foi possível deletar';
+
+      toast.error(message);
     },
   });
 };
@@ -247,6 +267,7 @@ export const Workspace: FC = () => {
         currentPage,
         search,
         workspaceId,
+        { shiftId },
       ),
     },
     {
@@ -269,7 +290,9 @@ export const Workspace: FC = () => {
       icon: GraduationCap,
       data: studentsData,
       isFetching: isFetchingStudents,
-      deleteMutation: useDeleteListItem(queryClient, 'students', currentPage, search, workspaceId),
+      deleteMutation: useDeleteListItem(queryClient, 'students', currentPage, search, workspaceId, {
+        responsibleId,
+      }),
     },
   ] satisfies {
     [K in ListKey]: ListConfig<K>;
