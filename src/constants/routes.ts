@@ -16,6 +16,7 @@ const ROUTES = {
         `/registers/${responsibleId}/${studentId}`,
     },
   },
+  WORKSPACE: '/workspace/:workspaceId',
   AUDIT_LOGS: '/audit-logs/',
 };
 

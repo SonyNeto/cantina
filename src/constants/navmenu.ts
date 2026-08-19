@@ -1,4 +1,4 @@
-import { PenSquare, ClipboardNote, Coffee, User } from 'pixelarticons/react';
+import { PenSquare, ClipboardNote, Coffee, User, University } from 'pixelarticons/react';
 import ROUTES from './routes';
 import { Pan } from '../assets/icons/MenuIcons';
 import type { WorkspaceAccessLevel } from '../utils/workspaceAccess';
@@ -35,6 +35,12 @@ const NAVMENU = {
       route: ROUTES.REGISTERS.ROOT,
       accessLevel: 'admin',
       icon: User,
+    },
+    {
+      label: 'Instituição',
+      route: ROUTES.WORKSPACE,
+      accessLevel: 'admin',
+      icon: University,
     },
     {
       label: 'Auditoria',

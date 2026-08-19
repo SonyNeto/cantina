@@ -88,6 +88,7 @@
   from {
     transform: translateX(-100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -97,6 +98,7 @@
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-100%);
   }
@@ -106,6 +108,7 @@
   from {
     height: 0;
   }
+
   to {
     height: var(--accordion-panel-height);
   }
@@ -115,6 +118,7 @@
   from {
     height: var(--accordion-panel-height);
   }
+
   to {
     height: 0;
   }
@@ -122,30 +126,41 @@
 
 @theme {
   --font-text: 'Pixelify Sans', sans-serif;
+
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
   --color-tertiary: var(--color-tertiary);
+
   --color-panel: var(--color-panel);
   --color-panel-header: var(--color-panel-header);
   --color-panel-contrast: var(--color-panel-contrast);
+
   --color-text: var(--color-text);
   --color-muted: var(--color-muted);
   --color-border: var(--color-border);
   --color-border-soft: var(--color-border-soft);
+
   --color-hover: var(--color-hover);
   --color-text-hover: var(--color-text-hover);
+
   --color-accent: var(--color-accent);
   --color-accent-hover: var(--color-accent-hover);
   --color-accent-soft: var(--color-accent-soft);
+
   --color-info: var(--color-info);
   --color-info-soft: var(--color-info-soft);
+
   --color-success: var(--color-success);
   --color-success-soft: var(--color-success-soft);
+
   --color-warning: var(--color-warning);
   --color-warning-soft: var(--color-warning-soft);
+
   --color-danger: var(--color-danger);
   --color-danger-soft: var(--color-danger-soft);
+
   --color-shadow: var(--color-shadow);
+
   --animate-drawer-in: drawer-in 0.2s ease-in;
   --animate-drawer-out: drawer-out 0.2s ease-out;
   --animate-accordion-in: accordion-in 0.2s ease-in;
@@ -182,11 +197,11 @@ body {
   }
 
   .app-header {
-    @apply bg-panel-header text-text grid min-h-22 w-full shrink-0 items-center gap-4 px-4 py-3 text-xl font-bold;
+    @apply raised bg-panel-header text-text grid min-h-22 w-full shrink-0 items-center gap-4 px-4 py-3 text-xl font-bold;
   }
 
   .app-header-accent {
-    @apply bg-panel-contrast text-text grid min-h-20 w-full shrink-0 items-center gap-2.5 px-4 py-3 text-xl font-bold;
+    @apply raised bg-panel-contrast text-text grid min-h-20 w-full shrink-0 items-center gap-2.5 px-4 py-3 text-xl font-bold;
   }
 
   .app-list {
@@ -214,7 +229,7 @@ body {
   }
 
   .app-row-label {
-    @apply !bg-panel-contrast sticky top-0 z-50 flex h-8 min-h-8 items-center !border-0 py-1;
+    @apply raised !bg-panel-contrast sticky top-0 z-50 flex h-8 min-h-8 items-center !border-0 py-1;
   }
 
   .app-row-action {
@@ -222,15 +237,15 @@ body {
   }
 
   .app-form-row {
-    @apply border-border/35 bg-warning-soft grid w-full shrink-0 items-center gap-3 border-b-4 p-4 text-xl font-medium;
+    @apply raised border-border/35 bg-warning-soft grid w-full shrink-0 items-center gap-3 border-b-4 p-4 text-xl font-medium;
   }
 
   .app-input {
-    @apply bg-panel-contrast text-text placeholder:text-muted h-12 min-w-0 rounded-none px-3 text-xl outline-none focus-visible:shadow-[inset_4px_4px_0_color-mix(in_srgb,var(--pixel-dark)_80%,transparent),inset_-4px_-4px_0_color-mix(in_srgb,var(--pixel-light)_100%,transparent)];
+    @apply sunken bg-panel-contrast text-text placeholder:text-muted h-12 min-w-0 rounded-none px-3 text-xl outline-none focus-visible:shadow-[inset_4px_4px_0_color-mix(in_srgb,var(--pixel-dark)_80%,transparent),inset_-4px_-4px_0_color-mix(in_srgb,var(--pixel-light)_100%,transparent)];
   }
 
   .app-total-bar {
-    @apply bg-info-soft text-info grid min-h-14 w-full items-center gap-2.5 px-4 py-3 text-xl font-bold;
+    @apply raised bg-info-soft text-info grid min-h-14 w-full items-center gap-2.5 px-4 py-3 text-xl font-bold;
   }
 
   .app-pagination {
@@ -272,22 +287,6 @@ body {
 
   .app-button {
     @apply focus-visible:ring-accent/35 z-30 inline-flex cursor-pointer items-center justify-center rounded-none font-medium whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_*]:pointer-events-none [&_svg]:shrink-0;
-  }
-
-  .app-header,
-  .app-header-accent,
-  .app-form-row,
-  .app-total-bar,
-  .app-row-label {
-    box-shadow:
-      inset 4px 4px 0 color-mix(in srgb, var(--pixel-light) 72%, transparent),
-      inset -4px -4px 0 color-mix(in srgb, var(--pixel-dark) 48%, transparent);
-  }
-
-  .app-input {
-    box-shadow:
-      inset 4px 4px 0 color-mix(in srgb, var(--pixel-dark) 52%, transparent),
-      inset -4px -4px 0 color-mix(in srgb, var(--pixel-light) 72%, transparent);
   }
 }
 
