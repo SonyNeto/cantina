@@ -8,31 +8,42 @@ import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 
+type Pagination = {
+  page: number;
+  totalPages: number;
+  nextPage: number | null;
+};
+
 type ListItem = {
   shifts: Shift;
   schoolClasses: SchoolClass;
   responsibles: Responsible;
   students: Student;
 };
+
 type ListKey = keyof ListItem;
+
+type ListResponse<K extends ListKey> = {
+  [P in K]: ListItem[P][];
+} & {
+  pagination: Pagination;
+};
+
 type ListConfig<K extends ListKey> = {
   key: K;
   label: string;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
-  data: ListItem[K][];
+  data: ListResponse<K>;
   isFetching: boolean;
-};
-type ListResponse<K extends keyof ListItem> = {
-  [P in K]: ListItem[P][];
 };
 
 const getList = async <K extends keyof ListItem>(
   object: K,
   page: number,
-  search: string
+  search: string,
 ): Promise<ListResponse<K>> => {
   //review this nomenclature
-  const params = new URLSearchParams ({
+  const params = new URLSearchParams({
     page: String(page),
     limit: String(10),
     search,
@@ -42,51 +53,67 @@ const getList = async <K extends keyof ListItem>(
 };
 
 const useListQuery = <K extends ListKey>(
-  key: K, 
+  key: K,
   page: number,
   search: string,
   workspaceId?: string,
 ) => {
   return useQuery({
-    queryKey: [key, workspaceId],
+    queryKey: ['workspaces', key, workspaceId, page, search],
     queryFn: () => getList(key, page, search),
     enabled: Boolean(workspaceId),
-    select: (data) => data[key],
   });
+};
+
+const defaultPagination = {
+  page: 1,
+  totalPages: 1,
+  nextPage: null,
 };
 
 export const Workspace: FC = () => {
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [search, setSearch] = useState<string>('');
-  const totalPages = 10; // Example value, replace with actual total pages
 
-  const { data: shiftsData = [], isFetching: isFetchingShifts } = useListQuery(
-    'shifts',
-    currentPage,
-    search,
-    workspaceId,
-  );
-  const { data: schoolClassesData = [], isFetching: isFetchingSchoolClasses } = useListQuery(
-    'schoolClasses',
-    currentPage,
-    search,
-    workspaceId,
-  );
-  const { data: responsiblesData = [], isFetching: isFetchingResponsibles } = useListQuery(
-    'responsibles',
-    currentPage,
-    search,
-    workspaceId,
-  );
-  const { data: studentsData = [], isFetching: isFetchingStudents } = useListQuery(
-    'students',
-    currentPage,
-    search,
-    workspaceId,
-  );
+  const {
+    data: shiftsData = {
+      shifts: [],
+      pagination: defaultPagination,
+    } satisfies ListResponse<'shifts'>,
+    isFetching: isFetchingShifts,
+  } = useListQuery('shifts', currentPage, search, workspaceId);
 
-  console.log(shiftsData)
+  const {
+    data: schoolClassesData = {
+      schoolClasses: [],
+      pagination: defaultPagination,
+    } satisfies ListResponse<'schoolClasses'>,
+    isFetching: isFetchingSchoolClasses,
+  } = useListQuery('schoolClasses', currentPage, search, workspaceId);
+
+  const {
+    data: responsiblesData = {
+      responsibles: [],
+      pagination: defaultPagination,
+    } satisfies ListResponse<'responsibles'>,
+    isFetching: isFetchingResponsibles,
+  } = useListQuery('responsibles', currentPage, search, workspaceId);
+
+  const {
+    data: studentsData = {
+      students: [],
+      pagination: defaultPagination,
+    } satisfies ListResponse<'students'>,
+    isFetching: isFetchingStudents,
+  } = useListQuery('students', currentPage, search, workspaceId);
+
+  console.log({
+    shiftsData,
+    schoolClassesData,
+    responsiblesData,
+    studentsData,
+  });
 
   const listConfig = [
     {
@@ -117,7 +144,9 @@ export const Workspace: FC = () => {
       data: studentsData,
       isFetching: isFetchingStudents,
     },
-  ] satisfies ListConfig<ListKey>[];
+  ] satisfies {
+    [K in ListKey]: ListConfig<K>;
+  }[ListKey][];
 
   return (
     <Tabs defaultValue="shifts" onValueChange={() => setCurrentPage(1)} className="app-page">
@@ -133,19 +162,26 @@ export const Workspace: FC = () => {
       </TabsList>
 
       {listConfig.map((list) => {
+        const { key, data, label } = list;
+        const items = (
+          list.data as {
+            [K in ListKey]?: ListItem[K][];
+          }
+        )[list.key]!;
+
         return (
           <TabPanel
-            key={list.key}
-            value={list.key}
-            title={list.label}
+            key={key}
+            value={key}
+            title={label}
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={data.pagination.totalPages}
             setCurrentPage={setCurrentPage}
             search={search}
             setSearch={setSearch}
             searchPlaceholder={`Encontre ${list.label}`}
           >
-            {list.data.map((item: ListItem[ListKey]) => {
+            {items.map((item) => {
               return (
                 <div key={item.id} className="app-row">
                   {'label' in item ? item.label : item.name}
@@ -156,6 +192,6 @@ export const Workspace: FC = () => {
           </TabPanel>
         );
       })}
-    </Tabs> 
+    </Tabs>
   );
 };
