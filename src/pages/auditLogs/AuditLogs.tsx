@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { Coffee, University, User } from 'pixelarticons/react';
+import { ChevronDown2, Coffee, University, User } from 'pixelarticons/react';
 import { useSearchParams } from 'react-router';
 import { Pan } from '../../assets/icons/MenuIcons';
 import { Tab, TabPanel, Tabs, TabsIndicator, TabsList } from '../../components/commons/Tabs';
@@ -10,6 +10,12 @@ import { Loader } from '../../components/commons/Loader';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { workspaceApiFetch } from '../../utils/api';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '../../components/commons/Accordion';
 
 type Pagination = {
   page: number;
@@ -34,6 +40,12 @@ type AuditLog = {
     eventId?: string;
     ip?: string;
     userAgent?: string;
+  };
+  context?: {
+    targetName: string | null;
+    studentName: string | null;
+    responsibleName: string | null;
+    itemLabels: string[];
   };
   createdAt: string;
 };
@@ -266,35 +278,125 @@ export const AuditLogs: FC = () => {
                       {dayjs(date).format('DD/MM')}
                     </div>
 
-                    {auditLogs.map((auditLog) => {
-                      const actor = auditLog.actor.email ?? auditLog.actor.role;
-                      const summary = getAuditLogSummary(auditLog);
+                    <Accordion multiple className="!border-b-0">
+                      {auditLogs.map((auditLog) => {
+                        const actor = auditLog.actor.email ?? auditLog.actor.role;
+                        const summary = getAuditLogSummary(auditLog);
 
-                      return (
-                        <div
-                          className="app-row grid-cols-[minmax(0,1fr)_minmax(6rem,10rem)] gap-2.5 py-2"
-                          key={auditLog.id}
-                        >
-                          <div className="flex min-w-0 flex-col">
-                            <span className="truncate" title={auditLog.action}>
-                              {actionLabels[auditLog.action] ?? auditLog.action}
-                            </span>
-                            <span className="text-muted truncate text-base" title={summary}>
-                              {summary}
-                            </span>
-                          </div>
+                        return (
+                          <AccordionItem key={auditLog.id} value={auditLog.id}>
+                            <AccordionTrigger className="app-row app-row-action group border-border/35 grid-cols-[minmax(0,1fr)_minmax(6rem,10rem)_2rem] gap-2.5 border-b-4 py-2 text-left">
+                              <div className="flex min-w-0 flex-col">
+                                <span className="truncate" title={auditLog.action}>
+                                  {actionLabels[auditLog.action] ?? auditLog.action}
+                                </span>
+                                <span className="text-muted truncate text-base" title={summary}>
+                                  {summary}
+                                </span>
+                              </div>
 
-                          <div className="text-muted flex min-w-0 flex-col items-end text-base">
-                            <span className="max-w-full truncate" title={actor}>
-                              {actor}
-                            </span>
-                            <time dateTime={auditLog.createdAt} className="tabular-nums">
-                              {dayjs(auditLog.createdAt).format('HH:mm')}
-                            </time>
-                          </div>
-                        </div>
-                      );
-                    })}
+                              <div className="text-muted flex min-w-0 flex-col items-end text-base">
+                                <span className="max-w-full truncate" title={actor}>
+                                  {actor}
+                                </span>
+                                <time dateTime={auditLog.createdAt} className="tabular-nums">
+                                  {dayjs(auditLog.createdAt).format('HH:mm')}
+                                </time>
+                              </div>
+
+                              <ChevronDown2 className="size-7 transition-transform group-data-[panel-open]:rotate-180" />
+                            </AccordionTrigger>
+
+                            <AccordionContent>
+                              <div className="grid w-full min-w-0 gap-4 text-base">
+                                <dl className="grid gap-2">
+                                  <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                    <dt className="text-muted font-medium">Autor</dt>
+                                    <dd className="min-w-0 break-words">{actor}</dd>
+                                  </div>
+
+                                  <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                    <dt className="text-muted font-medium">Em</dt>
+                                    <dd className="min-w-0 break-words">
+                                      {dayjs(auditLog.createdAt).format('DD/MM/YYYY [às] HH:mm:ss')}
+                                    </dd>
+                                  </div>
+
+                                  {auditLog.context?.targetName &&
+                                    auditLog.context.targetName !==
+                                      auditLog.context.studentName &&
+                                    auditLog.context.targetName !==
+                                      auditLog.context.responsibleName && (
+                                      <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                        <dt className="text-muted font-medium">
+                                          {targetLabels[auditLog.target.type] ?? 'Item'}
+                                        </dt>
+                                        <dd className="min-w-0 break-words">
+                                          {auditLog.context.targetName}
+                                        </dd>
+                                      </div>
+                                    )}
+
+                                  {auditLog.context?.studentName && (
+                                    <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                      <dt className="text-muted font-medium">
+                                        {key === 'orders' ? 'Para' : 'Aluno'}
+                                      </dt>
+                                      <dd className="min-w-0 break-words">
+                                        {auditLog.context.studentName}
+                                      </dd>
+                                    </div>
+                                  )}
+
+                                  {auditLog.context?.responsibleName && (
+                                    <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                      <dt className="text-muted font-medium">Responsável</dt>
+                                      <dd className="min-w-0 break-words">
+                                        {auditLog.context.responsibleName}
+                                      </dd>
+                                    </div>
+                                  )}
+
+                                  {auditLog.context && auditLog.context.itemLabels.length > 0 && (
+                                    <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                      <dt className="text-muted font-medium">Itens</dt>
+                                      <dd className="min-w-0">
+                                        <ul className="grid list-inside list-square gap-1">
+                                          {auditLog.context.itemLabels.map((itemLabel, index) => (
+                                            <li key={`${itemLabel}-${index}`}>{itemLabel}</li>
+                                          ))}
+                                        </ul>
+                                      </dd>
+                                    </div>
+                                  )}
+
+                                  {typeof auditLog.changes?.payment === 'number' && (
+                                    <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                      <dt className="text-muted font-medium">Pagamento</dt>
+                                      <dd className="min-w-0 break-words">
+                                        {(auditLog.changes.payment / 100).toLocaleString('pt-BR', {
+                                          style: 'currency',
+                                          currency: 'BRL',
+                                        })}
+                                      </dd>
+                                    </div>
+                                  )}
+
+                                  {typeof auditLog.changes?.keepChange === 'boolean' && (
+                                    <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
+                                      <dt className="text-muted font-medium">Manter troco</dt>
+                                      <dd className="min-w-0 break-words">
+                                        {auditLog.changes.keepChange ? 'Sim' : 'Não'}
+                                      </dd>
+                                    </div>
+                                  )}
+                                </dl>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        );
+                      })}
+                    </Accordion>
                   </div>
                 ))}
 
