@@ -1,12 +1,20 @@
 import { useState, type FC, type JSX } from 'react';
 import { Tab, TabPanel, Tabs, TabsIndicator, TabsList } from '../../components/commons/Tabs';
-import { Clock, Library, Users } from 'pixelarticons/react';
+import { Clock, Library, University, Users } from 'pixelarticons/react';
 import { GraduationCap } from '../../assets/icons/MenuIcons';
 import { workspaceApiFetch } from '../../utils/api';
-import type { Responsible, SchoolClass, Shift, Student } from '../../constants/school/types';
+import type {
+  Membership,
+  Responsible,
+  SchoolClass,
+  Shift,
+  Student,
+} from '../../constants/school/types';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
+import { ResponsibleForm } from '../registers/components/ResponsibleForm';
+import { StudentForm } from '../registers/components/StudentForm';
 
 type Pagination = {
   page: number;
@@ -15,6 +23,7 @@ type Pagination = {
 };
 
 type ListItem = {
+  memberships: Membership;
   shifts: Shift;
   schoolClasses: SchoolClass;
   responsibles: Responsible;
@@ -75,6 +84,15 @@ export const Workspace: FC = () => {
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [search, setSearch] = useState<string>('');
+  const [isAdding, setIsAdding] = useState<boolean>(false);
+
+  const {
+    data: membershipsData = {
+      memberships: [],
+      pagination: defaultPagination,
+    } satisfies ListResponse<'memberships'>,
+    isFetching: isFetchingMemberships,
+  } = useListQuery('memberships', currentPage, search, workspaceId);
 
   const {
     data: shiftsData = {
@@ -108,14 +126,14 @@ export const Workspace: FC = () => {
     isFetching: isFetchingStudents,
   } = useListQuery('students', currentPage, search, workspaceId);
 
-  console.log({
-    shiftsData,
-    schoolClassesData,
-    responsiblesData,
-    studentsData,
-  });
-
   const listConfig = [
+    {
+      key: 'memberships',
+      label: 'Membros',
+      icon: University,
+      data: membershipsData,
+      isFetching: isFetchingMemberships,
+    },
     {
       key: 'shifts',
       label: 'Turnos',
@@ -148,8 +166,35 @@ export const Workspace: FC = () => {
     [K in ListKey]: ListConfig<K>;
   }[ListKey][];
 
+  const addForm = (key: ListKey) => {
+    switch (key) {
+      case 'shifts':
+        return <></>;
+        break;
+      case 'schoolClasses':
+        return <></>;
+        break;
+      case 'responsibles':
+        return <ResponsibleForm workspaceId={workspaceId} onClose={() => setIsAdding(false)} />;
+        break;
+      case 'students':
+        return <StudentForm workspaceId={workspaceId} responsibleId={responsibleId} onClose={() => setIsAdding(false)} />;
+        break;
+      case 'memberships':
+        return <></>;
+        break;
+    }
+  };
+
   return (
-    <Tabs defaultValue="shifts" onValueChange={() => setCurrentPage(1)} className="app-page">
+    <Tabs
+      defaultValue="memberships"
+      onValueChange={() => {
+        setCurrentPage(1);
+        setIsAdding(false);
+      }}
+      className="app-page"
+    >
       <TabsList className="relative flex items-center">
         {listConfig.map((list) => {
           return (
@@ -180,11 +225,19 @@ export const Workspace: FC = () => {
             search={search}
             setSearch={setSearch}
             searchPlaceholder={`Encontre ${list.label}`}
+            onAdd={() => setIsAdding(true)}
+            isAdding={isAdding}
           >
+            {isAdding && addForm(key)}
             {items.map((item) => {
               return (
                 <div key={item.id} className="app-row">
-                  {'label' in item ? item.label : item.name}
+                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 py-3 pr-8 pl-4">
+                    <span>
+                      {'label' in item ? item.label : 'name' in item ? item.name : item.email}
+                    </span>
+                    <span>{'role' in item && item.role}</span>
+                  </div>
                 </div>
               );
             })}

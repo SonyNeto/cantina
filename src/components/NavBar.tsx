@@ -9,7 +9,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch, workspaceApiFetch } from '../utils/api';
 import ROUTES from '../constants/routes.ts';
 import { toast } from 'sonner';
-import { WorkspaceSelect } from './WorkspaceSelect.tsx';
 import { useWorkspaceStore } from '../stores/useWorkspaceStore.ts';
 import { canAccessWorkspaceRole } from '../utils/workspaceAccess.ts';
 import { ThemeSwitch } from './ThemeSwitch.tsx';
@@ -77,8 +76,6 @@ export const NavBar: FC = () => {
           </DrawerTrigger>
 
           <DrawerContent className="flex h-full flex-col">
-            <WorkspaceSelect />
-
             {NAVMENU.ITEMS.filter((item) =>
               canAccessWorkspaceRole(workspaceRole, item.accessLevel),
             ).map((item, idx) => {

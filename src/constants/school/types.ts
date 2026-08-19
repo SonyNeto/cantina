@@ -1,5 +1,11 @@
 export type ShiftId = string;
 
+export interface Membership {
+  userId: string;
+  email: string;
+  role: 'member' | 'admin' | 'owner';
+}
+
 export interface Shift {
   id: ShiftId;
   label: string;
