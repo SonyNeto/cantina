@@ -26,8 +26,14 @@ export function usePeriod(): UsePeriodReturn {
 
   const handlePeriodChange = (newPeriod: Period) => {
     setPeriod(newPeriod);
-    setSearchParams({
-      p: dayjs().month(newPeriod.month).year(newPeriod.year).format('YYYYMM'),
+    setSearchParams((currentSearchParams) => {
+      const nextSearchParams = new URLSearchParams(currentSearchParams);
+      nextSearchParams.set(
+        'p',
+        dayjs().month(newPeriod.month).year(newPeriod.year).format('YYYYMM'),
+      );
+
+      return nextSearchParams;
     });
   };
 

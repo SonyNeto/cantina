@@ -16,6 +16,7 @@ const ROUTES = {
         `/registers/${responsibleId}/${studentId}`,
     },
   },
+  AUDIT_LOGS: '/audit-logs/',
 };
 
 export default ROUTES;

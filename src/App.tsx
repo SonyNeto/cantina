@@ -16,6 +16,7 @@ import { Invites } from './pages/invites/Invites';
 import { ProtectedAdminRoute } from './pages/auth/ProtectedAdminRoute';
 import { getSavedTheme } from './utils/functions';
 import { Loader } from './components/commons/Loader';
+import { AuditLogs } from './pages/auditLogs/AuditLogs';
 
 const LoginPage = lazy(() =>
   import('./pages/auth/LoginPage').then((module) => ({
@@ -57,6 +58,7 @@ function App() {
                 <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
                 <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
                 <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
+                <Route path={ROUTES.AUDIT_LOGS} element={<AuditLogs />} />
               </Route>
             </Route>
           </Route>

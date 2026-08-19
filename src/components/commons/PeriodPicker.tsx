@@ -22,6 +22,7 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
   onChange,
   minYear = 2000,
   maxYear = 2099,
+  ...props
 }) => {
   const [open, setOpen] = useState(false);
   const [displayYear, setDisplayYear] = useState(value?.year || new Date().getFullYear());
@@ -49,6 +50,7 @@ const PeriodPicker: FC<PeriodPickerProps> = ({
           'raised border-border/45 text-primary bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 size-12 cursor-pointer place-items-center self-center justify-self-end rounded-none border-4 outline-none focus-visible:ring-[3px] [&_svg]:size-7',
           className,
         )}
+        {...props}
       >
         <Calendar2 />
       </PopoverTrigger>
