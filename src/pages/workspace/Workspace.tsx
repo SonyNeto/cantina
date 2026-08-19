@@ -63,8 +63,8 @@ const getList = async <K extends keyof ListItem>(
     limit: String(10),
     search,
   });
-  if (responsibleId) params.set(responsibleId, responsibleId);
-  if (shiftId) params.set(shiftId, shiftId);
+  if (responsibleId) params.set('responsibleId', responsibleId);
+  if (shiftId) params.set('shiftId', shiftId);
 
   const res = await workspaceApiFetch(`/${object}?${params}`);
   return res.json();
@@ -114,7 +114,7 @@ export const Workspace: FC = () => {
 
   const tab = searchParams.get('tab') ?? defaultTab;
   const responsibleId = searchParams.get('responsibleId') ?? undefined;
-  const shiftId = searchParams.get('shiftID') ?? undefined;
+  const shiftId = searchParams.get('shiftId') ?? undefined;
 
   const {
     data: membershipsData = {
@@ -205,11 +205,15 @@ export const Workspace: FC = () => {
       case 'responsibles':
         return <ResponsibleForm workspaceId={workspaceId} onClose={() => setIsAdding(false)} />;
       case 'students':
-        return <StudentForm
+        if (!responsibleId) return null;
+
+        return (
+          <StudentForm
             workspaceId={workspaceId}
             responsibleId={responsibleId}
             onClose={() => setIsAdding(false)}
-          />;
+          />
+        );
       case 'memberships':
         return <></>;
     }
@@ -223,7 +227,7 @@ export const Workspace: FC = () => {
         setIsAdding(false);
         setSearchParams({
           tab: value,
-        })
+        });
       }}
       value={tab}
       className="app-page"
