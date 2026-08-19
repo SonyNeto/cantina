@@ -152,6 +152,18 @@
   --animate-accordion-out: accordion-out 0.2s ease-out;
 }
 
+@utility raised {
+  box-shadow:
+    inset 4px 4px 0 color-mix(in srgb, var(--pixel-light) 72%, transparent),
+    inset -4px -4px 0 color-mix(in srgb, var(--pixel-dark) 48%, transparent);
+}
+
+@utility sunken {
+  box-shadow:
+    inset 4px 4px 0 color-mix(in srgb, var(--pixel-dark) 52%, transparent),
+    inset -4px -4px 0 color-mix(in srgb, var(--pixel-light) 72%, transparent);
+}
+
 body {
   @apply bg-primary font-text text-text;
 }
@@ -262,7 +274,6 @@ body {
     @apply focus-visible:ring-accent/35 z-30 inline-flex cursor-pointer items-center justify-center rounded-none font-medium whitespace-nowrap outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_*]:pointer-events-none [&_svg]:shrink-0;
   }
 
-  .raised,
   .app-header,
   .app-header-accent,
   .app-form-row,
@@ -273,7 +284,6 @@ body {
       inset -4px -4px 0 color-mix(in srgb, var(--pixel-dark) 48%, transparent);
   }
 
-  .sunken,
   .app-input {
     box-shadow:
       inset 4px 4px 0 color-mix(in srgb, var(--pixel-dark) 52%, transparent),
