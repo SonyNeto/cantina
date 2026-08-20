@@ -60,13 +60,21 @@ type ListResponse<K extends ListKey> = {
   pagination: Pagination;
 };
 
-type ListConfig<K extends ListKey> = {
+type ListConfig<K extends ListKey = ListKey> = {
   key: K;
   label: string;
   icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
   data: ListResponse<K>;
   isFetching: boolean;
   deleteMutation: UseMutationResult<void, Error, string, unknown>;
+  parent?: {
+    key: ListKey;
+    param: string;
+  };
+  child?: {
+    key: ListKey;
+    param: string;
+  };
 };
 
 const getList = async <K extends keyof ListItem>(
@@ -94,22 +102,11 @@ const useListQuery = <K extends ListKey>(
   page: number,
   search: string,
   workspaceId?: string,
-  filter?: {
-    responsibleId?: string;
-    shiftId?: string;
-  },
+  parent?: { key: ListKey; id: string },
 ) => {
   return useQuery({
-    queryKey: [
-      'workspaces',
-      key,
-      workspaceId,
-      page,
-      search,
-      filter?.responsibleId,
-      filter?.shiftId,
-    ],
-    queryFn: () => getList(key, page, search, filter?.responsibleId, filter?.shiftId),
+    queryKey: ['workspaces', key, workspaceId, page, search, parent?.id],
+    queryFn: () => getList(key, page, search, parent?.id),
     enabled: Boolean(workspaceId),
   });
 };
@@ -120,20 +117,14 @@ const useDeleteListItem = <K extends ListKey>(
   page: number,
   search: string,
   workspaceId?: string,
-  filter?: {
-    responsibleId?: string;
-    shiftId?: string;
-  },
+  parent?: { key: ListKey; id: string },
 ) => {
   return useMutation({
     mutationFn: async (id: string): Promise<void> => {
-      let route: string;
-      if (key === 'schoolClasses') {
-        route = `/shifts/${filter?.shiftId}/${key}/${id}`;
-      } else if (key === 'students') {
-        route = `/responsibles/${filter?.responsibleId}/${key}/${id}`;
-      } else {
-        route = `/${key}/${id}`;
+      let route: string = `/${key}/${id}`;
+
+      if (parent) {
+        route = `/${parent.key}/${parent.id}` + route;
       }
 
       const res = await workspaceApiFetch(route, {
@@ -144,20 +135,11 @@ const useDeleteListItem = <K extends ListKey>(
       if (res.status === 409) {
         throw new Error('Existem alunos cadastrados');
       }
-
     },
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          'workspaces',
-          key,
-          workspaceId,
-          page,
-          search,
-          filter?.responsibleId,
-          filter?.shiftId,
-        ],
+        queryKey: ['workspaces', key, workspaceId, page, search, parent?.id],
       });
       toast.success('Removido com sucesso!');
     },
@@ -214,7 +196,10 @@ export const Workspace: FC = () => {
       pagination: defaultPagination,
     } satisfies ListResponse<'schoolClasses'>,
     isFetching: isFetchingSchoolClasses,
-  } = useListQuery('schoolClasses', currentPage, search, workspaceId, { shiftId });
+  } = useListQuery('schoolClasses', currentPage, search, workspaceId, {
+    key: 'shifts',
+    id: shiftId,
+  });
 
   const {
     data: responsiblesData = {
@@ -230,7 +215,10 @@ export const Workspace: FC = () => {
       pagination: defaultPagination,
     } satisfies ListResponse<'students'>,
     isFetching: isFetchingStudents,
-  } = useListQuery('students', currentPage, search, workspaceId, { responsibleId });
+  } = useListQuery('students', currentPage, search, workspaceId, {
+    key: 'responsibles',
+    id: responsibleId,
+  });
 
   const listConfig = [
     {
@@ -254,6 +242,10 @@ export const Workspace: FC = () => {
       data: shiftsData,
       isFetching: isFetchingShifts,
       deleteMutation: useDeleteListItem(queryClient, 'shifts', currentPage, search, workspaceId),
+      child: {
+        key: 'schoolClasses',
+        param: 'shiftId',
+      },
     },
     {
       key: 'schoolClasses',
@@ -267,8 +259,12 @@ export const Workspace: FC = () => {
         currentPage,
         search,
         workspaceId,
-        { shiftId },
+        { key: 'shifts', id: shiftId },
       ),
+      parent: {
+        key: 'shifts',
+        param: 'shiftId',
+      },
     },
     {
       key: 'responsibles',
@@ -283,6 +279,10 @@ export const Workspace: FC = () => {
         search,
         workspaceId,
       ),
+      child: {
+        key: 'students',
+        param: 'responsibleId',
+      },
     },
     {
       key: 'students',
@@ -291,8 +291,13 @@ export const Workspace: FC = () => {
       data: studentsData,
       isFetching: isFetchingStudents,
       deleteMutation: useDeleteListItem(queryClient, 'students', currentPage, search, workspaceId, {
-        responsibleId,
+        key: 'responsibles',
+        id: responsibleId,
       }),
+      parent: {
+        key: 'responsibles',
+        param: 'responsibleId',
+      },
     },
   ] satisfies {
     [K in ListKey]: ListConfig<K>;
@@ -399,7 +404,7 @@ export const Workspace: FC = () => {
           );
 
           if (list.key === tab) return tabComponent;
-          if (list.key === 'schoolClasses' || list.key === 'students') return;
+          if (list.parent) return;
           return tabComponent;
         })}
         <TabsIndicator />
@@ -430,16 +435,21 @@ export const Workspace: FC = () => {
               setDrawerOpenIndex(null);
             }}
             isAdding={isAdding}
-            returnAction={(key === 'schoolClasses' || key === 'students') ? () => {
-              const tab = key === 'schoolClasses' ? 'shifts' : key === 'students' ? 'responsibles' : defaultTab;
-              setCurrentPage(1);
-              setIsAdding(false);
-              setSearchParams({
-                tab,
-              });
-              setDrawerOpenIndex(null);
-              setEditingIndex(null);
-            } : null}
+            returnAction={
+              list.parent
+                ? () => {
+                    setCurrentPage(1);
+                    setIsAdding(false);
+
+                    setSearchParams({
+                      tab: list.parent.key,
+                    });
+
+                    setDrawerOpenIndex(null);
+                    setEditingIndex(null);
+                  }
+                : null
+            }
           >
             {isAdding && addForm({ key } as FormRequest)}
             {items.map((item, idx) => {
@@ -505,23 +515,12 @@ export const Workspace: FC = () => {
                     openSide={isDrawerOpen ? 'right' : null}
                     onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
                     onTap={() => {
-                      if (list.key === 'shifts') {
-                        setSearchParams({
-                          tab: 'schoolClasses',
-                          shiftId: item.id,
-                        });
+                      if (!list.child) return;
 
-                        return;
-                      }
-
-                      if (list.key === 'responsibles') {
-                        setSearchParams({
-                          tab: 'students',
-                          responsibleId: item.id,
-                        });
-
-                        return;
-                      }
+                      setSearchParams({
+                        tab: list.child.key,
+                        [list.child.param]: item.id,
+                      });
                     }}
                     captureInteractions={!isEditing}
                   />

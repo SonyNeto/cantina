@@ -69,7 +69,12 @@ const TabPanel = ({
   <TabsPrimitive.Panel className={cn('app-content', className)} {...props}>
     <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] !border-0 shadow-[inset_4px_0_0_color-mix(in_srgb,var(--pixel-light)_72%,transparent),inset_-4px_0_0_color-mix(in_srgb,var(--pixel-dark)_48%,transparent),inset_0_-4px_0_color-mix(in_srgb,var(--pixel-dark)_48%,transparent)] [&_svg]:size-10 [&_svg]:shrink-0">
       {returnAction && (
-        <Button variant={'ghost'} className="justify-self-start" disableHover onClick={returnAction}>
+        <Button
+          variant={'ghost'}
+          className="justify-self-start"
+          disableHover
+          onClick={returnAction}
+        >
           <ArrowLeft />
         </Button>
       )}

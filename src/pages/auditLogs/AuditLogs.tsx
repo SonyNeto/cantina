@@ -323,8 +323,7 @@ export const AuditLogs: FC = () => {
                                   </div>
 
                                   {auditLog.context?.targetName &&
-                                    auditLog.context.targetName !==
-                                      auditLog.context.studentName &&
+                                    auditLog.context.targetName !== auditLog.context.studentName &&
                                     auditLog.context.targetName !==
                                       auditLog.context.responsibleName && (
                                       <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
@@ -361,7 +360,7 @@ export const AuditLogs: FC = () => {
                                     <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
                                       <dt className="text-muted font-medium">Itens</dt>
                                       <dd className="min-w-0">
-                                        <ul className="grid list-inside list-square gap-1">
+                                        <ul className="list-square grid list-inside gap-1">
                                           {auditLog.context.itemLabels.map((itemLabel, index) => (
                                             <li key={`${itemLabel}-${index}`}>{itemLabel}</li>
                                           ))}
