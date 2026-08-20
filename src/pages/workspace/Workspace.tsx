@@ -430,6 +430,16 @@ export const Workspace: FC = () => {
               setDrawerOpenIndex(null);
             }}
             isAdding={isAdding}
+            returnAction={(key === 'schoolClasses' || key === 'students') ? () => {
+              const tab = key === 'schoolClasses' ? 'shifts' : key === 'students' ? 'responsibles' : defaultTab;
+              setCurrentPage(1);
+              setIsAdding(false);
+              setSearchParams({
+                tab,
+              });
+              setDrawerOpenIndex(null);
+              setEditingIndex(null);
+            } : null}
           >
             {isAdding && addForm({ key } as FormRequest)}
             {items.map((item, idx) => {

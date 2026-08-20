@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef, MouseEventHandler, ReactNode } from 'rea
 import { cn } from '../../utils/functions';
 import { PageNavigator } from './PageNavigator';
 import { Button } from './Button';
-import { Plus } from 'pixelarticons/react';
+import { ArrowLeft, Plus } from 'pixelarticons/react';
 import { SearchBar } from './SearchBar';
 import { WorkspaceSelect } from '../WorkspaceSelect';
 
@@ -19,6 +19,7 @@ type TabPanelProps = ComponentPropsWithoutRef<typeof TabsPrimitive.Panel> & {
   onAdd?: MouseEventHandler<HTMLButtonElement>;
   isAdding?: boolean;
   headerAction?: ReactNode;
+  returnAction?: () => void | null;
 };
 type TabIndicatorProps = ComponentPropsWithoutRef<typeof TabsPrimitive.Indicator>;
 
@@ -62,11 +63,16 @@ const TabPanel = ({
   onAdd,
   isAdding,
   headerAction,
+  returnAction,
   ...props
 }: TabPanelProps) => (
   <TabsPrimitive.Panel className={cn('app-content', className)} {...props}>
     <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] !border-0 shadow-[inset_4px_0_0_color-mix(in_srgb,var(--pixel-light)_72%,transparent),inset_-4px_0_0_color-mix(in_srgb,var(--pixel-dark)_48%,transparent),inset_0_-4px_0_color-mix(in_srgb,var(--pixel-dark)_48%,transparent)] [&_svg]:size-10 [&_svg]:shrink-0">
-      <span aria-hidden={true} className="col-start-1" />
+      {returnAction && (
+        <Button variant={'ghost'} className="justify-self-start" disableHover onClick={returnAction}>
+          <ArrowLeft />
+        </Button>
+      )}
       <span className="col-start-2 text-center">{title}</span>
       {headerAction ?? (
         <Button
