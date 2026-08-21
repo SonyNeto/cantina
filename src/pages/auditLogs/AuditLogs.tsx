@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { ChevronDown2, Coffee, University, User } from 'pixelarticons/react';
 import { useSearchParams } from 'react-router';
@@ -200,6 +200,7 @@ export const AuditLogs: FC = () => {
     queryKey: ['workspaces', 'auditLogs', workspaceId, tab, period, currentPage, search],
     queryFn: () => getAuditLogs(tab, period, currentPage, search),
     enabled: Boolean(workspaceId),
+    placeholderData: keepPreviousData,
   });
 
   const auditLogsByDate = auditLogsData.auditLogs.reduce<Record<string, AuditLog[]>>(
@@ -272,19 +273,22 @@ export const AuditLogs: FC = () => {
           >
             {key === tab && (
               <>
-                {auditLogDateGroups.map(([date, auditLogs]) => (
-                  <div key={date} className="app-group">
-                    <div className="app-row app-row-label text-muted px-4 text-xl">
-                      {dayjs(date).format('DD/MM')}
-                    </div>
+                {isFetching && <Loader />}
 
-                    <Accordion multiple className="!border-b-0">
-                      {auditLogs.map((auditLog) => {
-                        const actor = auditLog.actor.email ?? auditLog.actor.role;
-                        const summary = getAuditLogSummary(auditLog);
+                {!isFetching &&
+                  auditLogDateGroups.map(([date, auditLogs]) => (
+                    <div key={date} className="app-group">
+                      <div className="app-row app-row-label text-muted px-4 text-xl">
+                        {dayjs(date).format('DD/MM')}
+                      </div>
 
-                        return (
-                          <AccordionItem key={auditLog.id} value={auditLog.id}>
+                      <Accordion multiple className="!border-b-0">
+                        {auditLogs.map((auditLog) => {
+                          const actor = auditLog.actor.email ?? auditLog.actor.role;
+                          const summary = getAuditLogSummary(auditLog);
+
+                          return (
+                            <AccordionItem key={auditLog.id} value={auditLog.id}>
                             <AccordionTrigger className="app-row app-row-action group border-border/35 grid-cols-[minmax(0,1fr)_minmax(6rem,10rem)_2rem] gap-2.5 border-b-4 py-2 text-left">
                               <div className="flex min-w-0 flex-col">
                                 <span className="truncate" title={auditLog.action}>
@@ -323,7 +327,8 @@ export const AuditLogs: FC = () => {
                                   </div>
 
                                   {auditLog.context?.targetName &&
-                                    auditLog.context.targetName !== auditLog.context.studentName &&
+                                    auditLog.context.targetName !==
+                                      auditLog.context.studentName &&
                                     auditLog.context.targetName !==
                                       auditLog.context.responsibleName && (
                                       <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
@@ -360,7 +365,7 @@ export const AuditLogs: FC = () => {
                                     <div className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3">
                                       <dt className="text-muted font-medium">Itens</dt>
                                       <dd className="min-w-0">
-                                        <ul className="list-square grid list-inside gap-1">
+                                        <ul className="grid list-inside list-square gap-1">
                                           {auditLog.context.itemLabels.map((itemLabel, index) => (
                                             <li key={`${itemLabel}-${index}`}>{itemLabel}</li>
                                           ))}
@@ -392,12 +397,12 @@ export const AuditLogs: FC = () => {
                                 </dl>
                               </div>
                             </AccordionContent>
-                          </AccordionItem>
-                        );
-                      })}
-                    </Accordion>
-                  </div>
-                ))}
+                            </AccordionItem>
+                          );
+                        })}
+                      </Accordion>
+                    </div>
+                  ))}
 
                 {!isFetching && auditLogDateGroups.length === 0 && (
                   <div className="app-row flex min-h-32 items-center justify-center text-center">
@@ -405,7 +410,6 @@ export const AuditLogs: FC = () => {
                   </div>
                 )}
 
-                {isFetching && <Loader />}
               </>
             )}
           </TabPanel>
