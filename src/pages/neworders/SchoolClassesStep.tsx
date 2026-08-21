@@ -8,7 +8,7 @@ import { workspaceApiFetch } from '../../utils/api';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 
 interface Props {
-  onNext: (classId: string) => void;
+  onNext: (schoolClassId: string) => void;
   onBack: () => void;
   shiftId: ShiftId | '';
 }
@@ -18,11 +18,11 @@ type SchoolClassesResponse = {
 };
 
 const getSchoolClasses = async (shiftId: ShiftId | ''): Promise<SchoolClassesResponse> => {
-  const res = await workspaceApiFetch(`/shifts/${shiftId}/classes`);
+  const res = await workspaceApiFetch(`/shifts/${shiftId}/schoolClasses`);
   return res.json();
 };
 
-export const ClassesStep: FC<Props> = ({ onNext, onBack, shiftId }) => {
+export const SchoolClassesStep: FC<Props> = ({ onNext, onBack, shiftId }) => {
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
   const { data: schoolClasses = [], isPending } = useQuery({

@@ -3,51 +3,53 @@ import type { ComponentPropsWithRef } from 'react';
 import { toast } from 'sonner';
 import z from 'zod';
 import { Check } from 'pixelarticons/react';
-import type { Responsible } from '../../../constants/school/types';
+import type { SchoolClass } from '../../../constants/school/types';
 import { workspaceApiFetch } from '../../../utils/api';
 import { Button } from '../../../components/commons/Button';
 import { X } from '../../../assets/icons/MenuIcons';
 import { cn } from '../../../utils/functions';
 
-type ResponsibleInput = {
-  name: string;
-  responsibleId?: string;
+type SchoolClassInput = {
+  label: string;
+  schoolClassId?: string;
 };
 
-type ResponsibleResponse = {
-  responsible: Responsible;
+type SchoolClassResponse = {
+  schoolClass: SchoolClass;
 };
 
-type ResponsibleFormProps = ComponentPropsWithRef<'form'> & {
+type SchoolClassFormProps = ComponentPropsWithRef<'form'> & {
   workspaceId: string | undefined;
-  responsibleId?: string;
+  shiftId: string;
+  schoolClassId?: string;
   onClose: () => void;
   method?: 'post' | 'update';
-  defaultName?: string;
+  defaultLabel?: string;
 };
 
-const responsibleSchema = z.object({
-  name: z.string().trim().min(1, 'Informe o nome do responsável'),
-  responsibleId: z.string().optional(),
+const schoolClassSchema = z.object({
+  label: z.string().trim().min(1, 'Informe o nome da turma'),
+  schoolClassId: z.string().optional(),
 });
 
-export const ResponsibleForm = ({
+export const SchoolClassForm = ({
   className,
   workspaceId,
-  responsibleId,
+  shiftId,
+  schoolClassId,
   onClose,
   method = 'post',
-  defaultName,
-}: ResponsibleFormProps) => {
+  defaultLabel,
+}: SchoolClassFormProps) => {
   const queryClient = useQueryClient();
 
-  const createResponsible = useMutation({
-    mutationFn: async ({ name }: ResponsibleInput): Promise<ResponsibleResponse> => {
-      const res = await workspaceApiFetch('/responsibles', {
+  const createSchoolClass = useMutation({
+    mutationFn: async ({ label }: SchoolClassInput): Promise<SchoolClassResponse> => {
+      const res = await workspaceApiFetch(`/shifts/${shiftId}/schoolClasses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
+          label,
         }),
       });
 
@@ -55,19 +57,23 @@ export const ResponsibleForm = ({
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspaces', 'responsibles', workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: ['workspaces', 'schoolClasses', workspaceId],
+      });
       onClose();
     },
   });
 
-  const updateResponsible = useMutation({
-    mutationFn: async ({ name, responsibleId }: ResponsibleInput): Promise<ResponsibleResponse> => {
-      const res = await workspaceApiFetch(`/responsibles/${responsibleId}`, {
+  const updateSchoolClass = useMutation({
+    mutationFn: async ({
+      label,
+      schoolClassId,
+    }: SchoolClassInput): Promise<SchoolClassResponse> => {
+      const res = await workspaceApiFetch(`/shifts/${shiftId}/schoolClasses/${schoolClassId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
+          label,
         }),
       });
 
@@ -75,9 +81,10 @@ export const ResponsibleForm = ({
     },
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', workspaceId] });
-      queryClient.invalidateQueries({ queryKey: ['workspaces', 'responsibles', workspaceId] });
-      toast.success('Responsável atualizado com sucesso!');
+      queryClient.invalidateQueries({
+        queryKey: ['workspaces', 'schoolClasses', workspaceId],
+      });
+      toast.success('Turma atualizada com sucesso!');
       onClose();
     },
   });
@@ -89,9 +96,9 @@ export const ResponsibleForm = ({
         e.preventDefault();
 
         const formData = new FormData(e.currentTarget);
-        const result = responsibleSchema.safeParse({
-          name: String(formData.get('name') ?? ''),
-          responsibleId,
+        const result = schoolClassSchema.safeParse({
+          label: String(formData.get('label') ?? ''),
+          schoolClassId,
         });
 
         if (!result.success) {
@@ -100,21 +107,21 @@ export const ResponsibleForm = ({
         }
 
         if (method === 'post') {
-          createResponsible.mutate(result.data);
+          createSchoolClass.mutate(result.data);
         }
 
         if (method === 'update') {
-          updateResponsible.mutate(result.data);
+          updateSchoolClass.mutate(result.data);
         }
       }}
     >
       <div className="inline-flex min-w-0 items-center gap-2.5">
         <input
-          name="name"
-          id={responsibleId ? `responsible-name-${responsibleId}` : 'add-responsible-name'}
+          name="label"
+          id={schoolClassId ? `school-class-label-${schoolClassId}` : 'add-school-class-label'}
           type="text"
-          placeholder="Nome do responsável"
-          defaultValue={defaultName}
+          placeholder="Nome da turma"
+          defaultValue={defaultLabel}
           className="app-input w-full max-w-[20ch] truncate"
         />
       </div>

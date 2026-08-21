@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ShiftsStep } from './ShiftsStep';
-import { ClassesStep } from './ClassesStep';
+import { SchoolClassesStep } from './SchoolClassesStep';
 import { StudentsStep } from './StudentsStep';
 import { OrdersStep } from './OrdersStep';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -14,7 +14,7 @@ import { z } from 'zod';
 
 const STEPS = {
   SHIFTS: 'SHIFTS',
-  CLASSES: 'CLASSES',
+  SCHOOL_CLASSES: 'SCHOOL_CLASSES',
   STUDENTS: 'STUDENTS',
   ORDER: 'ORDER',
 };
@@ -46,7 +46,7 @@ const orderFormSchema = z.object({
 export const NewOrders: FC = () => {
   const [step, setStep] = useState<Step>(STEPS.SHIFTS);
   const [shiftId, setShiftId] = useState<ShiftId | ''>('');
-  const [classId, setClassId] = useState<string>('');
+  const [schoolClassId, setSchoolClassId] = useState<string>('');
   const queryClient = useQueryClient();
 
   const form = useForm<OrderForm>({
@@ -105,18 +105,18 @@ export const NewOrders: FC = () => {
           {step === STEPS.SHIFTS && (
             <ShiftsStep
               onNext={(selectedShiftId) => {
-                setStep(STEPS.CLASSES);
+                setStep(STEPS.SCHOOL_CLASSES);
                 setShiftId(selectedShiftId);
               }}
             />
           )}
 
-          {step === STEPS.CLASSES && (
-            <ClassesStep
+          {step === STEPS.SCHOOL_CLASSES && (
+            <SchoolClassesStep
               shiftId={shiftId}
-              onNext={(selectedClassId) => {
+              onNext={(selectedSchoolClassId) => {
                 setStep(STEPS.STUDENTS);
-                setClassId(selectedClassId);
+                setSchoolClassId(selectedSchoolClassId);
               }}
               onBack={() => {
                 setStep(STEPS.SHIFTS);
@@ -128,9 +128,9 @@ export const NewOrders: FC = () => {
           {step === STEPS.STUDENTS && (
             <StudentsStep
               shiftId={shiftId}
-              classId={classId}
+              schoolClassId={schoolClassId}
               onNext={() => setStep(STEPS.ORDER)}
-              onBack={() => setStep(STEPS.CLASSES)}
+              onBack={() => setStep(STEPS.SCHOOL_CLASSES)}
             />
           )}
 

@@ -103,3 +103,14 @@ export function Guajava(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function GraduationCap(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={24} height={24} {...props}>
+      <path
+        fill="currentColor"
+        d="M 10 2 L 10 4 L 12 4 L 14 4 L 14 2 L 12 2 L 10 2 z M 14 4 L 14 6 L 16 6 L 18 6 L 18 4 L 16 4 L 14 4 z M 18 6 L 18 8 L 20 8 L 22 8 L 22 6 L 20 6 L 18 6 z M 22 8 L 22 10 L 24 10 L 24 8 L 22 8 z M 22 10 L 20 10 L 18 10 L 18 12 L 16 12 L 14 12 L 14 14 L 16 14 L 18 14 L 18 16 L 18 18 L 20 18 L 20 16 L 20 14 L 20 12 L 22 12 L 22 10 z M 22 12 L 22 14 L 22 16 L 22 18 L 22 20 L 24 20 L 24 18 L 24 16 L 24 14 L 24 12 L 22 12 z M 18 18 L 16 18 L 14 18 L 14 20 L 16 20 L 18 20 L 18 18 z M 14 20 L 12 20 L 10 20 L 10 22 L 12 22 L 14 22 L 14 20 z M 10 20 L 10 18 L 8 18 L 6 18 L 6 20 L 8 20 L 10 20 z M 6 18 L 6 16 L 6 14 L 8 14 L 10 14 L 10 12 L 8 12 L 6 12 L 6 10 L 4 10 L 2 10 L 2 12 L 4 12 L 4 14 L 4 16 L 4 18 L 6 18 z M 2 10 L 2 8 L 0 8 L 0 10 L 2 10 z M 2 8 L 4 8 L 6 8 L 6 6 L 4 6 L 2 6 L 2 8 z M 6 6 L 8 6 L 10 6 L 10 4 L 8 4 L 6 4 L 6 6 z M 10 14 L 10 16 L 12 16 L 14 16 L 14 14 L 12 14 L 10 14 z "
+      />
+    </svg>
+  );
+}

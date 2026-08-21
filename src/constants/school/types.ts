@@ -1,5 +1,12 @@
 export type ShiftId = string;
 
+export interface Membership {
+  id: string;
+  userId: string;
+  email: string;
+  role: 'member' | 'admin' | 'owner';
+}
+
 export interface Shift {
   id: ShiftId;
   label: string;
@@ -15,7 +22,7 @@ export interface SchoolClass {
 export interface Student {
   id: string;
   name: string;
-  classId: string;
+  schoolClassId: string;
   responsibleId: string;
 }
 
