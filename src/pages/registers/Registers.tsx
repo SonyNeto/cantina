@@ -10,11 +10,12 @@ import { usePeriod, type Period } from '../../hooks/usePeriod';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { PageNavigator } from '../../components/commons/PageNavigator';
 import { SearchBar } from '../../components/commons/SearchBar';
-import { fromCents } from '../../utils/functions';
+import { cn, formatSignedCurrency, fromCents } from '../../utils/functions';
 
 type ResponsibleRegister = {
   responsibleId: string;
   responsibleName: string;
+  consumption: number;
   total: number;
 };
 
@@ -114,7 +115,7 @@ export const Registers: FC = () => {
             <button
               type="button"
               key={responsibleTotal.responsibleId}
-              className="app-row app-row-action grid-cols-[minmax(0,1fr)_7ch] text-left"
+              className="app-row app-row-action grid-cols-[minmax(0,1fr)_9ch] text-left"
               onClick={() =>
                 navigate({
                   pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
@@ -126,7 +127,15 @@ export const Registers: FC = () => {
                 <User />
                 <span>{responsibleTotal.responsibleName}</span>
               </div>
-              <span className="text-center tabular-nums">{`R$${fromCents(responsibleTotal.total).toFixed(2)}`}</span>
+              <span
+                className={cn(
+                  'text-right tabular-nums',
+                  responsibleTotal.total < 0 && 'text-danger',
+                  responsibleTotal.total > 0 && 'text-success',
+                )}
+              >
+                {formatSignedCurrency(responsibleTotal.total)}
+              </span>
             </button>
           ))}
         </div>

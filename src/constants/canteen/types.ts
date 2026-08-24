@@ -15,7 +15,6 @@ export interface Register {
   sourceOrderItemId?: string;
   product: Product;
   created_at: Date;
-  payment: number;
   studentId: string;
 }
 

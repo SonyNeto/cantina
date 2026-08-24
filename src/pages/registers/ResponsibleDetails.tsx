@@ -12,7 +12,7 @@ import { workspaceApiFetch } from '../../utils/api';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { cn, fromCents, toCents } from '../../utils/functions';
+import { cn, formatSignedCurrency, fromCents, toCents } from '../../utils/functions';
 
 type Responsible = {
   id: string;
@@ -31,6 +31,7 @@ type ResponsibleRegister = Omit<Register, 'created_at'> & {
 type ResponsibleRegistersResponse = {
   responsible: Responsible;
   registers: ResponsibleRegister[];
+  consumption: number;
   total: number;
 };
 
@@ -39,6 +40,7 @@ type ResponsiblePayment = {
   created_at: string;
   payment: number;
   responsibleId: string;
+  type: 'balance' | 'order';
 };
 
 type ResponsiblePaymentsResponse = {
@@ -46,8 +48,8 @@ type ResponsiblePaymentsResponse = {
 };
 
 type ResponsibleEntry =
-  | (ResponsibleRegister & { type: 'register' })
-  | (ResponsiblePayment & { type: 'payment' });
+  | (ResponsibleRegister & { entryType: 'register' })
+  | (ResponsiblePayment & { entryType: 'payment' });
 
 type ResponsibleResponse = {
   responsible: Responsible;
@@ -114,7 +116,7 @@ export const ResponsibleDetails: FC = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message ?? 'Não foi possível adicionar o saldo');
+        throw new Error(data.message ?? 'Não foi possível adicionar o pagamento');
       }
 
       return data;
@@ -122,7 +124,7 @@ export const ResponsibleDetails: FC = () => {
     onSuccess: async () => {
       setBalanceInput('');
       setIsAddingBalance(false);
-      toast.success('Saldo adicionado com sucesso!');
+      toast.success('Pagamento adicionado com sucesso!');
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] }),
@@ -143,10 +145,10 @@ export const ResponsibleDetails: FC = () => {
 
   const entries = [
     ...(registersData?.registers ?? []).map(
-      (register): ResponsibleEntry => ({ ...register, type: 'register' }),
+      (register): ResponsibleEntry => ({ ...register, entryType: 'register' }),
     ),
     ...(paymentsData?.payments ?? []).map(
-      (payment): ResponsibleEntry => ({ ...payment, type: 'payment' }),
+      (payment): ResponsibleEntry => ({ ...payment, entryType: 'payment' }),
     ),
   ].sort((firstEntry, secondEntry) => {
     return new Date(secondEntry.created_at).getTime() - new Date(firstEntry.created_at).getTime();
@@ -187,10 +189,10 @@ export const ResponsibleDetails: FC = () => {
                 {dayjs(date).format('DD/MM')}
               </div>
               {entries.map((entry) =>
-                entry.type === 'register' ? (
+                entry.entryType === 'register' ? (
                   <div
                     key={`register-${entry.id}`}
-                    className="app-row grid-cols-[minmax(0,1fr)_8ch]"
+                    className="app-row grid-cols-[minmax(0,1fr)_9ch]"
                   >
                     <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                       <User />
@@ -201,18 +203,8 @@ export const ResponsibleDetails: FC = () => {
                         </span>
                       </div>
                     </div>
-                    <span
-                      className={cn(
-                        'self-center text-right tabular-nums',
-                        entry.payment === entry.product.price && 'line-through',
-                      )}
-                    >
-                      R${fromCents(entry.product.price).toFixed(2)}
-                      {entry.payment > 0 && entry.payment < entry.product.price && (
-                        <>
-                          <br />- R${fromCents(entry.payment).toFixed(2)}
-                        </>
-                      )}
+                    <span className="text-danger self-center text-right tabular-nums">
+                      -R${fromCents(entry.product.price).toFixed(2)}
                     </span>
                   </div>
                 ) : (
@@ -220,12 +212,12 @@ export const ResponsibleDetails: FC = () => {
                     key={`payment-${entry.id}`}
                     className="app-row grid-cols-[minmax(0,1fr)_8ch]"
                   >
-                    <div className="text-success inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                    <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                       <Banknote />
                       <div className="flex min-w-0 flex-col">
                         <span>Pagamento</span>
                         <span className="text-muted min-w-0 text-base whitespace-normal">
-                          Saldo adicionado
+                          {entry.type === 'order' ? 'Pagamento do pedido' : 'Saldo adicionado'}
                         </span>
                       </div>
                     </div>
@@ -260,12 +252,20 @@ export const ResponsibleDetails: FC = () => {
                 variant="primary"
                 size="lg"
                 className="border-success/60 bg-success text-primary hover:bg-success/85 !size-12 !p-0"
-                aria-label={isAddingBalance ? 'Cancelar adição de saldo' : 'Adicionar saldo'}
+                aria-label={
+                  isAddingBalance ? 'Cancelar adição de pagamento' : 'Adicionar pagamento'
+                }
                 aria-pressed={isAddingBalance}
-                title="Adicionar saldo"
+                title="Adicionar pagamento"
                 onClick={() => {
-                  setIsAddingBalance((isOpen) => !isOpen);
-                  setBalanceInput('');
+                  const nextIsAddingPayment = !isAddingBalance;
+
+                  setIsAddingBalance(nextIsAddingPayment);
+                  setBalanceInput(
+                    nextIsAddingPayment
+                      ? fromCents(registersData?.consumption ?? 0).toFixed(2)
+                      : '',
+                  );
                 }}
               >
                 <Banknote />
@@ -275,7 +275,7 @@ export const ResponsibleDetails: FC = () => {
                 {isAddingBalance && (
                   <>
                     <label htmlFor="responsible-balance" className="text-right">
-                      Adicionar saldo:
+                      Adicionar pagamento:
                     </label>
                     <div className="inline-flex min-w-0 items-center justify-end gap-1">
                       <span>R$</span>
@@ -308,13 +308,24 @@ export const ResponsibleDetails: FC = () => {
                   </>
                 )}
 
-                <span className="text-right">Total: </span>
-                <span className="text-right tabular-nums">
-                  {`R$${fromCents(registersData?.total ?? 0).toFixed(2)}`}
-                </span>
                 <span className="text-right">Saldo: </span>
-                <span className="text-right tabular-nums">
+                <span className="text-success text-right tabular-nums">
                   {`R$${fromCents(registersData?.responsible.balance ?? 0).toFixed(2)}`}
+                </span>
+                <span className="text-right">Consumo: </span>
+                <span className="text-danger text-right tabular-nums">
+                  {`-R$${fromCents(registersData?.consumption ?? 0).toFixed(2)}`}
+                </span>
+                <div className="border-border/45 col-span-2 border-b-4" />
+                <span className="text-right">Total: </span>
+                <span
+                  className={cn(
+                    'text-right tabular-nums',
+                    (registersData?.total ?? 0) < 0 && 'text-danger',
+                    (registersData?.total ?? 0) > 0 && 'text-success',
+                  )}
+                >
+                  {formatSignedCurrency(registersData?.total ?? 0)}
                 </span>
               </div>
             </div>

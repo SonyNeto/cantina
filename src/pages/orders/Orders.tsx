@@ -250,6 +250,7 @@ export const Orders: FC = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registers', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['payments', workspaceId] });
       toast.success('Pedido movido para registro');
     },
 

@@ -14,6 +14,12 @@ export function fromCents(value: number) {
   return value / 100;
 }
 
+export function formatSignedCurrency(value: number) {
+  const sign = value > 0 ? '+' : value < 0 ? '-' : '';
+
+  return `${sign}R$${fromCents(Math.abs(value)).toFixed(2)}`;
+}
+
 export function getSavedTheme() {
   const savedTheme = localStorage.getItem('theme');
 
