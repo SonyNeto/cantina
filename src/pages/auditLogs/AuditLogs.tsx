@@ -99,7 +99,6 @@ const actionLabels: Record<string, string> = {
   'orderItem.statusUpdated': 'Status do item atualizado',
   'orderItem.deleted': 'Item removido do pedido',
   'orderItem.register': 'Item registrado',
-  'register.updatePayment': 'Pagamento atualizado',
   'payment.created': 'Pagamento registrado',
   'menuItem.created': 'Item do cardápio criado',
   'menuItem.updated': 'Item do cardápio atualizado',
@@ -137,8 +136,19 @@ const statusLabels: Record<string, string> = {
   ready: 'Pronto',
 };
 
+const formatAuditPayment = (payment: number) =>
+  `R$${(payment / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
 const getAuditLogSummary = (auditLog: AuditLog): string =>
   [
+    auditLog.action === 'payment.created' &&
+    auditLog.context?.responsibleName &&
+    typeof auditLog.changes?.payment === 'number'
+      ? `${auditLog.context.responsibleName} ${formatAuditPayment(auditLog.changes.payment)}`
+      : null,
     (auditLog.changes?.product as { label?: string } | undefined)?.label ??
       (typeof auditLog.changes?.name === 'string'
         ? auditLog.changes.name
