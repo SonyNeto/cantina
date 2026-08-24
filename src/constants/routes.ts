@@ -10,11 +10,6 @@ const ROUTES = {
     ROOT: '/registers',
     DETAIL: 'registers/:responsibleId',
     DETAIL_PATH: (responsibleId: string) => `/registers/${responsibleId}`,
-    STUDENTS: {
-      DETAIL: 'registers/:responsibleId/:studentId',
-      DETAIL_PATH: (responsibleId: string, studentId: string) =>
-        `/registers/${responsibleId}/${studentId}`,
-    },
   },
   WORKSPACE: '/workspace/',
   AUDIT_LOGS: '/audit-logs/',

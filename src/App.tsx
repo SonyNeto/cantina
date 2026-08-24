@@ -6,7 +6,6 @@ import { Menu } from './pages/menu/Menu';
 import { NewOrders } from './pages/neworders/NewOrders';
 import { Registers } from './pages/registers/Registers';
 import { ResponsibleDetails } from './pages/registers/ResponsibleDetails';
-import { StudentDetails } from './pages/registers/StudentDetails';
 import { Toast } from './components/commons/Toast';
 import { Orders } from './pages/orders/Orders';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -58,7 +57,6 @@ function App() {
                 <Route path={ROUTES.MENU} element={<Menu />} />
                 <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />
                 <Route path={ROUTES.REGISTERS.DETAIL} element={<ResponsibleDetails />} />
-                <Route path={ROUTES.REGISTERS.STUDENTS.DETAIL} element={<StudentDetails />} />
                 <Route path={ROUTES.WORKSPACE} element={<Workspace />} />
                 <Route path={ROUTES.AUDIT_LOGS} element={<AuditLogs />} />
               </Route>

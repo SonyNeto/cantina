@@ -1,118 +1,172 @@
 import { useState, type FC } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router';
-import ROUTES from '../../constants/routes';
-import { ArrowLeft, Check, PenSquare, User, UserPlus } from 'pixelarticons/react';
-import { Button } from '../../components/commons/Button';
+import { Link, useLocation, useParams } from 'react-router';
+import { ArrowLeft, Banknote, Check, User } from 'pixelarticons/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import dayjs from 'dayjs';
+import { toast } from 'sonner';
+import ROUTES from '../../constants/routes';
+import type { Register } from '../../constants/canteen/types';
 import { Loader } from '../../components/commons/Loader';
+import { Button } from '../../components/commons/Button';
 import { workspaceApiFetch } from '../../utils/api';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { StudentForm } from './components/StudentForm';
-import { TrashCan } from '../../assets/icons/MenuIcons';
-import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
-import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
-import { toast } from 'sonner';
-import { PageNavigator } from '../../components/commons/PageNavigator';
-import { fromCents } from '../../utils/functions';
+import { cn, fromCents, toCents } from '../../utils/functions';
 
-type StudentTotal = {
+type Responsible = {
   id: string;
   name: string;
-  schoolClassId: string;
-  schoolClassLabel: string;
-  schoolClassShiftLabel: string;
-  total: number;
-};
-
-type ResponsibleTotals = {
-  responsibleId: string;
-  responsibleName: string;
-  total: number;
   balance: number;
-  studentsTotals: StudentTotal[];
 };
 
-type Pagination = {
-  page: number;
-  totalPages: number;
-  nextPage: number | null;
+type ResponsibleRegister = Omit<Register, 'created_at'> & {
+  created_at: string;
+  student: {
+    id: string;
+    name: string;
+  };
 };
 
 type ResponsibleRegistersResponse = {
-  responsibleTotals: ResponsibleTotals;
-  pagination: Pagination;
+  responsible: Responsible;
+  registers: ResponsibleRegister[];
+  total: number;
 };
+
+type ResponsiblePayment = {
+  id: string;
+  created_at: string;
+  payment: number;
+  responsibleId: string;
+};
+
+type ResponsiblePaymentsResponse = {
+  payments: ResponsiblePayment[];
+};
+
+type ResponsibleEntry =
+  | (ResponsibleRegister & { type: 'register' })
+  | (ResponsiblePayment & { type: 'payment' });
+
+type ResponsibleResponse = {
+  responsible: Responsible;
+};
+
+function parseCurrencyInput(value: string) {
+  const parsedValue = Number(value.replace(',', '.'));
+
+  return Number.isFinite(parsedValue) ? Math.max(toCents(parsedValue), 0) : 0;
+}
 
 const getResponsibleRegisters = async (
   responsibleId: string,
   period: Period,
-  page: number,
 ): Promise<ResponsibleRegistersResponse> => {
+  const formattedPeriod = `${period.year}${(period.month + 1).toString().padStart(2, '0')}`;
   const res = await workspaceApiFetch(
-    `/responsibles/${responsibleId}/registers?p=${period.year}${(period.month + 1).toString().padStart(2, '0')}&page=${page}&limit=${6}`,
+    `/responsibles/${responsibleId}/registers?p=${formattedPeriod}`,
   );
+
+  return res.json();
+};
+
+const getResponsiblePayments = async (
+  responsibleId: string,
+  period: Period,
+): Promise<ResponsiblePaymentsResponse> => {
+  const formattedPeriod = `${period.year}${(period.month + 1).toString().padStart(2, '0')}`;
+  const res = await workspaceApiFetch(
+    `/responsibles/${responsibleId}/payments?p=${formattedPeriod}`,
+  );
+
   return res.json();
 };
 
 export const ResponsibleDetails: FC = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const [period, setPeriod] = usePeriod();
+  const [isAddingBalance, setIsAddingBalance] = useState(false);
+  const [balanceInput, setBalanceInput] = useState('');
   const location = useLocation();
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
-  const [isAdding, setIsAdding] = useState(false);
   const { responsibleId } = useParams();
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
 
   const { data: registersData, isPending } = useQuery({
-    queryKey: ['registers', workspaceId, responsibleId, period, currentPage],
-    queryFn: () => getResponsibleRegisters(responsibleId ?? '', period, currentPage),
+    queryKey: ['registers', workspaceId, responsibleId, period],
+    queryFn: () => getResponsibleRegisters(responsibleId ?? '', period),
     enabled: Boolean(workspaceId && responsibleId),
-    select: (data) => ({
-      responsibleTotals: data.responsibleTotals,
-      studentsTotals: data.responsibleTotals.studentsTotals,
-      totalPages: data.pagination.totalPages,
-    }),
   });
 
-  const responsibleTotals = registersData?.responsibleTotals;
-  const responsibleStudents = registersData?.studentsTotals ?? [];
-  const totalPages = registersData?.totalPages ?? 1;
+  const { data: paymentsData, isPending: isPaymentsPending } = useQuery({
+    queryKey: ['payments', workspaceId, responsibleId, period],
+    queryFn: () => getResponsiblePayments(responsibleId ?? '', period),
+    enabled: Boolean(workspaceId && responsibleId),
+  });
 
-  const deleteStudent = useMutation({
-    mutationFn: async ({
-      responsibleId,
-      studentId,
-    }: {
-      responsibleId: string;
-      studentId: string;
-    }): Promise<void> => {
-      await workspaceApiFetch(`/responsibles/${responsibleId}/students/${studentId}`, {
-        method: 'DELETE',
+  const addBalance = useMutation({
+    mutationFn: async (amount: number): Promise<ResponsibleResponse> => {
+      const res = await workspaceApiFetch(`/responsibles/${responsibleId}/payments`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment: amount }),
       });
-    },
+      const data = await res.json();
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] });
-      toast.success('Aluno removido com sucesso!');
+      if (!res.ok) {
+        throw new Error(data.message ?? 'Não foi possível adicionar o saldo');
+      }
+
+      return data;
+    },
+    onSuccess: async () => {
+      setBalanceInput('');
+      setIsAddingBalance(false);
+      toast.success('Saldo adicionado com sucesso!');
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['registers', workspaceId, responsibleId] }),
+        queryClient.invalidateQueries({
+          queryKey: ['registers', 'responsibles', workspaceId],
+        }),
+        queryClient.invalidateQueries({ queryKey: ['payments', workspaceId, responsibleId] }),
+      ]);
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
   if (!responsibleId) {
-    return <div>Respnsável não encontrado</div>;
+    return <div>Responsável não encontrado</div>;
   }
 
-  return isPending ? (
+  const entries = [
+    ...(registersData?.registers ?? []).map(
+      (register): ResponsibleEntry => ({ ...register, type: 'register' }),
+    ),
+    ...(paymentsData?.payments ?? []).map(
+      (payment): ResponsibleEntry => ({ ...payment, type: 'payment' }),
+    ),
+  ].sort((firstEntry, secondEntry) => {
+    return new Date(secondEntry.created_at).getTime() - new Date(firstEntry.created_at).getTime();
+  });
+
+  const entriesByDate = entries.reduce<Record<string, ResponsibleEntry[]>>((acc, entry) => {
+    const date = dayjs(entry.created_at).format('YYYY-MM-DD');
+
+    acc[date] ??= [];
+    acc[date].push(entry);
+
+    return acc;
+  }, {});
+
+  return isPending || isPaymentsPending ? (
     <Loader />
   ) : (
     <div className="app-page">
       <div className="app-content">
-        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="app-header grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] [&_svg]:size-10 [&_svg]:shrink-0">
           <Link
             key="back-registers"
             to={{ pathname: ROUTES.REGISTERS.ROOT, search: location.search }}
@@ -120,143 +174,151 @@ export const ResponsibleDetails: FC = () => {
           >
             <ArrowLeft />
           </Link>
-          <span className="justify-self-center text-center">{`Alunos de ${responsibleTotals?.responsibleName}`}</span>
-          <Button
-            variant="primary"
-            className="bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
-            disabled={isAdding}
-            onClick={() => {
-              setIsAdding(true);
-              setEditingIndex(null);
-              setDrawerOpenIndex(null);
-            }}
-            aria-label="Adicionar aluno"
-            title="Adicionar aluno"
-          >
-            <UserPlus />
-          </Button>
-          <PeriodPicker value={period} onChange={setPeriod} className="col-start-4" />
+          <span className="justify-self-center text-center">
+            {`Registros de ${registersData?.responsible.name ?? ''}`}
+          </span>
+          <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
         </div>
 
         <div className="app-list">
-          {isAdding && (
-            <StudentForm
-              workspaceId={workspaceId}
-              responsibleId={responsibleId}
-              onClose={() => setIsAdding(false)}
-            />
-          )}
-          {responsibleStudents.map((student, idx) => {
-            const isEditing = editingIndex === idx;
-            const isDrawerOpen = drawerOpenIndex === idx;
-
-            return (
-              <div
-                key={student.id}
-                className="app-row app-row-tall relative isolate overflow-hidden !p-0"
-              >
-                {isEditing ? (
-                  <StudentForm
-                    className="relative z-10 !border-0"
-                    workspaceId={workspaceId}
-                    responsibleId={responsibleId}
-                    studentId={student.id}
-                    method="update"
-                    defaultName={student.name}
-                    defaultSchoolClass={student.schoolClassId}
-                    onClose={() => {
-                      setEditingIndex(null);
-                      setDrawerOpenIndex(idx);
-                    }}
-                  />
-                ) : (
-                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch_7ch] items-center gap-2.5 px-4 py-3">
+          {Object.entries(entriesByDate).map(([date, entries]) => (
+            <div key={date} className="app-group">
+              <div className="app-row app-row-label text-muted px-4 text-xl">
+                {dayjs(date).format('DD/MM')}
+              </div>
+              {entries.map((entry) =>
+                entry.type === 'register' ? (
+                  <div
+                    key={`register-${entry.id}`}
+                    className="app-row grid-cols-[minmax(0,1fr)_8ch]"
+                  >
                     <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                       <User />
-                      <span>{student.name}</span>
+                      <div className="flex min-w-0 flex-col">
+                        <span className="min-w-0 whitespace-normal">{entry.product.label}</span>
+                        <span className="text-muted min-w-0 text-base whitespace-normal">
+                          {entry.student.name}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-center">{student.schoolClassLabel}</span>
-                      <span className="text-center">{student.schoolClassShiftLabel}</span>
-                    </div>
-                    <span className="text-center tabular-nums">{`R$${fromCents(student.total).toFixed(2)}`}</span>
+                    <span
+                      className={cn(
+                        'self-center text-right tabular-nums',
+                        entry.payment === entry.product.price && 'line-through',
+                      )}
+                    >
+                      R${fromCents(entry.product.price).toFixed(2)}
+                      {entry.payment > 0 && entry.payment < entry.product.price && (
+                        <>
+                          <br />- R${fromCents(entry.payment).toFixed(2)}
+                        </>
+                      )}
+                    </span>
                   </div>
-                )}
-                <SwipeActionRow
-                  right={{
-                    content: (
-                      <>
-                        <Button
-                          onClick={() => {
-                            setEditingIndex(isEditing ? null : idx);
-                            setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                            setIsAdding(false);
-                          }}
-                          disabled={isEditing}
-                        >
-                          <PenSquare />
-                        </Button>
-
-                        <Dialog>
-                          <DialogTrigger
-                            render={<Button size="md" variant="primary" disabled={isEditing} />}
-                          >
-                            <TrashCan />
-                          </DialogTrigger>
-                          <DialogContent title="Atenção">
-                            <span>Tem certeza que deseja excluir o aluno?</span>
-                            <DialogClose
-                              render={
-                                <Button
-                                  onClick={() =>
-                                    deleteStudent.mutate({
-                                      responsibleId,
-                                      studentId: student.id,
-                                    })
-                                  }
-                                />
-                              }
-                            >
-                              <Check />
-                              <span>Sim</span>
-                            </DialogClose>
-                          </DialogContent>
-                        </Dialog>
-                      </>
-                    ),
-                    handleWidth: 16,
-                    width: 136,
-                  }}
-                  openSide={isDrawerOpen ? 'right' : null}
-                  onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
-                  captureInteractions={!isEditing}
-                  onTap={() =>
-                    navigate({
-                      pathname: ROUTES.REGISTERS.STUDENTS.DETAIL_PATH(
-                        responsibleTotals?.responsibleId ?? responsibleId,
-                        student.id,
-                      ),
-                      search: location.search,
-                    })
-                  }
-                />
-              </div>
-            );
-          })}
+                ) : (
+                  <div
+                    key={`payment-${entry.id}`}
+                    className="app-row grid-cols-[minmax(0,1fr)_8ch]"
+                  >
+                    <div className="text-success inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                      <Banknote />
+                      <div className="flex min-w-0 flex-col">
+                        <span>Pagamento</span>
+                        <span className="text-muted min-w-0 text-base whitespace-normal">
+                          Saldo adicionado
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-success self-center text-right tabular-nums">
+                      +R${fromCents(entry.payment).toFixed(2)}
+                    </span>
+                  </div>
+                ),
+              )}
+            </div>
+          ))}
         </div>
-        <footer className="app-footer">
-          <div className="app-total-bar grid-cols-[minmax(0,1fr)_8ch] [&_svg]:size-10 [&_svg]:shrink-0">
-            <span className="text-right">Total: </span>
-            <span className="text-right tabular-nums">{`R$${fromCents(responsibleTotals?.total ?? 0).toFixed(2)}`}</span>
-            <span className="text-right">Saldo: </span>
-            <span className="text-right tabular-nums">{`R$${fromCents(responsibleTotals?.balance ?? 0).toFixed(2)}`}</span>
-          </div>
 
-          <PageNavigator
-            currentPage={currentPage}
-            totalPages={totalPages}
-            setCurrentPage={setCurrentPage}
-          />
+        <footer className="app-footer">
+          <form
+            className="app-total-bar [&_svg]:size-10 [&_svg]:shrink-0"
+            onSubmit={(event) => {
+              event.preventDefault();
+
+              const amount = parseCurrencyInput(balanceInput);
+
+              if (amount <= 0) {
+                toast.error('Informe um valor maior que zero');
+                return;
+              }
+
+              addBalance.mutate(amount);
+            }}
+          >
+            <div className="ml-auto grid w-full max-w-sm grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2">
+              <Button
+                variant="primary"
+                size="lg"
+                className="border-success/60 bg-success text-primary hover:bg-success/85 !size-12 !p-0"
+                aria-label={isAddingBalance ? 'Cancelar adição de saldo' : 'Adicionar saldo'}
+                aria-pressed={isAddingBalance}
+                title="Adicionar saldo"
+                onClick={() => {
+                  setIsAddingBalance((isOpen) => !isOpen);
+                  setBalanceInput('');
+                }}
+              >
+                <Banknote />
+              </Button>
+
+              <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2">
+                {isAddingBalance && (
+                  <>
+                    <label htmlFor="responsible-balance" className="text-right">
+                      Adicionar saldo:
+                    </label>
+                    <div className="inline-flex min-w-0 items-center justify-end gap-1">
+                      <span>R$</span>
+                      <input
+                        id="responsible-balance"
+                        type="text"
+                        inputMode="decimal"
+                        autoFocus
+                        value={balanceInput}
+                        placeholder="0,00"
+                        aria-label="Valor do saldo"
+                        className="app-input w-full max-w-[7ch] text-end tabular-nums"
+                        onChange={(event) => setBalanceInput(event.currentTarget.value)}
+                        onBlur={() => {
+                          const amount = parseCurrencyInput(balanceInput);
+                          setBalanceInput(amount > 0 ? fromCents(amount).toFixed(2) : '');
+                        }}
+                      />
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        size="sm"
+                        aria-label="Confirmar saldo"
+                        disabled={addBalance.isPending}
+                      >
+                        <Check />
+                      </Button>
+                    </div>
+                    <div className="border-border/45 col-span-2 border-b-4" />
+                  </>
+                )}
+
+                <span className="text-right">Total: </span>
+                <span className="text-right tabular-nums">
+                  {`R$${fromCents(registersData?.total ?? 0).toFixed(2)}`}
+                </span>
+                <span className="text-right">Saldo: </span>
+                <span className="text-right tabular-nums">
+                  {`R$${fromCents(registersData?.responsible.balance ?? 0).toFixed(2)}`}
+                </span>
+              </div>
+            </div>
+          </form>
         </footer>
       </div>
     </div>
