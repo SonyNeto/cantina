@@ -155,7 +155,7 @@ export const ResponsibleDetails: FC = () => {
   });
 
   const entriesByDate = entries.reduce<Record<string, ResponsibleEntry[]>>((acc, entry) => {
-    const date = dayjs(entry.created_at).format('YYYY-MM-DD');
+    const date = dayjs(entry.created_at).toISOString().slice(0, 10);
 
     acc[date] ??= [];
     acc[date].push(entry);
