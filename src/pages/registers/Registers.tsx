@@ -1,26 +1,21 @@
 import { useState, type FC } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import ROUTES from '../../constants/routes';
-import { Button } from '../../components/commons/Button';
-import { Check, PenSquare, User, UserPlus } from 'pixelarticons/react';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { User } from 'pixelarticons/react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
 import { workspaceApiFetch } from '../../utils/api';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { usePeriod, type Period } from '../../hooks/usePeriod';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
-import { ResponsibleForm } from './components/ResponsibleForm';
-import { SwipeActionRow } from '../../components/commons/SwipeActionRow';
-import { TrashCan } from '../../assets/icons/MenuIcons';
-import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
-import { toast } from 'sonner';
 import { PageNavigator } from '../../components/commons/PageNavigator';
 import { SearchBar } from '../../components/commons/SearchBar';
-import { fromCents } from '../../utils/functions';
+import { cn, formatSignedCurrency, fromCents } from '../../utils/functions';
 
 type ResponsibleRegister = {
   responsibleId: string;
   responsibleName: string;
+  consumption: number;
   total: number;
 };
 
@@ -65,16 +60,12 @@ const getRegistersSummary = async (period: Period): Promise<RegistersSummary> =>
 };
 
 export const Registers: FC = () => {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [period, setPeriod] = usePeriod();
   const location = useLocation();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [search, setSearch] = useState<string>('');
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [drawerOpenIndex, setDrawerOpenIndex] = useState<number | null>(null);
 
   const { data: registersData, isFetching } = useQuery({
     queryKey: ['registers', 'responsibles', workspaceId, period, currentPage, search],
@@ -96,49 +87,17 @@ export const Registers: FC = () => {
     }),
   });
 
-  const deleteResponsible = useMutation({
-    mutationFn: async (responsibleId: string): Promise<void> => {
-      await workspaceApiFetch(`/responsibles/${responsibleId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['registers', 'responsibles', workspaceId] });
-      toast.success('Responsável removido com sucesso!');
-    },
-  });
-
   const responsiblesTotals = registersData?.responsiblesTotals ?? [];
   const totalPages = registersData?.totalPages ?? 1;
 
   return (
     <div className="app-page">
       <div className="app-content">
-        <div className="app-header raised grid-cols-[2.5rem_minmax(0,1fr)_2.5rem_2.5rem] !border-0 [&_svg]:size-10 [&_svg]:shrink-0">
+        <div className="app-header raised grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] !border-0 [&_svg]:size-10 [&_svg]:shrink-0">
           <span aria-hidden={true} className="col-start-1" />
           <span className="col-start-2 text-center">Responsáveis</span>
-          <Button
-            variant="primary"
-            className="bg-info hover:bg-info-soft hover:text-info focus-visible:ring-accent/35 col-start-3 !size-12 place-items-center self-center justify-self-end !p-0 outline-none focus-visible:ring-[3px] [&_svg]:size-7"
-            disabled={isAdding}
-            onClick={() => {
-              setIsAdding(true);
-              setEditingIndex(null);
-              setDrawerOpenIndex(null);
-            }}
-            aria-label="Adicionar responsável"
-            title="Adicionar responsável"
-          >
-            <UserPlus />
-          </Button>
-          <PeriodPicker value={period} onChange={setPeriod} className="col-start-4" />
+          <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
         </div>
-
-        {isAdding && (
-          <ResponsibleForm workspaceId={workspaceId} onClose={() => setIsAdding(false)} />
-        )}
 
         <SearchBar
           query={search}
@@ -152,95 +111,33 @@ export const Registers: FC = () => {
         {isFetching && <Loader />}
 
         <div className="app-list">
-          {responsiblesTotals.map((responsibleTotal, idx) => {
-            const isEditing = editingIndex === idx;
-            const isDrawerOpen = drawerOpenIndex === idx;
-
-            return (
-              <div
-                key={responsibleTotal.responsibleId}
-                className="app-row relative isolate overflow-hidden !p-0"
-              >
-                {isEditing ? (
-                  <ResponsibleForm
-                    className="relative z-10 !border-0"
-                    workspaceId={workspaceId}
-                    responsibleId={responsibleTotal.responsibleId}
-                    method="update"
-                    defaultName={responsibleTotal.responsibleName}
-                    onClose={() => {
-                      setEditingIndex(null);
-                      setDrawerOpenIndex(idx);
-                    }}
-                  />
-                ) : (
-                  <div className="app-row-action relative z-10 grid w-full grid-cols-[minmax(0,1fr)_7ch] items-center gap-2.5 py-3 pr-8 pl-4">
-                    <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
-                      <User />
-                      <span>{responsibleTotal.responsibleName}</span>
-                    </div>
-                    <span className="text-center tabular-nums">{`R$${fromCents(responsibleTotal.total).toFixed(2)}`}</span>
-                  </div>
-                )}
-
-                <SwipeActionRow
-                  right={{
-                    content: (
-                      <>
-                        <Button
-                          onClick={() => {
-                            setEditingIndex(isEditing ? null : idx);
-                            setDrawerOpenIndex(isDrawerOpen ? null : idx);
-                            setIsAdding(false);
-                          }}
-                          disabled={isEditing}
-                        >
-                          <PenSquare />
-                        </Button>
-
-                        <Dialog>
-                          <DialogTrigger
-                            render={<Button size="md" variant="primary" disabled={isEditing} />}
-                          >
-                            <TrashCan />
-                          </DialogTrigger>
-                          <DialogContent title="Atenção">
-                            <span>Tem certeza que deseja excluir o responsável?</span>
-                            <DialogClose
-                              render={
-                                <Button
-                                  onClick={() => {
-                                    deleteResponsible.mutate(responsibleTotal.responsibleId);
-                                    setEditingIndex(null);
-                                    setIsAdding(false);
-                                    setDrawerOpenIndex(null);
-                                  }}
-                                />
-                              }
-                            >
-                              <Check />
-                              <span>Sim</span>
-                            </DialogClose>
-                          </DialogContent>
-                        </Dialog>
-                      </>
-                    ),
-                    handleWidth: 16,
-                    width: 136,
-                  }}
-                  openSide={isDrawerOpen ? 'right' : null}
-                  onOpenSideChange={(side) => setDrawerOpenIndex(side === 'right' ? idx : null)}
-                  onTap={() =>
-                    navigate({
-                      pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
-                      search: location.search,
-                    })
-                  }
-                  captureInteractions={!isEditing}
-                />
+          {responsiblesTotals.map((responsibleTotal) => (
+            <button
+              type="button"
+              key={responsibleTotal.responsibleId}
+              className="app-row app-row-action grid-cols-[minmax(0,1fr)_9ch] text-left"
+              onClick={() =>
+                navigate({
+                  pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
+                  search: location.search,
+                })
+              }
+            >
+              <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
+                <User />
+                <span>{responsibleTotal.responsibleName}</span>
               </div>
-            );
-          })}
+              <span
+                className={cn(
+                  'text-right tabular-nums',
+                  responsibleTotal.total < 0 && 'text-danger',
+                  responsibleTotal.total > 0 && 'text-success',
+                )}
+              >
+                {formatSignedCurrency(responsibleTotal.total)}
+              </span>
+            </button>
+          ))}
         </div>
 
         <footer className="app-footer">
