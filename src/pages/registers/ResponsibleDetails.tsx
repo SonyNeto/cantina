@@ -13,6 +13,7 @@ import { usePeriod, type Period } from '../../hooks/usePeriod';
 import PeriodPicker from '../../components/commons/PeriodPicker';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { cn, formatSignedCurrency, fromCents, toCents } from '../../utils/functions';
+import { MONTHS_FULL } from '../../constants/dates';
 
 type Responsible = {
   id: string;
@@ -162,6 +163,13 @@ export const ResponsibleDetails: FC = () => {
     return acc;
   }, {});
 
+  const accountBalance = registersData?.responsible.accountBalance ?? 0;
+  const periodPayments = (paymentsData?.payments ?? []).reduce(
+    (total, payment) => total + payment.payment,
+    0,
+  );
+  const periodLabel = `${MONTHS_FULL[period.month]} de ${period.year}`;
+
   return isPending || isPaymentsPending ? (
     <Loader />
   ) : (
@@ -175,9 +183,20 @@ export const ResponsibleDetails: FC = () => {
           >
             <ArrowLeft />
           </Link>
-          <span className="justify-self-center text-center">
-            {`Registros de ${registersData?.responsible.name ?? ''}`}
-          </span>
+          <div className="flex min-w-0 flex-col items-center justify-self-center text-center">
+            <span>{`Registros de ${registersData?.responsible.name ?? ''}`}</span>
+            <span className="text-base font-medium">
+              Saldo:{' '}
+              <span
+                className={cn(
+                  accountBalance < 0 && 'text-danger',
+                  accountBalance > 0 && 'text-success',
+                )}
+              >
+                {formatSignedCurrency(accountBalance)}
+              </span>
+            </span>
+          </div>
           <PeriodPicker value={period} onChange={setPeriod} className="col-start-3" />
         </div>
 
@@ -307,26 +326,16 @@ export const ResponsibleDetails: FC = () => {
                   </>
                 )}
 
-                <span className="text-right">Saldo: </span>
+                <span className="text-muted col-span-2 text-right text-base font-medium">
+                  {`No período: ${periodLabel}`}
+                </span>
+                <span className="text-right">Pagamentos: </span>
                 <span className="text-success text-right tabular-nums">
-                  {`R$${fromCents(
-                    Math.max(registersData?.responsible.accountBalance ?? 0, 0),
-                  ).toFixed(2)}`}
+                  {`+R$${fromCents(periodPayments).toFixed(2)}`}
                 </span>
                 <span className="text-right">Consumo: </span>
                 <span className="text-danger text-right tabular-nums">
                   {`-R$${fromCents(registersData?.consumption ?? 0).toFixed(2)}`}
-                </span>
-                <div className="border-border/45 col-span-2 border-b-4" />
-                <span className="text-right">Total: </span>
-                <span
-                  className={cn(
-                    'text-right tabular-nums',
-                    (registersData?.responsible.accountBalance ?? 0) < 0 && 'text-danger',
-                    (registersData?.responsible.accountBalance ?? 0) > 0 && 'text-success',
-                  )}
-                >
-                  {formatSignedCurrency(registersData?.responsible.accountBalance ?? 0)}
                 </span>
               </div>
             </div>
