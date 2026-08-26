@@ -17,7 +17,7 @@ import { cn, formatSignedCurrency, fromCents, toCents } from '../../utils/functi
 type Responsible = {
   id: string;
   name: string;
-  balance: number;
+  accountBalance: number;
 };
 
 type ResponsibleRegister = Omit<Register, 'created_at'> & {
@@ -32,7 +32,6 @@ type ResponsibleRegistersResponse = {
   responsible: Responsible;
   registers: ResponsibleRegister[];
   consumption: number;
-  total: number;
 };
 
 type ResponsiblePayment = {
@@ -40,7 +39,7 @@ type ResponsiblePayment = {
   created_at: string;
   payment: number;
   responsibleId: string;
-  type: 'balance' | 'order';
+  type: 'manual' | 'order';
 };
 
 type ResponsiblePaymentsResponse = {
@@ -217,7 +216,7 @@ export const ResponsibleDetails: FC = () => {
                       <div className="flex min-w-0 flex-col">
                         <span>Pagamento</span>
                         <span className="text-muted min-w-0 text-base whitespace-normal">
-                          {entry.type === 'order' ? 'Pagamento do pedido' : 'Saldo adicionado'}
+                          {entry.type === 'order' ? 'Pagamento do pedido' : 'Pagamento adicionado'}
                         </span>
                       </div>
                     </div>
@@ -310,7 +309,9 @@ export const ResponsibleDetails: FC = () => {
 
                 <span className="text-right">Saldo: </span>
                 <span className="text-success text-right tabular-nums">
-                  {`R$${fromCents(registersData?.responsible.balance ?? 0).toFixed(2)}`}
+                  {`R$${fromCents(
+                    Math.max(registersData?.responsible.accountBalance ?? 0, 0),
+                  ).toFixed(2)}`}
                 </span>
                 <span className="text-right">Consumo: </span>
                 <span className="text-danger text-right tabular-nums">
@@ -321,11 +322,11 @@ export const ResponsibleDetails: FC = () => {
                 <span
                   className={cn(
                     'text-right tabular-nums',
-                    (registersData?.total ?? 0) < 0 && 'text-danger',
-                    (registersData?.total ?? 0) > 0 && 'text-success',
+                    (registersData?.responsible.accountBalance ?? 0) < 0 && 'text-danger',
+                    (registersData?.responsible.accountBalance ?? 0) > 0 && 'text-success',
                   )}
                 >
-                  {formatSignedCurrency(registersData?.total ?? 0)}
+                  {formatSignedCurrency(registersData?.responsible.accountBalance ?? 0)}
                 </span>
               </div>
             </div>

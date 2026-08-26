@@ -10,13 +10,13 @@ import { usePeriod, type Period } from '../../hooks/usePeriod';
 import { useWorkspaceStore } from '../../stores/useWorkspaceStore';
 import { PageNavigator } from '../../components/commons/PageNavigator';
 import { SearchBar } from '../../components/commons/SearchBar';
+import { Button } from '../../components/commons/Button';
 import { cn, formatSignedCurrency, fromCents } from '../../utils/functions';
 
-type ResponsibleRegister = {
+type ResponsibleAccount = {
   responsibleId: string;
   responsibleName: string;
-  consumption: number;
-  total: number;
+  accountBalance: number;
 };
 
 type Pagination = {
@@ -25,8 +25,8 @@ type Pagination = {
   nextPage: number | null;
 };
 
-type ResponsiblesRegistersResponse = {
-  responsiblesTotals: ResponsibleRegister[];
+type ResponsibleAccountsResponse = {
+  responsibleAccounts: ResponsibleAccount[];
   pagination: Pagination;
 };
 
@@ -34,11 +34,11 @@ type RegistersSummary = {
   revenue: number;
 };
 
-const getResponsiblesRegisters = async (
+const getResponsibleAccounts = async (
   period: Period,
   page: number,
   search: string,
-): Promise<ResponsiblesRegistersResponse> => {
+): Promise<ResponsibleAccountsResponse> => {
   const formattedPeriod = `${period.year}${(period.month + 1).toString().padStart(2, '0')}`;
 
   const params = new URLSearchParams({
@@ -67,13 +67,13 @@ export const Registers: FC = () => {
   const [search, setSearch] = useState<string>('');
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
-  const { data: registersData, isFetching } = useQuery({
+  const { data: accountsData, isFetching } = useQuery({
     queryKey: ['registers', 'responsibles', workspaceId, period, currentPage, search],
-    queryFn: () => getResponsiblesRegisters(period, currentPage, search),
+    queryFn: () => getResponsibleAccounts(period, currentPage, search),
     enabled: Boolean(workspaceId),
     placeholderData: keepPreviousData,
     select: (data) => ({
-      responsiblesTotals: data.responsiblesTotals,
+      responsibleAccounts: data.responsibleAccounts,
       totalPages: data.pagination.totalPages,
     }),
   });
@@ -87,8 +87,8 @@ export const Registers: FC = () => {
     }),
   });
 
-  const responsiblesTotals = registersData?.responsiblesTotals ?? [];
-  const totalPages = registersData?.totalPages ?? 1;
+  const responsibleAccounts = accountsData?.responsibleAccounts ?? [];
+  const totalPages = accountsData?.totalPages ?? 1;
 
   return (
     <div className="app-page">
@@ -111,32 +111,34 @@ export const Registers: FC = () => {
         {isFetching && <Loader />}
 
         <div className="app-list">
-          {responsiblesTotals.map((responsibleTotal) => (
-            <button
-              type="button"
-              key={responsibleTotal.responsibleId}
-              className="app-row app-row-action grid-cols-[minmax(0,1fr)_9ch] text-left"
+          {responsibleAccounts.map((responsibleAccount) => (
+            <Button
+              key={responsibleAccount.responsibleId}
+              variant="ghost"
+              size="lg"
+              disableHover
+              className="app-row app-row-action !grid !h-auto !min-w-0 grid-cols-[minmax(0,1fr)_9ch] !justify-normal !px-4 !py-3 text-left !font-normal !whitespace-normal"
               onClick={() =>
                 navigate({
-                  pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleTotal.responsibleId),
+                  pathname: ROUTES.REGISTERS.DETAIL_PATH(responsibleAccount.responsibleId),
                   search: location.search,
                 })
               }
             >
               <div className="inline-flex min-w-0 items-center gap-2.5 [&_svg]:size-10 [&_svg]:shrink-0">
                 <User />
-                <span>{responsibleTotal.responsibleName}</span>
+                <span>{responsibleAccount.responsibleName}</span>
               </div>
               <span
                 className={cn(
                   'text-right tabular-nums',
-                  responsibleTotal.total < 0 && 'text-danger',
-                  responsibleTotal.total > 0 && 'text-success',
+                  responsibleAccount.accountBalance < 0 && 'text-danger',
+                  responsibleAccount.accountBalance > 0 && 'text-success',
                 )}
               >
-                {formatSignedCurrency(responsibleTotal.total)}
+                {formatSignedCurrency(responsibleAccount.accountBalance)}
               </span>
-            </button>
+            </Button>
           ))}
         </div>
 
