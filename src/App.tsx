@@ -17,6 +17,7 @@ import { getSavedTheme } from './utils/functions';
 import { Loader } from './components/commons/Loader';
 import { Workspace } from './pages/workspace/Workspace';
 import { AuditLogs } from './pages/auditLogs/AuditLogs';
+import { EditOrder } from './pages/orders/EditOrder';
 
 const LoginPage = lazy(() =>
   import('./pages/auth/LoginPage').then((module) => ({
@@ -53,6 +54,7 @@ function App() {
               <Route path={ROUTES.HOME} element={<NewOrders />} />
               <Route path={ROUTES.NEWORDERS} element={<NewOrders />} />
               <Route path={ROUTES.ORDERS} element={<Orders />} />
+              <Route path={ROUTES.ORDER_EDIT} element={<EditOrder />} />
               <Route element={<ProtectedAdminRoute />}>
                 <Route path={ROUTES.MENU} element={<Menu />} />
                 <Route path={ROUTES.REGISTERS.ROOT} element={<Registers />} />

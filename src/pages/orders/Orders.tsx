@@ -1,5 +1,5 @@
-import { type FC } from 'react';
-import { ArrowBarRight, Check } from 'pixelarticons/react';
+import { useState, type FC } from 'react';
+import { AlignStartVertical, ArrowBarRight, Check } from 'pixelarticons/react';
 import { Cooking, X } from '../../assets/icons/MenuIcons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader } from '../../components/commons/Loader';
@@ -15,6 +15,9 @@ import {
   CollapsibleTrigger,
 } from '../../components/commons/Collapsible';
 import { Button } from '../../components/commons/Button';
+import { useNavigate } from 'react-router';
+import ROUTES from '../../constants/routes';
+import { Dialog, DialogContent, DialogTrigger } from '../../components/commons/Dialog';
 
 type OrderItemWithDetails = {
   id: string;
@@ -52,12 +55,20 @@ type OrderItemParams = {
   itemId: string;
 };
 
+type UpdateOrderItemStatusParams = OrderItemParams & {
+  status: OrderItem['status'];
+};
+
 type ItemResponse = {
   item: OrderItem | null;
 };
 
 type RegisterResponse = {
   register: Register;
+};
+
+type RegistersResponse = {
+  registers: Register[];
 };
 
 const getOrders = async (): Promise<OrdersResponse> => {
@@ -67,6 +78,8 @@ const getOrders = async (): Promise<OrdersResponse> => {
 
 export const Orders: FC = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [isRegisterAllDialogOpen, setIsRegisterAllDialogOpen] = useState(false);
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
 
   const { data: ordersData, isPending } = useQuery({
@@ -109,15 +122,21 @@ export const Orders: FC = () => {
     },
     {},
   );
+  const totalReadyItems = Object.values(itemsBySchoolClass).reduce(
+    (total, items) => total + items.filter((item) => item.status === 'ready').length,
+    0,
+  );
 
   const updateOrderItemStatus = useMutation({
-    mutationFn: async ({ orderId, itemId }: OrderItemParams): Promise<ItemResponse> => {
+    mutationFn: async ({
+      orderId,
+      itemId,
+      status,
+    }: UpdateOrderItemStatusParams): Promise<ItemResponse> => {
       const res = await workspaceApiFetch(`/orders/${orderId}/items/${itemId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'ready',
-        }),
+        body: JSON.stringify({ status }),
       });
 
       if (!res.ok) {
@@ -127,7 +146,7 @@ export const Orders: FC = () => {
       return res.json();
     },
 
-    onMutate: async ({ orderId, itemId }: OrderItemParams) => {
+    onMutate: async ({ orderId, itemId, status }: UpdateOrderItemStatusParams) => {
       await queryClient.cancelQueries({
         queryKey: ['orders', workspaceId],
       });
@@ -151,7 +170,7 @@ export const Orders: FC = () => {
                     item.id === itemId
                       ? {
                           ...item,
-                          status: 'ready' as const,
+                          status,
                         }
                       : item,
                   ),
@@ -169,12 +188,16 @@ export const Orders: FC = () => {
       return queryClient.invalidateQueries({ queryKey: ['orders', workspaceId] });
     },
 
-    onError: (_error, _variables, context) => {
+    onError: (_error, variables, context) => {
       if (context?.previousOrders) {
         queryClient.setQueryData(['orders', workspaceId], context.previousOrders);
       }
 
-      toast.error('Não foi possível marcar o item como pronto');
+      toast.error(
+        variables.status === 'ready'
+          ? 'Não foi possível marcar o item como pronto'
+          : 'Não foi possível devolver o item para preparação',
+      );
     },
   });
 
@@ -185,6 +208,11 @@ export const Orders: FC = () => {
         headers: { 'Content-Type': 'application/json' },
       });
 
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? 'Erro ao excluir item');
+      }
+
       return res.json();
     },
 
@@ -193,8 +221,8 @@ export const Orders: FC = () => {
       toast.success('Item removido com sucesso!');
     },
 
-    onError: () => {
-      toast.error('Não foi possível remover o item.');
+    onError: (error) => {
+      toast.error(error.message || 'Não foi possível remover o item.');
     },
   });
 
@@ -251,7 +279,7 @@ export const Orders: FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registers', workspaceId] });
       queryClient.invalidateQueries({ queryKey: ['payments', workspaceId] });
-      toast.success('Pedido movido para registro');
+      toast.success('Item movido para registro');
     },
 
     onError: (_error, _variables, context) => {
@@ -259,7 +287,7 @@ export const Orders: FC = () => {
         queryClient.setQueryData(['orders', workspaceId], context.previousOrders);
       }
 
-      toast.error('Não foi possível mover o item para registro');
+      toast.error('Não foi possível mover o item para o registro');
     },
 
     onSettled: () => {
@@ -275,6 +303,69 @@ export const Orders: FC = () => {
     },
   });
 
+  const registerAllReady = useMutation({
+    mutationFn: async (): Promise<RegistersResponse> => {
+      const res = await workspaceApiFetch('/orders/register-ready', {
+        method: 'POST',
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message ?? 'Erro ao mover itens para o registro');
+      }
+
+      return res.json();
+    },
+
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['orders', workspaceId] });
+
+      const previousOrders = queryClient.getQueryData<OrdersResponse>(['orders', workspaceId]);
+
+      queryClient.setQueryData<OrdersResponse>(['orders', workspaceId], (currentData) => {
+        if (!currentData) return currentData;
+
+        return {
+          ...currentData,
+          orders: Object.fromEntries(
+            Object.entries(currentData.orders).map(([schoolClassId, orders]) => [
+              schoolClassId,
+              orders.map((order) => ({
+                ...order,
+                items: order.items.filter((item) => item.status !== 'ready'),
+              })),
+            ]),
+          ),
+        };
+      });
+
+      return { previousOrders };
+    },
+
+    onSuccess: ({ registers }) => {
+      queryClient.invalidateQueries({ queryKey: ['registers', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['payments', workspaceId] });
+      setIsRegisterAllDialogOpen(false);
+      toast.success(
+        registers.length === 1
+          ? '1 item movido para o registro'
+          : `${registers.length} itens movidos para o registro`,
+      );
+    },
+
+    onError: (error, _variables, context) => {
+      if (context?.previousOrders) {
+        queryClient.setQueryData(['orders', workspaceId], context.previousOrders);
+      }
+
+      toast.error(error.message || 'Não foi possível mover os itens para o registro');
+    },
+
+    onSettled: () => {
+      return queryClient.invalidateQueries({ queryKey: ['orders', workspaceId] });
+    },
+  });
+
   return isPending ? (
     <Loader />
   ) : (
@@ -284,7 +375,7 @@ export const Orders: FC = () => {
         type="alternated"
         swipeDelta={8}
         defaultOpenSide="left"
-        interactionClassName="h-16"
+        interactionClassName="right-10 h-16 w-[calc(100%-2.5rem)]"
         left={{
           content: (
             <div className="app-page app-orders">
@@ -298,6 +389,7 @@ export const Orders: FC = () => {
                   itemsBySchoolClass={itemsBySchoolClass}
                   status="cooking"
                   labelClassName="bg-secondary/35"
+                  onItemTap={(item) => navigate(ROUTES.ORDER_EDIT_PATH(item.orderId))}
                   actions={{
                     left: {
                       content: <X className="text-danger-soft size-10" />,
@@ -310,7 +402,7 @@ export const Orders: FC = () => {
                       }),
                       confirmation: {
                         title: 'Atenção',
-                        message: 'Tem certeza que deseja excluir o pedido?',
+                        message: 'Tem certeza que deseja excluir o item?',
                         onConfirm: (item) => {
                           deleteOrderItem.mutate({
                             orderId: item.orderId,
@@ -330,7 +422,7 @@ export const Orders: FC = () => {
                       }),
                       onOpen: (item, closeDrawer) => {
                         updateOrderItemStatus.mutate(
-                          { orderId: item.orderId, itemId: item.id },
+                          { orderId: item.orderId, itemId: item.id, status: 'ready' },
                           { onSettled: closeDrawer },
                         );
                       },
@@ -346,15 +438,65 @@ export const Orders: FC = () => {
           content: (
             <div className="app-page app-orders">
               <div className="app-content">
-                <div className="app-header-accent border-border/40 bg-success-soft text-success flex items-center justify-center gap-3 [&_svg]:size-10 [&_svg]:shrink-0">
-                  <span className="text-center">Pronto</span>
-                  <Check />
+                <div className="app-header-accent border-border/40 bg-success-soft text-success grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center [&_svg]:size-10 [&_svg]:shrink-0">
+                  <span aria-hidden="true" />
+                  <div className="flex min-w-0 items-center justify-center gap-3">
+                    <span className="text-center">Pronto</span>
+                    <Check />
+                  </div>
+                  <Dialog
+                    open={isRegisterAllDialogOpen}
+                    onOpenChange={setIsRegisterAllDialogOpen}
+                  >
+                    <DialogTrigger
+                      render={
+                        <Button
+                          variant="primary"
+                          className="justify-self-end"
+                          disableHover
+                          disabled={totalReadyItems === 0 || registerAllReady.isPending}
+                          aria-label="Mover todos os itens prontos para o registro"
+                        />
+                      }
+                    >
+                      <AlignStartVertical />
+                    </DialogTrigger>
+                    <DialogContent title="Atenção">
+                      <span>
+                        Todos os itens prontos serão movidos para o registro. Deseja continuar?
+                      </span>
+                      <Button
+                        className="w-full"
+                        disabled={registerAllReady.isPending}
+                        onClick={() => registerAllReady.mutate()}
+                      >
+                        <Check />
+                        <span>Confirmar</span>
+                      </Button>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 <OrdersTable
                   itemsBySchoolClass={itemsBySchoolClass}
                   status="ready"
                   actions={{
+                    left: {
+                      content: <Cooking className="text-warning-soft size-10" />,
+                      handleWidth: 16,
+                      handleClassName: 'bg-warning',
+                      width: 136,
+                      threshold: 0.8,
+                      progressStyle: (progress) => ({
+                        backgroundColor: `color-mix(in oklab, var(--color-warning-soft), var(--color-warning) ${Math.trunc(progress * 100)}%)`,
+                      }),
+                      onOpen: (item, closeDrawer) => {
+                        updateOrderItemStatus.mutate(
+                          { orderId: item.orderId, itemId: item.id, status: 'cooking' },
+                          { onSettled: closeDrawer },
+                        );
+                      },
+                    },
                     right: {
                       content: <ArrowBarRight className="text-panel size-10" />,
                       handleWidth: 16,

@@ -21,7 +21,9 @@ export interface Register {
 export type OrderStatus = 'cooking' | 'ready';
 
 export interface OrderItemDraft {
+  id?: string;
   productId: string;
+  status?: OrderStatus;
 }
 
 export interface OrderItem {
@@ -35,6 +37,10 @@ export interface Order {
   studentId: string;
   created_at: string;
   payment: number;
+  paymentApplied: number;
+  hasRegisteredItems: boolean;
+  keepChange: boolean;
+  details?: string;
   items: OrderItem[];
 }
 
