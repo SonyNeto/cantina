@@ -12,6 +12,11 @@ import { fromCents, toCents } from '../../utils/functions';
 interface Props {
   onBack: () => void;
   isSubmitting: boolean;
+  title?: string;
+  subtitle?: string;
+  submitLabel?: string;
+  protectReadyItems?: boolean;
+  paymentLocked?: boolean;
 }
 
 type MenuItemsResponse = {
@@ -23,10 +28,16 @@ const getMenuItems = async (): Promise<MenuItemsResponse> => {
   return res.json();
 };
 
-export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
+export const OrdersStep: FC<Props> = ({
+  onBack,
+  isSubmitting,
+  title = 'Cardápio',
+  subtitle,
+  submitLabel = 'Concluir',
+  protectReadyItems = false,
+  paymentLocked = false,
+}) => {
   const workspaceId = useWorkspaceStore((state) => state.workspace?.id);
-  const [isImmediatePayment, setIsImmediatePayment] = useState<boolean>(false);
-  const [haveDetails, setHaveDetails] = useState<boolean>(false);
 
   const { data: menuItems = [], isPending } = useQuery({
     queryKey: ['menuItems', workspaceId],
@@ -35,7 +46,11 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
     select: (data) => data.menuItems,
   });
 
-  const { control, register, setValue, unregister } = useFormContext<OrderForm>();
+  const { control, getValues, register, setValue, unregister } = useFormContext<OrderForm>();
+  const [isImmediatePayment, setIsImmediatePayment] = useState(
+    () => getValues('payment') > 0,
+  );
+  const [haveDetails, setHaveDetails] = useState(() => Boolean(getValues('details')?.trim()));
 
   const items =
     useWatch({
@@ -69,7 +84,9 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
   }
 
   function decreaseProductQuantity(productId: string) {
-    const itemIndex = items.findLastIndex((item) => item.productId === productId);
+    const itemIndex = items.findLastIndex(
+      (item) => item.productId === productId && (!protectReadyItems || item.status !== 'ready'),
+    );
     if (itemIndex === -1) return;
 
     setValue(
@@ -79,6 +96,12 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
         shouldDirty: true,
         shouldValidate: true,
       },
+    );
+  }
+
+  function canDecreaseProductQuantity(productId: string) {
+    return items.some(
+      (item) => item.productId === productId && (!protectReadyItems || item.status !== 'ready'),
     );
   }
 
@@ -118,7 +141,14 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
           <Button variant={'ghost'} className="justify-self-start" disableHover onClick={onBack}>
             <ArrowLeft />
           </Button>
-          <span className="justify-self-center text-center">Cardápio</span>
+          <div className="min-w-0 justify-self-center text-center">
+            <span className="block">{title}</span>
+            {subtitle && (
+              <span className="block truncate text-base font-normal" title={subtitle}>
+                {subtitle}
+              </span>
+            )}
+          </div>
           <span aria-hidden="true" />
         </div>
 
@@ -138,6 +168,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                 <Button
                   variant="primary"
                   size="sm"
+                  disabled={!canDecreaseProductQuantity(item.id)}
                   onClick={() => decreaseProductQuantity(item.id)}
                 >
                   <Minus />
@@ -193,6 +224,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                     variant="primary"
                     size="lg"
                     className="border-success/60 bg-success text-primary hover:bg-success/85"
+                    disabled={paymentLocked}
                     aria-label={isImmediatePayment ? 'Remover pagamento' : 'Adicionar pagamento'}
                     aria-pressed={isImmediatePayment}
                     onClick={() => {
@@ -219,7 +251,14 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                 </div>
 
                 <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-2">
-                  {isImmediatePayment ? (
+                  {paymentLocked ? (
+                    <>
+                      <span className="text-right">Pagamento do pedido:</span>
+                      <span className="text-right tabular-nums">{`R$ ${fromCents(payment).toFixed(2)}`}</span>
+                      <span className="text-right">Total dos itens ativos:</span>
+                      <span className="text-right tabular-nums">{`R$ ${fromCents(total).toFixed(2)}`}</span>
+                    </>
+                  ) : isImmediatePayment ? (
                     <>
                       <span className="text-right">Pagamento:</span>
                       <div className="inline-flex min-w-0 items-center justify-end gap-1">
@@ -227,7 +266,8 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                         <input
                           type="text"
                           inputMode="decimal"
-                          defaultValue={fromCents(total).toFixed(2)}
+                          defaultValue={fromCents(payment).toFixed(2)}
+                          disabled={paymentLocked}
                           aria-label="Valor do pagamento"
                           className="app-input w-full max-w-[7ch] text-end tabular-nums"
                           onChange={(event) => {
@@ -268,6 +308,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                             <input
                               type="checkbox"
                               {...register('keepChange')}
+                              disabled={paymentLocked}
                               aria-label="Deixar troco como saldo"
                               className="peer absolute inset-0 z-10 size-full cursor-pointer appearance-none outline-none"
                             />
@@ -290,9 +331,16 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
                 </div>
               </div>
 
+              {paymentLocked && (
+                <span className="text-muted col-span-3 text-center text-base">
+                  Pagamento bloqueado após o primeiro item registrado.
+                </span>
+              )}
+
               {haveDetails && (
                 <textarea
                   maxLength={100}
+                  defaultValue={getValues('details')}
                   placeholder="Escreva uma observação sobre o pedido"
                   className="app-input col-span-3 !h-auto w-full !p-2"
                   onChange={(event) => {
@@ -311,7 +359,7 @@ export const OrdersStep: FC<Props> = ({ onBack, isSubmitting }) => {
               size="xl"
               className="border-border/70 w-full max-w-sm"
             >
-              Concluir
+              {submitLabel}
             </Button>
           </div>
         </footer>

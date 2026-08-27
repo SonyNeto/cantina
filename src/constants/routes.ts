@@ -5,6 +5,8 @@ const ROUTES = {
   INVITE: '/invite/:token',
   NEWORDERS: 'neworders',
   ORDERS: 'orders',
+  ORDER_EDIT: '/orders/:orderId/edit',
+  ORDER_EDIT_PATH: (orderId: string) => `/orders/${orderId}/edit`,
   MENU: 'menu',
   REGISTERS: {
     ROOT: '/registers',
