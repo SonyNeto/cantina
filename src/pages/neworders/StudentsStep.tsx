@@ -111,8 +111,8 @@ export const StudentsStep: FC<Props> = ({ onNext, onBack, shiftId, schoolClassId
       </div>
 
       {activeSchoolClassOrders.length > 0 && (
-        <footer className="app-footer z-40" aria-label="Pedidos ativos da turma">
-          <h2 className="bg-panel-header raised flex min-h-14 w-full items-center justify-center gap-3 px-4 text-xl font-bold [&_svg]:size-10 [&_svg]:shrink-0">
+        <footer className="app-footer max-h-[36vh] z-40 overflow-auto" aria-label="Pedidos ativos da turma">
+          <h2 className="bg-panel-header raised flex sticky top-0 min-h-14 w-full items-center justify-center gap-3 px-4 text-xl font-bold [&_svg]:size-10 [&_svg]:shrink-0">
             <span>Pedidos ativos</span>
             <Cooking aria-hidden="true" />
           </h2>
